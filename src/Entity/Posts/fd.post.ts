@@ -9,22 +9,22 @@ export class FashionDesignerPostsEntity{
     @PrimaryGeneratedColumn("uuid")
     id :string
 
-    @Column({unique:true})
+    @Column({nullable:true})
     caption:string
 
     @CreateDateColumn()
     cratedDate:Date
 
-    @Column()
+    @Column({nullable:true})
     media:string
 
-    @Column({type:"simple-array"})
+    @Column({type:"simple-array",nullable:true})
     likes:string[]
 
-    @Column({type:"simple-array"})
+    @Column({type:"simple-array",nullable:true})
     shares:string[]
 
-    @Column({type:"simple-array"})
+    @Column({type:"simple-array",nullable:true})
     comments:string[]
 
     //relationships with models and photographers  and the author

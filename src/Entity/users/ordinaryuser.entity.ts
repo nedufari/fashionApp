@@ -6,25 +6,25 @@ export class OrdinaryUserEntity{
     @PrimaryGeneratedColumn("uuid")
     id :string
 
-    @Column({unique:true})
+    @Column({unique:true,nullable:false})
     email:string
 
-    @Column({length: 10})
+    @Column({nullable:false})
     password:string
 
-    @Column()
+    @Column({nullable:false})
     name:string
 
-    @Column()
+    @Column({nullable:true})
     address:string
 
     @Column({type:"enum", enum:Roles, default:Roles.ORDINARY_USERS})
     role:Roles
 
-    @Column({length:11})
+    @Column({length:11,nullable:true})
     phone:string
 
-   @Column()
+   @Column({nullable:true})
    digitalPicture:string
 
 

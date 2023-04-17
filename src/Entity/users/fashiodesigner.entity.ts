@@ -13,31 +13,31 @@ export class FashionDesignerEntity{
     @Column({unique:true,nullable:false})
     email:string
 
-    @Column({unique:true})
+    @Column({unique:true,nullable:true})
     brandname:string 
 
-    @Column({length: 10,nullable:false})
+    @Column({nullable:false})
     password:string
 
-    @Column()
+    @Column({nullable:true})
     name:string
 
-    @Column()
+    @Column({nullable:true})
     address:string
 
     @Column({type:"enum", enum:Roles, default:Roles.FASHION_MOGUL})
     role:Roles
 
-    @Column({length:11})
+    @Column({length:11,nullable:true})
     phone1:string
 
-    @Column({length:11})
+    @Column({length:11,nullable:true})
     phone2:string
 
-    @Column({length:300})
+    @Column({length:300,nullable:true})
     bio:string
 
-    @Column()
+    @Column({nullable:true})
     fashion_genre: string 
 
     @CreateDateColumn()

@@ -6,17 +6,20 @@ export class FashionMdodelPostsEtity{
     @PrimaryGeneratedColumn('uuid')
     id:string
 
-    @Column()
+    @Column({nullable:true})
     media:string
 
-    @Column()
+    @Column({nullable:true})
     captions:string
 
-    @Column({type:'simple-array'})
+    @Column({type:"simple-array",nullable:true})
     likes:string[]
 
-    @Column({type:"simple-array"})
+    @Column({type:"simple-array",nullable:true})
     shares:string[]
+
+    @Column({type:"simple-array",nullable:true})
+    comments:string[]
 
     @OneToOne(()=>FashionModelsEntity,(desginer:FashionModelsEntity)=> desginer.contractor)
     designer:FashionModelsEntity

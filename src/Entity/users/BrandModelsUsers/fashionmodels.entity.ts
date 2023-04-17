@@ -18,198 +18,198 @@ export class FashionModelsEntity{
     @Column({unique:true,})
     username:string 
 
-    @Column({length: 10,nullable:false})
+    @Column({nullable:false})
     password:string
 
-    @Column()
+    @Column({nullable:true})
     fullname:string
 
-    @Column()
+    @Column({nullable:true})
     address:string
 
     @Column({type:"enum", enum:Roles, default:Roles.FASHION_MODELS})
     role:Roles
 
-    @Column({length:11})
+    @Column({length:11,nullable:true})
     phone1:string
 
-    @Column({length:11})
+    @Column({length:11,nullable:true})
     phone2:string
 
-    @Column({length:300})
+    @Column({length:300,nullable:true})
     bio:string
 
-    @Column({length:2})
+    @Column({nullable:true})
     age:string
 
-    @Column()
+    @Column({nullable:true})
     gender:string
 
-    @Column()
+    @Column({nullable:true})
     state_of_residence:string
 
-    @Column()
+    @Column({nullable:true})
     complexion:string 
 
-    @Column()
+    @Column({nullable:true})
     height_in_ft:string
 
-    @Column()
+    @Column({nullable:true})
     weight_in_kg:string
 
     @CreateDateColumn()
     cratedDate:Date
 
 // social media handle 
-    @Column()
+    @Column({nullable:true})
     facebook:string
 
-    @Column()
+    @Column({nullable:true})
     instagram:string
 
-    @Column()
+    @Column({nullable:true})
     twitter:string
 
-    @Column()
+    @Column({nullable:true})
     tiktok:string
 
-    @Column()
+    @Column({nullable:true})
     snapchat:string
 
 
 
 /// entities about dress sizes for already sewn dresses not double(eve numbers only )
-    @Column()
+    @Column({nullable:true})
     gown_size:number
 
-    @Column()
+    @Column({nullable:true})
     blouse_size:number
 
-    @Column()
+    @Column({nullable:true})
     skirt_size:number
 
-    @Column()
+    @Column({nullable:true})
     trouser_size:number
 
-    @Column()
+    @Column({nullable:true})
     shirt_size:number
 
-    @Column()
+    @Column({nullable:true})
     hat_size:string
 
 /// measurements for fresh sewn dresses for ladies
 
-    @Column()
+    @Column({nullable:true})
     shoulder:string
 
-    @Column()
+    @Column({nullable:true})
     burst:string
 
-    @Column()
+    @Column({nullable:true})
     burst_point:string
 
-    @Column()
+    @Column({nullable:true})
     round_under_burst:string
 
 
-    @Column()
+    @Column({nullable:true})
     under_burst_length:string
 
-    @Column()
+    @Column({nullable:true})
     nipple_to_nipple:string
 
-    @Column()
+    @Column({nullable:true})
     half_length:string
 
-    @Column()
+    @Column({nullable:true})
     arm_hole:string
 
-    @Column()
+    @Column({nullable:true})
     sleve_short:string
 
-    @Column()
+    @Column({nullable:true})
     sleve_long:string
 
-    @Column()
+    @Column({nullable:true})
     sleve_3qtr:string
 
-    @Column()
+    @Column({nullable:true})
     Round_sleeve:string
 
-    @Column()
+    @Column({nullable:true})
     elbow:string
 
-    @Column()
+    @Column({nullable:true})
     heep:string
 
-    @Column()
+    @Column({nullable:true})
     heep_length:string
 
-    @Column()
+    @Column({nullable:true})
     flap:string
 
-    @Column()
+    @Column({nullable:true})
     waist:string
 
-    @Column()
+    @Column({nullable:true})
     blouse_length:string
 
-    @Column()
+    @Column({nullable:true})
     gown_length:string
 
-    @Column()
+    @Column({nullable:true})
     skirt_length:string
 
-    @Column()
+    @Column({nullable:true})
     knee_length:string
 
-    @Column()
+    @Column({nullable:true})
     trouser_length:string
 
-    @Column()
+    @Column({nullable:true})
     ankle:string
 
-    @Column()
+    @Column({nullable:true})
     thigh:string
 
-    @Column()
+    @Column({nullable:true})
     wrist:string
 
     /// measurements for fresh sewn dresses for guys a some can also be gotten from
-    @Column()
+    @Column({nullable:true})
     chest:string
 
-    @Column()
+    @Column({nullable:true})
     shirt_length:string
 
-    @Column()
+    @Column({nullable:true})
     top_length:string
 
-    @Column()
+    @Column({nullable:true})
     back:string
 
-    @Column()
+    @Column({nullable:true})
     caps_ize:string
 
    
 
 
-    @Column({type:"enum", enum:ContractDuration})
+    @Column({type:"enum", enum:ContractDuration,nullable:true})
     contractduration:ContractDuration
 
-    @Column()
+    @Column({nullable:true})
     pricerange: string 
 
     @Column({type:"boolean", default:true})
     negotiable:boolean
 
-    @Column()
+    @Column({nullable:true})
     displayPicture:string
 
     @Column({type:"enum", enum:KindOfModel, default:KindOfModel.FASHION_WEARS})
     kindofmodel=KindOfModel
 
-    @Column({type:"enum", enum:PaymentPlan})
+    @Column({type:"enum", enum:PaymentPlan,nullable:true})
     paymentplan:PaymentPlan
 
     //a model can work for more than one fashiondesigner // multiple streams of income

@@ -12,91 +12,91 @@ export class MakeUpModelsEntity{
     @PrimaryGeneratedColumn("uuid")
     id :string
 
-    @Column({unique:true})
+    @Column({unique:true,nullable:false})
     email:string
 
-    @Column({unique:true,})
+    @Column({unique:true,nullable:false})
     username:string 
 
-    @Column({length: 10})
+    @Column({nullable:false})
     password:string
 
-    @Column()
+    @Column({nullable:true})
     fullname:string
 
-    @Column()
+    @Column({nullable:true})
     address:string
 
     @Column({type:"enum", enum:Roles, default:Roles.FASHION_MODELS})
     role:Roles
 
-    @Column({length:11})
+    @Column({length:11,nullable:true})
     phone1:string
 
-    @Column({length:11})
+    @Column({length:11,nullable:true})
     phone2:string
 
-    @Column({length:300})
+    @Column({length:300,nullable:true})
     bio:string
 
-    @Column({length:2})
-    age:string
+    @Column({nullable:true})
+    age:number
 
-    @Column()
+    @Column({nullable:true})
     gender:string
 
-    @Column()
+    @Column({nullable:true})
     state_of_residence:string
 
-    @Column()
+    @Column({nullable:true})
     complexion:string 
 
-    @Column({type:"double"})
-    height_in_ft:Double 
+    @Column({nullable:true})
+    height_in_ft:string
 
-    @Column({type:"double"})
-    weight_in_kg:Double 
+    @Column({nullable:true})
+    weight_in_kg:string
 
-    @Column({type:"boolean",default:false})
+    @Column({type:"boolean",default:false,nullable:true})
     on_low_cut:boolean
 
     @CreateDateColumn()
     cratedDate:Date
 
 // social media handle 
-    @Column()
+    @Column({nullable:true})
     facebook:string
 
-    @Column()
+    @Column({nullable:true})
     instagram:string
 
-    @Column()
+    @Column({nullable:true})
     twitter:string
 
-    @Column()
+    @Column({nullable:true})
     tiktok:string
 
-    @Column()
+    @Column({nullable:true})
     snapchat:string
 
 //
 
-    @Column({type:"enum", enum:ContractDuration})
+    @Column({type:"enum", enum:ContractDuration,nullable:true})
     contractduration:ContractDuration
 
-    @Column()
+    @Column({nullable:true})
     pricerange: string 
 
     @Column({type:"boolean", default:true})
     negotiable:boolean
 
-    @Column()
+    @Column({nullable:true})
     displayPicture:string
 
     @Column({type:"enum", enum:KindOfModel, default:KindOfModel.MAKEUP})
     kindofmodel:KindOfModel
 
-    @Column({type:"enum", enum:PaymentPlan})
+    @Column({type:"enum", enum:PaymentPlan,nullable:true})
     paymentplan:PaymentPlan
 
     //a model can work for more than one fashiondesigner // multiple streams of income

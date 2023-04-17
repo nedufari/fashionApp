@@ -12,53 +12,53 @@ export class KidsModelsEntity{
     @PrimaryGeneratedColumn("uuid")
     id :string
 
-    @Column({unique:true})
+    @Column({unique:true,nullable:false})
     email:string
 
-    @Column({unique:true,})
+    @Column({unique:true,nullable:false})
     username:string 
 
-    @Column({length: 10})
+    @Column({nullable:false})
     password:string
 
-    @Column()
+    @Column({nullable:true})
     fullname:string
 
     //parents either dad or mum or guardian 
-    @Column()
+    @Column({nullable:false})
     manager:string
 
-    @Column()
+    @Column({nullable:true})
     address:string
 
     @Column({type:"enum", enum:Roles, default:Roles.FASHION_MODELS})
     role:Roles
 
-    @Column({length:11})
+    @Column({length:11,nullable:true})
     phone1:string
 
-    @Column({length:11})
+    @Column({length:11,nullable:true})
     ManagerPhone:string
 
-    @Column({length:300})
+    @Column({length:300,nullable:true})
     bio:string
 
-    @Column({length:2})
-    age:string
+    @Column({nullable:false})
+    age:number
 
-    @Column()
+    @Column({nullable:true})
     gender:string
 
-    @Column()
+    @Column({nullable:true})
     state_of_residence:string
 
-    @Column()
+    @Column({nullable:true})
     complexion:string 
 
-    @Column()
+    @Column({nullable:true})
     height_in_ft:string
 
-    @Column()
+    @Column({nullable:true})
     weight_in_kg:string 
 
     @Column({type:"boolean",default:false})
@@ -68,111 +68,111 @@ export class KidsModelsEntity{
     cratedDate:Date
 
 // social media handle 
-    @Column()
+    @Column({nullable:true})
     facebook:string
 
-    @Column()
+    @Column({nullable:true})
     instagram:string
 
-    @Column()
+    @Column({nullable:true})
     twitter:string
 
-    @Column()
+    @Column({nullable:true})
     tiktok:string
 
-    @Column()
+    @Column({nullable:true})
     snapchat:string
 
 //maager social media handle 
-    @Column()
+    @Column({nullable:true})
     Managerfacebook:string
 
-    @Column()
+    @Column({nullable:true})
     Managerinstagram:string
 
-    @Column()
+    @Column({nullable:true})
     Managertwitter:string
 
 
 
 /// entities about dress sizes for already sewn dresses 
-    @Column()
+    @Column({nullable:true})
     gown_size:number
 
-    @Column()
+    @Column({nullable:true})
     blouse_size:number
 
-    @Column()
+    @Column({nullable:true})
     skirt_size:number
 
-    @Column()
+    @Column({nullable:true})
     trouser_size:number
 
-    @Column()
+    @Column({nullable:true})
     shirt_size:number
 
-    @Column()
+    @Column({nullable:true})
     hat_size:string
 
 /// measurements for fresh sewn dresses
 
-    @Column()
+    @Column({nullable:true})
     shirt_length:string
 
-    @Column()
+    @Column({nullable:true})
     top_length:string
 
-    @Column()
+    @Column({nullable:true})
     caps_ize:string
 
-    @Column()
+    @Column({nullable:true})
     shoulder:string
 
-    @Column()
+    @Column({nullable:true})
     chest:string
 
-    @Column()
+    @Column({nullable:true})
     half_length:string
 
-    @Column()
+    @Column({nullable:true})
     sleve_short:string
 
-    @Column()
+    @Column({nullable:true})
     sleve_long:string
 
-    @Column()
+    @Column({nullable:true})
     sleve_3qtr:string
 
-    @Column()
+    @Column({nullable:true})
     Round_sleeve:string
 
 
 
 
     //shoe info
-    @Column()    
+    @Column({nullable:true})    
     shoe_size:number
 
-    @Column()    
+    @Column({nullable:true})    
     alternative_shoe_size:number
 
 
-    @Column({type:"enum", enum:ContractDuration})
+    @Column({type:"enum", enum:ContractDuration,nullable:true})
     contractduration:ContractDuration
 
-    @Column()
+    @Column({nullable:true})
     pricerange: string 
 
-    @Column({type:"boolean", default:true})
+    @Column({type:"boolean", default:true,nullable:true})
     negotiable:boolean
 
-    @Column()
+    @Column({nullable:true})
     displayPicture:string
 
     @Column({type:"enum", enum:KindOfModel, default:KindOfModel.KID})
     kindofmodel=KindOfModel
 
-    @Column({type:"enum", enum:PaymentPlan})
+    @Column({type:"enum", enum:PaymentPlan,nullable:true})
     paymentplan:PaymentPlan
 
     //a model can work for more than one fashiondesigner // multiple streams of income

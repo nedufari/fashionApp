@@ -10,52 +10,52 @@ export class PhotographerEntity{
     @PrimaryGeneratedColumn("uuid")
     id :string
 
-    @Column({unique:true})
+    @Column({unique:true,nullable:false})
     email:string
 
-    @Column({unique:true,})
+    @Column({unique:true,nullable:false})
     username:string 
 
-    @Column({length: 10})
+    @Column({nullable:false})
     password:string
 
-    @Column()
+    @Column({nullable:true})
     fullname:string
 
-    @Column()
+    @Column({nullable:true})
     address:string
 
     @Column({type:"enum", enum:Roles, default:Roles.PHOTOGRAPHERS})
     role:Roles
 
-    @Column({length:11})
+    @Column({length:11,nullable:true})
     phone1:string
 
-    @Column({length:11})
+    @Column({length:11,nullable:true})
     phone2:string
 
-    @Column({length:300})
+    @Column({length:300,nullable:true})
     bio:string
 
-    @Column({length:2})
-    age:string
+    @Column({nullable:true})
+    age:number
 
-    @Column()
+    @Column({nullable:true})
     gender:string
 
-    @Column({type:"enum", enum:ContractDuration})
+    @Column({type:"enum", enum:ContractDuration,nullable:true})
     contractduration:ContractDuration
 
-    @Column()
+    @Column({nullable:true})
     pricerange: string 
 
-    @Column({type:"boolean", default:true})
+    @Column({type:"boolean", default:true,nullable:true})
     negotiable:boolean
 
-    @Column()
+    @Column({nullable:true})
     displayPicture:string
 
-    @Column({type:"enum", enum:PaymentPlan})
+    @Column({type:"enum", enum:PaymentPlan,nullable:true})
     paymentplan:PaymentPlan
 
     //relationship between the fashiondesigner and the photographer , a photographer can have many designers 

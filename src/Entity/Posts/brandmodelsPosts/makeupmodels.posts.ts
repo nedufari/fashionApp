@@ -8,22 +8,22 @@ export class MakeUpMdodelPostsEntity{
     @PrimaryGeneratedColumn('uuid')
     id:string
 
-    @Column()
+    @Column({nullable:true})
     media:string
 
-    @Column({length:300})
+    @Column({length:300,nullable:true})
     captions:string
 
     @CreateDateColumn()
     cratedDate:Date
 
-    @Column({type:'simple-array'})
+    @Column({type:"simple-array",nullable:true})
     likes:string[]
 
-    @Column({type:"simple-array"})
+    @Column({type:"simple-array",nullable:true})
     shares:string[]
 
-    @Column({type:"simple-array"})
+    @Column({type:"simple-array",nullable:true})
     comments:string[]
 
     @OneToOne(()=>MakeUpModelsEntity,(desginer:MakeUpModelsEntity)=> desginer.contractor)
