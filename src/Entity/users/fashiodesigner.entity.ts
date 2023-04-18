@@ -23,6 +23,9 @@ export class FashionDesignerEntity{
     name:string
 
     @Column({nullable:true})
+    digital_photo:string
+
+    @Column({nullable:true})
     address:string
 
     @Column({type:"enum", enum:Roles, default:Roles.FASHION_MOGUL})

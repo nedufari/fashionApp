@@ -7,6 +7,7 @@ import { HairModelsEntity } from "../Entity/users/BrandModelsUsers/hairmodels.en
 import { SkincareModelsEntity } from "../Entity/users/BrandModelsUsers/skincaremodels.entity";
 import { FootwearModelsEntity } from "../Entity/users/BrandModelsUsers/footwaremodels.entity";
 import { KidsModelsEntity } from "../Entity/users/BrandModelsUsers/kidsmodels.entity";
+import { MakeUpModelsEntity } from "../Entity/users/BrandModelsUsers/makeupmodels.entity";
 
 
 // since we have eight different kind of user and tables we would have eight different repository
@@ -47,5 +48,10 @@ export class FootwearModelRepository extends Repository <FootwearModelsEntity>{
 
 @EntityRepository(KidsModelsEntity)
 export class KidsModelRepository extends Repository <KidsModelsEntity>{
+
+}
+
+@EntityRepository(MakeUpModelsEntity)
+export class MakeUpModelRepository extends Repository <MakeUpModelsEntity>{
 
 }

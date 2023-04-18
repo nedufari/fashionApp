@@ -7,6 +7,7 @@ import {
   FootwearModelRepository,
   HairModelRepository,
   KidsModelRepository,
+  MakeUpModelRepository,
   OrdinaryUserRepository,
   PhotographerRepository,
   SkincareModelRepository,
@@ -27,6 +28,7 @@ import {
 } from './dto/registrationdto';
 import { ConfigService } from '@nestjs/config';
 import { Logindto } from './dto/logindto';
+import { MakeUpModelsEntity } from '../Entity/users/BrandModelsUsers/makeupmodels.entity';
 
 @Injectable()
 export class AuthService {
@@ -47,6 +49,8 @@ export class AuthService {
     private footwearrepository: FootwearModelRepository,
     @InjectRepository(KidsModelsEntity)
     private kidsmodelrepository: KidsModelRepository,
+    @InjectRepository(MakeUpModelsEntity)
+    private makeuprepository: MakeUpModelRepository,
     private jwt: JwtService,
     private configservice: ConfigService,
   ) {}
@@ -200,6 +204,27 @@ export class AuthService {
         HttpStatus.CONFLICT,
       );
     return await this.footwearrepository.save({
+      email,
+      password: hashedpassword,
+      username,
+    });
+  }
+
+  async makeupmodelignup(
+    userdto: RegistrationDto,
+  ): Promise<MakeUpModelsEntity> {
+    const { email, password, username } = userdto;
+    const hashedpassword = await this.hashpassword(password);
+    const emailexsist = this.ordnaryuserrepository.findOne({
+      where: { email: email },
+      select: ['id', 'email'],
+    });
+    if (!emailexsist)
+      throw new HttpException(
+        `user with email: ${email} exists, please use another unique email`,
+        HttpStatus.CONFLICT,
+      );
+    return await this.makeuprepository.save({
       email,
       password: hashedpassword,
       username,

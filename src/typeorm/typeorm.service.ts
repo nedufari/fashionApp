@@ -17,6 +17,8 @@ import { SkincareModelsEntity } from "../Entity/users/BrandModelsUsers/skincarem
 import { SkinCareMdodelPostsEntity } from "../Entity/Posts/brandmodelsPosts/skincaremodel.posts";
 import { HairMdodelPostsEntity } from "../Entity/Posts/brandmodelsPosts/hairmodels.posts";
 import { HairModelsEntity } from "../Entity/users/BrandModelsUsers/hairmodels.entity";
+import { MakeUpModelsEntity } from "../Entity/users/BrandModelsUsers/makeupmodels.entity";
+import { MakeUpMdodelPostsEntity } from "../Entity/Posts/brandmodelsPosts/makeupmodels.posts";
 
 @Injectable()
 export class TypeOrmService implements TypeOrmOptionsFactory{
@@ -33,7 +35,7 @@ export class TypeOrmService implements TypeOrmOptionsFactory{
             database:this.configservice.get('DATABASE_NAME'),
             synchronize:true,
             logging:false,
-            entities:[FashionDesignerEntity, OrdinaryUserEntity, FashionModelsEntity, FashionDesignerPostsEntity,FashionMdodelPostsEtity, PhotographerEntity,PhotographerPostsEntity,KidsMdodelPostsEntity,KidsModelsEntity,FootwareMdodelPostsEntity,FootwearModelsEntity,SkincareModelsEntity,SkinCareMdodelPostsEntity,HairMdodelPostsEntity,HairModelsEntity],
+            entities:[FashionDesignerEntity, OrdinaryUserEntity, FashionModelsEntity, FashionDesignerPostsEntity,FashionMdodelPostsEtity, PhotographerEntity,PhotographerPostsEntity,KidsMdodelPostsEntity,KidsModelsEntity,FootwareMdodelPostsEntity,FootwearModelsEntity,SkincareModelsEntity,SkinCareMdodelPostsEntity,HairMdodelPostsEntity,HairModelsEntity,MakeUpModelsEntity,MakeUpMdodelPostsEntity],
             migrations:[],
             subscribers:[],
 

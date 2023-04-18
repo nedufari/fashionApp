@@ -14,6 +14,7 @@ import { SkincareModelsEntity } from '../Entity/users/BrandModelsUsers/skincarem
 import { JwtModule } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
+import { MakeUpModelsEntity } from '../Entity/users/BrandModelsUsers/makeupmodels.entity';
 
 @Module({
   providers: [JwtGuard, RolesGuard, JwtStrategy, AuthService],
@@ -28,6 +29,7 @@ import { AuthController } from './auth.controller';
       KidsModelsEntity,
       FashionModelsEntity,
       SkincareModelsEntity,
+      MakeUpModelsEntity,
     ]),
     JwtModule.registerAsync({
         useFactory:()=>({

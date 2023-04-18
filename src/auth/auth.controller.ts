@@ -10,6 +10,7 @@ import { SkincareModelsEntity } from '../Entity/users/BrandModelsUsers/skincarem
 import { KidsModelsEntity } from '../Entity/users/BrandModelsUsers/kidsmodels.entity';
 import { FashionModelsEntity } from '../Entity/users/BrandModelsUsers/fashionmodels.entity';
 import { Logindto } from './dto/logindto';
+import { MakeUpModelsEntity } from '../Entity/users/BrandModelsUsers/makeupmodels.entity';
 
 @Controller('auth')
 export class AuthController {
@@ -25,7 +26,7 @@ export class AuthController {
         return await this.authservice.fashiondesignersignup(dto)
     }
 
-    @Post('photorapher')
+    @Post('photographer')
     async photographersignup(@Body()dto:RegistrationDto):Promise<PhotographerEntity>{
         return await this.authservice.photographersignup(dto)
     }
@@ -53,6 +54,10 @@ export class AuthController {
     @Post('ordinaryuser')
     async fashionmodelssignup(@Body()dto:RegistrationDto):Promise<FashionModelsEntity>{
         return await this.authservice.fashionmodelsignup(dto)
+    }
+    @Post('ordinaryuser')
+    async makeupmodelssignup(@Body()dto:RegistrationDto):Promise<MakeUpModelsEntity>{
+        return await this.authservice.makeupmodelignup(dto)
     }
 
     @Post("login")
