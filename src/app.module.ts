@@ -9,6 +9,7 @@ import { PhotographersModule } from './photographers/photographers.module';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TypeOrmService } from './typeorm/typeorm.service';
+import { ContractModule } from './contract/contract.module';
 
 @Module({
   imports: [
@@ -18,7 +19,8 @@ import { TypeOrmService } from './typeorm/typeorm.service';
     FashionModelsModule,
     PhotographersModule,
     ConfigModule.forRoot({isGlobal:true}),
-    TypeOrmModule.forRootAsync({useClass:TypeOrmService})
+    TypeOrmModule.forRootAsync({useClass:TypeOrmService}),
+    ContractModule
 
   ],
   controllers: [AppController],

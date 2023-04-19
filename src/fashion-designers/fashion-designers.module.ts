@@ -13,9 +13,10 @@ import { KidsModelsEntity } from '../Entity/users/BrandModelsUsers/kidsmodels.en
 import { MakeUpModelsEntity } from '../Entity/users/BrandModelsUsers/makeupmodels.entity';
 import { OrdinaryUserEntity } from '../Entity/users/ordinaryuser.entity';
 import { HairModelsEntity } from '../Entity/users/BrandModelsUsers/hairmodels.entity';
+import { Contracts } from '../Entity/Actions/contracts.entity';
 
 @Module({
-    imports:[AuthModule,TypeOrmModule.forFeature([FashionDesignerEntity,PhotographerEntity,FashionModelsEntity,FootwearModelsEntity,HairModelsEntity,SkincareModelsEntity,KidsModelsEntity,MakeUpModelsEntity,OrdinaryUserEntity])],
+    imports:[AuthModule,TypeOrmModule.forFeature([FashionDesignerEntity,PhotographerEntity,FashionModelsEntity,FootwearModelsEntity,HairModelsEntity,SkincareModelsEntity,KidsModelsEntity,MakeUpModelsEntity,OrdinaryUserEntity,Contracts])],
     providers:[FashionDesignerService],
     controllers:[fashiondesignercontroller]
 })
