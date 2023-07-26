@@ -9,10 +9,10 @@ export const  generate2FACode6digits=()=>{
     return otp;
 };
 
-// export const  generate2FACode4digits=async()=>{
-//     const nanoid = customAlphabet('1234567890', 6);
-//     return await nanoid();
-// };
+export const  generate2FACode4digits=():string=>{
+    const nanoid = customAlphabet('1234567890', 6);
+    return nanoid();
+};
 
 export const randomAlphaNumeric = async (length: number) => {
     let result = '';

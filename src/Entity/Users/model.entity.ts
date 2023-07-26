@@ -13,7 +13,7 @@ export class ModelEntity implements IModel{
     @PrimaryGeneratedColumn("uuid")
     id :string
 
-    @Generated('uuid')
+    @Column()
     ModelID:string
 
     @Column({unique:true,nullable:false})

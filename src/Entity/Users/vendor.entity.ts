@@ -10,7 +10,7 @@ export class vendorEntity implements IVendor{
     @PrimaryGeneratedColumn("uuid")
     id :string
 
-    @Generated('uuid')
+    @Column()
     VendorID:string
 
     @Column({unique:true,nullable:false})

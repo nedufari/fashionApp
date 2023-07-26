@@ -8,7 +8,7 @@ import { Logindto } from './dto/logindto';
 import { AdminEntityRepository, CustomerEntityRepository, ModelEntityRepository, NotificationsRepository, OtpRepository, PhotographerEntityRepository, VendorEntityRepository } from './auth.repository';
 import { IAdminResponse } from '../Users/admin/admin.interface';
 import { ICustomerResponse } from '../Users/customers/customers.interface';
-import { generate2FACode6digits } from '../helpers';
+import { generate2FACode4digits, generate2FACode6digits } from '../helpers';
 import { UserOtp } from '../Entity/userotp.entity';
 import { MailService } from '../mailer.service';
 import { Notifications } from '../Entity/Notification/notification.entity';
@@ -18,6 +18,7 @@ import { CustomerEntity } from '../Entity/Users/customer.entity';
 import { vendorEntity } from '../Entity/Users/vendor.entity';
 import { ModelEntity } from '../Entity/Users/model.entity';
 import { PhotographerEntity } from '../Entity/Users/photorapher.entity';
+import { nanoid } from 'nanoid';
 
 
 @Injectable()
@@ -50,23 +51,32 @@ export class AuthService {
     return await bcrypt.compare(userpassword,dbpassword);
   }
 
+  private generateIdentityNumber():string{
+    return nanoid(8)
+  }
+
 
   ///signup for various users
 
   async CustomerSignup(userdto: RegistrationDto,): Promise<{message:string}> {
     try {
-      const { email, password, username,} = userdto;
-      const hashedpassword = await this.hashpassword(password);
-      const emailexsist = this.customerrepository.findOne({where: { email: email },select: ['id', 'email']});
+      const hashedpassword = await this.hashpassword(userdto.password);
+      const customer = new CustomerEntity()
+      customer.email=userdto.email
+      customer.password=hashedpassword
+      customer.username=userdto.username
+      customer.CustomerID=this.generateIdentityNumber()
+      
+      const emailexsist = this.customerrepository.findOne({where: { email: userdto.email },select: ['id', 'email']});
       if (!emailexsist)
         throw new HttpException(
-          `user with email: ${email} exists, please use another unique email`,
+          `user with email: ${userdto.email} exists, please use another unique email`,
           HttpStatus.CONFLICT,
         );
-        await this.customerrepository.save({email,password: hashedpassword,username,});
+        await this.customerrepository.save(customer);
 
       //2fa authentication 
-      const emiailverificationcode= generate2FACode6digits()
+      const emiailverificationcode= generate2FACode4digits()
 
       const otp= new UserOtp()
       otp.email=userdto.email
@@ -75,7 +85,7 @@ export class AuthService {
       const fiveminuteslater=new Date()
       await fiveminuteslater.setMinutes(fiveminuteslater.getMinutes()+5)
       otp.expiration_time=fiveminuteslater
-      await this.otprepository.create()
+      await this.otprepository.save(otp)
       console.log('customer account created please check your mail to verify your account, by inputing the six digit OTP sent to you')
 
       //send mail 
@@ -111,7 +121,7 @@ export class AuthService {
       notification.subject="New Customer!"
       notification.notification_type=NotificationType.SIGNED_UP
       notification.message=`Hello ${(await emailexsist).username}, your customer has been created. please complete your profile `
-      await this.notificationrepository.create()
+      await this.notificationrepository.save(notification)
 
       return {message:"new coustomer signed up and verification otp has been sent "}
     

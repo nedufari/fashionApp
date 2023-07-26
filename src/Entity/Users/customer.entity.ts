@@ -9,7 +9,7 @@ export class CustomerEntity implements ICustomer{
     @PrimaryGeneratedColumn("uuid")
     id :string
 
-    @Generated('uuid')
+    @Column()
     CustomerID:string
 
     @Column({unique:true,nullable:false})

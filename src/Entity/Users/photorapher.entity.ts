@@ -10,7 +10,7 @@ export class PhotographerEntity implements IPhotographer{
     @PrimaryGeneratedColumn("uuid")
     id :string
 
-    @Generated('uuid')
+    @Column()
     PhotographerID:string
 
     @Column({unique:true,nullable:false})

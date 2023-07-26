@@ -9,7 +9,7 @@ export class AdminEntity implements IAdmin{
     @PrimaryGeneratedColumn("uuid")
     id :string
 
-    @Generated('uuid')
+    @Column()
     AdminID:string
 
     @Column({unique:true,nullable:false})
