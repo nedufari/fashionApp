@@ -1,5 +1,6 @@
-import { IsEmail, IsNotEmpty, IsString,IsNumber } from "class-validator"
+import { IsEmail, IsNotEmpty, IsString,IsNumber, IsEnum } from "class-validator"
 import{} from "class-transformer"
+import { Roles } from "../../Enums/roles.enum"
 
 export class RegistrationDto{
     //used by all models and photographer
@@ -16,21 +17,6 @@ export class RegistrationDto{
     username:string
 }
 
-export class UserRegistrationDto{
-    //used by the fashion designer and the ordinary user
-    @IsEmail()
-    @IsNotEmpty()
-    email:string
-
-    @IsString()
-    @IsNotEmpty()
-    password:string
-
-    @IsString()
-    @IsNotEmpty()
-    name:string
-
-}
 
 export class kidsModeleRegistrationDto{
     @IsEmail()

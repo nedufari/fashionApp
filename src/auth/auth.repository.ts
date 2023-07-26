@@ -1,57 +1,46 @@
 import { EntityRepository, Repository } from "typeorm";
-import { OrdinaryUserEntity } from "../Entity/users/ordinaryuser.entity";
-import { FashionDesignerEntity } from "../Entity/users/fashiodesigner.entity";
-import { PhotographerEntity } from "../Entity/users/photographers.entity";
-import { FashionModelsEntity } from "../Entity/users/BrandModelsUsers/fashionmodels.entity";
-import { HairModelsEntity } from "../Entity/users/BrandModelsUsers/hairmodels.entity";
-import { SkincareModelsEntity } from "../Entity/users/BrandModelsUsers/skincaremodels.entity";
-import { FootwearModelsEntity } from "../Entity/users/BrandModelsUsers/footwaremodels.entity";
-import { KidsModelsEntity } from "../Entity/users/BrandModelsUsers/kidsmodels.entity";
-import { MakeUpModelsEntity } from "../Entity/users/BrandModelsUsers/makeupmodels.entity";
+import { CustomerEntity } from "../Entity/Users/customer.entity";
+import { vendorEntity } from "../Entity/Users/vendor.entity";
+import { ModelEntity } from "../Entity/Users/model.entity";
+import { PhotographerEntity } from "../Entity/Users/photorapher.entity";
+import { AdminEntity } from "../Entity/Users/admin.entity";
+import { UserOtp } from "../Entity/userotp.entity";
+import { Notifications } from "../Entity/Notification/notification.entity";
 
 
-// since we have eight different kind of user and tables we would have eight different repository
-@EntityRepository(OrdinaryUserEntity)
-export class OrdinaryUserRepository extends Repository <OrdinaryUserEntity>{
+@EntityRepository(CustomerEntity)
+export class CustomerEntityRepository extends Repository <CustomerEntity>{
 
 }
 
-@EntityRepository(FashionDesignerEntity)
-export class FashionDesignerRepository extends Repository <FashionDesignerEntity>{
+@EntityRepository(vendorEntity)
+export class VendorEntityRepository extends Repository <vendorEntity>{
+
+}
+
+@EntityRepository(ModelEntity)
+export class ModelEntityRepository extends Repository <ModelEntity>{
 
 }
 
 @EntityRepository(PhotographerEntity)
-export class PhotographerRepository extends Repository <PhotographerEntity>{
+export class PhotographerEntityRepository extends Repository <PhotographerEntity>{
 
 }
 
-@EntityRepository(FashionModelsEntity)
-export class FashionModelRepository extends Repository <FashionModelsEntity>{
+@EntityRepository(AdminEntity)
+export class AdminEntityRepository extends Repository <AdminEntity>{
 
 }
 
-@EntityRepository(HairModelsEntity)
-export class HairModelRepository extends Repository <HairModelsEntity>{
+@EntityRepository(UserOtp)
+export class OtpRepository extends Repository <UserOtp>{
 
 }
 
-@EntityRepository(SkincareModelsEntity)
-export class SkincareModelRepository extends Repository <SkincareModelsEntity>{
+
+@EntityRepository(Notifications)
+export class NotificationsRepository extends Repository <Notifications>{
 
 }
 
-@EntityRepository(FootwearModelsEntity)
-export class FootwearModelRepository extends Repository <FootwearModelsEntity>{
-
-}
-
-@EntityRepository(KidsModelsEntity)
-export class KidsModelRepository extends Repository <KidsModelsEntity>{
-
-}
-
-@EntityRepository(MakeUpModelsEntity)
-export class MakeUpModelRepository extends Repository <MakeUpModelsEntity>{
-
-}

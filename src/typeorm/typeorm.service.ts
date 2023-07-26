@@ -1,25 +1,17 @@
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { TypeOrmModuleOptions, TypeOrmOptionsFactory} from "@nestjs/typeorm"
-import { Migration } from "typeorm";
-import { FashionDesignerEntity } from "../Entity/users/fashiodesigner.entity";
-import { OrdinaryUserEntity } from "../Entity/users/ordinaryuser.entity";
-import { FashionModelsEntity } from "../Entity/users/BrandModelsUsers/fashionmodels.entity";
-import { FashionDesignerPostsEntity } from "../Entity/Posts/fd.post";
-import { FashionMdodelPostsEtity } from "../Entity/Posts/brandmodelsPosts/fashionModel.posts";
-import { PhotographerEntity } from "../Entity/users/photographers.entity";
-import { PhotographerPostsEntity } from "../Entity/Posts/photographer.posts";
-import { KidsMdodelPostsEntity } from "../Entity/Posts/brandmodelsPosts/kidsmodel.posts";
-import { KidsModelsEntity } from "../Entity/users/BrandModelsUsers/kidsmodels.entity";
-import { FootwareMdodelPostsEntity } from "../Entity/Posts/brandmodelsPosts/footwareModel.posts";
-import { FootwearModelsEntity } from "../Entity/users/BrandModelsUsers/footwaremodels.entity";
-import { SkincareModelsEntity } from "../Entity/users/BrandModelsUsers/skincaremodels.entity";
-import { SkinCareMdodelPostsEntity } from "../Entity/Posts/brandmodelsPosts/skincaremodel.posts";
-import { HairMdodelPostsEntity } from "../Entity/Posts/brandmodelsPosts/hairmodels.posts";
-import { HairModelsEntity } from "../Entity/users/BrandModelsUsers/hairmodels.entity";
-import { MakeUpModelsEntity } from "../Entity/users/BrandModelsUsers/makeupmodels.entity";
-import { MakeUpMdodelPostsEntity } from "../Entity/Posts/brandmodelsPosts/makeupmodels.posts";
-import { Contracts } from "../Entity/Actions/contracts.entity";
+import { AdminEntity } from "../Entity/Users/admin.entity";
+import { ModelEntity } from "../Entity/Users/model.entity";
+import { PhotographerEntity } from "../Entity/Users/photorapher.entity";
+import { vendorEntity } from "../Entity/Users/vendor.entity";
+import { CustomerEntity } from "../Entity/Users/customer.entity";
+import { Comments } from "../Entity/Activities/comment.entity";
+import { Likes } from "../Entity/Activities/likes.entity";
+import { Replies } from "../Entity/Activities/reply.entity";
+import { UserOtp } from "../Entity/userotp.entity";
+import { Notifications } from "../Entity/Notification/notification.entity";
+import { Contracts } from "../Entity/contracts.entity";
 
 @Injectable()
 export class TypeOrmService implements TypeOrmOptionsFactory{
@@ -36,7 +28,7 @@ export class TypeOrmService implements TypeOrmOptionsFactory{
             database:this.configservice.get('DATABASE_NAME'),
             synchronize:true,
             logging:false,
-            entities:[FashionDesignerEntity, OrdinaryUserEntity, FashionModelsEntity, FashionDesignerPostsEntity,FashionMdodelPostsEtity, PhotographerEntity,PhotographerPostsEntity,KidsMdodelPostsEntity,KidsModelsEntity,FootwareMdodelPostsEntity,FootwearModelsEntity,SkincareModelsEntity,SkinCareMdodelPostsEntity,HairMdodelPostsEntity,HairModelsEntity,MakeUpModelsEntity,MakeUpMdodelPostsEntity,Contracts],
+            entities:[ AdminEntity,ModelEntity,PhotographerEntity,vendorEntity,CustomerEntity,Comments,Likes,Replies,UserOtp,Notifications,Contracts],
             migrations:[],
             subscribers:[],
 

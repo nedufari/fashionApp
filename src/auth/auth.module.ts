@@ -3,33 +3,33 @@ import { JwtGuard } from './guards/jwt.guards';
 import { RolesGuard } from './guards/role.guards';
 import { JwtStrategy } from './jwt.strategy';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { FashionDesignerEntity } from '../Entity/users/fashiodesigner.entity';
-import { OrdinaryUserEntity } from '../Entity/users/ordinaryuser.entity';
-import { PhotographerEntity } from '../Entity/users/photographers.entity';
-import { FootwearModelsEntity } from '../Entity/users/BrandModelsUsers/footwaremodels.entity';
-import { HairModelsEntity } from '../Entity/users/BrandModelsUsers/hairmodels.entity';
-import { KidsModelsEntity } from '../Entity/users/BrandModelsUsers/kidsmodels.entity';
-import { FashionModelsEntity } from '../Entity/users/BrandModelsUsers/fashionmodels.entity';
-import { SkincareModelsEntity } from '../Entity/users/BrandModelsUsers/skincaremodels.entity';
+
+
 import { JwtModule } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
-import { MakeUpModelsEntity } from '../Entity/users/BrandModelsUsers/makeupmodels.entity';
+import { UserModule } from '../Users/users.module';
+import { CustomerEntity } from '../Entity/Users/customer.entity';
+import { vendorEntity } from '../Entity/Users/vendor.entity';
+import { PhotographerEntity } from '../Entity/Users/photorapher.entity';
+import { AdminEntity } from '../Entity/Users/admin.entity';
+import { Notifications } from '../Entity/Notification/notification.entity';
+import { UserOtp } from '../Entity/userotp.entity';
+import { ModelEntity } from '../Entity/Users/model.entity';
+import { MailService } from '../mailer.service';
 
 @Module({
-  providers: [JwtGuard, RolesGuard, JwtStrategy, AuthService],
+  providers: [JwtGuard, RolesGuard, JwtStrategy, AuthService,MailService],
   exports:[],
   imports: [
     TypeOrmModule.forFeature([
-      FashionDesignerEntity,
-      OrdinaryUserEntity,
+      CustomerEntity,
+      vendorEntity,
       PhotographerEntity,
-      FootwearModelsEntity,
-      HairModelsEntity,
-      KidsModelsEntity,
-      FashionModelsEntity,
-      SkincareModelsEntity,
-      MakeUpModelsEntity,
+      AdminEntity,
+      Notifications,
+      UserOtp,
+      ModelEntity     
     ]),
     JwtModule.registerAsync({
         useFactory:()=>({

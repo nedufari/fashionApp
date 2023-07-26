@@ -1,5 +1,5 @@
 import { IsEnum, IsString } from "class-validator";
-import { ContractDuration } from "../Enums/contractduration.enum";
+import { ContractDuration } from "../Enums/contractDuration.enum";
 
 export class ContractDto{
     

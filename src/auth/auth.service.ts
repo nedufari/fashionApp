@@ -1,58 +1,45 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { OrdinaryUserEntity } from '../Entity/users/ordinaryuser.entity';
-import {
-  FashionDesignerRepository,
-  FashionModelRepository,
-  FootwearModelRepository,
-  HairModelRepository,
-  KidsModelRepository,
-  MakeUpModelRepository,
-  OrdinaryUserRepository,
-  PhotographerRepository,
-  SkincareModelRepository,
-} from './auth.repository';
-import { FashionDesignerEntity } from '../Entity/users/fashiodesigner.entity';
-import { PhotographerEntity } from '../Entity/users/photographers.entity';
-import { FashionModelsEntity } from '../Entity/users/BrandModelsUsers/fashionmodels.entity';
-import { HairModelsEntity } from '../Entity/users/BrandModelsUsers/hairmodels.entity';
-import { SkincareModelsEntity } from '../Entity/users/BrandModelsUsers/skincaremodels.entity';
-import { FootwearModelsEntity } from '../Entity/users/BrandModelsUsers/footwaremodels.entity';
-import { KidsModelsEntity } from '../Entity/users/BrandModelsUsers/kidsmodels.entity';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import {
-  RegistrationDto,
-  UserRegistrationDto,
-  kidsModeleRegistrationDto,
-} from './dto/registrationdto';
+import {RegistrationDto,kidsModeleRegistrationDto,} from './dto/registrationdto';
 import { ConfigService } from '@nestjs/config';
 import { Logindto } from './dto/logindto';
-import { MakeUpModelsEntity } from '../Entity/users/BrandModelsUsers/makeupmodels.entity';
+import { AdminEntityRepository, CustomerEntityRepository, ModelEntityRepository, NotificationsRepository, OtpRepository, PhotographerEntityRepository, VendorEntityRepository } from './auth.repository';
+import { IAdminResponse } from '../Users/admin/admin.interface';
+import { ICustomerResponse } from '../Users/customers/customers.interface';
+import { generate2FACode6digits } from '../helpers';
+import { UserOtp } from '../Entity/userotp.entity';
+import { MailService } from '../mailer.service';
+import { Notifications } from '../Entity/Notification/notification.entity';
+import { NotificationType } from '../Enums/notificationTypes.enum';
+import { AdminEntity } from '../Entity/Users/admin.entity';
+import { CustomerEntity } from '../Entity/Users/customer.entity';
+import { vendorEntity } from '../Entity/Users/vendor.entity';
+import { ModelEntity } from '../Entity/Users/model.entity';
+import { PhotographerEntity } from '../Entity/Users/photorapher.entity';
+
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(OrdinaryUserEntity)
-    private ordnaryuserrepository: OrdinaryUserRepository,
-    @InjectRepository(FashionDesignerEntity)
-    private fashiondesigerrepository: FashionDesignerRepository,
-    @InjectRepository(PhotographerEntity)
-    private photographerrepository: PhotographerRepository,
-    @InjectRepository(FashionModelsEntity)
-    private fashionmodelrepository: FashionModelRepository,
-    @InjectRepository(HairModelsEntity)
-    private hairmodelrepository: HairModelRepository,
-    @InjectRepository(SkincareModelsEntity)
-    private skincaremodelrepository: SkincareModelRepository,
-    @InjectRepository(FootwearModelsEntity)
-    private footwearrepository: FootwearModelRepository,
-    @InjectRepository(KidsModelsEntity)
-    private kidsmodelrepository: KidsModelRepository,
-    @InjectRepository(MakeUpModelsEntity)
-    private makeuprepository: MakeUpModelRepository,
+    @InjectRepository(AdminEntity)
+    private adminrepository: AdminEntityRepository,
+    @InjectRepository(CustomerEntity)
+    private customerrepository: CustomerEntityRepository,
     private jwt: JwtService,
+    @InjectRepository(vendorEntity)
+    private vendorrepository: VendorEntityRepository,
+    @InjectRepository(ModelEntity)
+    private modelrepository: ModelEntityRepository,
+    @InjectRepository(PhotographerEntity)
+    private photographerrepository: PhotographerEntityRepository,
+    @InjectRepository(UserOtp)
+    private otprepository: OtpRepository,
+    @InjectRepository(Notifications)
+    private notificationrepository: NotificationsRepository,
     private configservice: ConfigService,
+    private mailerservice:MailService
   ) {}
 
   async hashpassword(password: string): Promise<string> {
@@ -63,203 +50,112 @@ export class AuthService {
     return await bcrypt.compare(userpassword,dbpassword);
   }
 
+
   ///signup for various users
 
-  async ordinaryusersignup(
-    userdto: UserRegistrationDto,
-  ): Promise<OrdinaryUserEntity> {
-    const { email, password, name } = userdto;
-    const hashedpassword = await this.hashpassword(password);
-    const emailexsist = this.ordnaryuserrepository.findOne({
-      where: { email: email },
-      select: ['id', 'email'],
-    });
-    if (!emailexsist)
-      throw new HttpException(
-        `user with email: ${email} exists, please use another unique email`,
-        HttpStatus.CONFLICT,
-      );
-    return await this.ordnaryuserrepository.save({
-      email,
-      password: hashedpassword,
-      name,
-    });
-  }
+  async CustomerSignup(userdto: RegistrationDto,): Promise<{message:string}> {
+    try {
+      const { email, password, username,} = userdto;
+      const hashedpassword = await this.hashpassword(password);
+      const emailexsist = this.customerrepository.findOne({where: { email: email },select: ['id', 'email']});
+      if (!emailexsist)
+        throw new HttpException(
+          `user with email: ${email} exists, please use another unique email`,
+          HttpStatus.CONFLICT,
+        );
+        await this.customerrepository.save({email,password: hashedpassword,username,});
 
-  async fashiondesignersignup(
-    userdto: UserRegistrationDto,
-  ): Promise<FashionDesignerEntity> {
-    const { email, password, name } = userdto;
-    const hashedpassword = await this.hashpassword(password);
-    const emailexsist = this.fashiondesigerrepository.findOne({
-      where: { email: email },
-      select: ['id', 'email'],
-    });
-    if (!emailexsist)
-      throw new HttpException(
-        `user with email: ${email} exists, please use another unique email`,
-        HttpStatus.CONFLICT,
-      );
-    return await this.fashiondesigerrepository.save({
-      email,
-      password: hashedpassword,
-      name,
-    });
-  }
+      //2fa authentication 
+      const emiailverificationcode= generate2FACode6digits()
 
-  async photographersignup(
-    userdto: RegistrationDto,
-  ): Promise<PhotographerEntity> {
-    const { email, password, username } = userdto;
-    const hashedpassword = await this.hashpassword(password);
-    const emailexsist = this.ordnaryuserrepository.findOne({
-      where: { email: email },
-      select: ['id', 'email'],
-    });
-    if (!emailexsist)
-      throw new HttpException(
-        `user with email: ${email} exists, please use another unique email`,
-        HttpStatus.CONFLICT,
-      );
-    return await this.photographerrepository.save({
-      email,
-      password: hashedpassword,
-      username,
-    });
-  }
+      const otp= new UserOtp()
+      otp.email=userdto.email
+      otp.otp=emiailverificationcode
+      otp.role=(await emailexsist).role
+      const fiveminuteslater=new Date()
+      await fiveminuteslater.setMinutes(fiveminuteslater.getMinutes()+5)
+      otp.expiration_time=fiveminuteslater
+      await this.otprepository.create()
+      console.log('customer account created please check your mail to verify your account, by inputing the six digit OTP sent to you')
 
-  async fashionmodelsignup(
-    userdto: RegistrationDto,
-  ): Promise<FashionModelsEntity> {
-    const { email, password, username } = userdto;
-    const hashedpassword = await this.hashpassword(password);
-    const emailexsist = this.ordnaryuserrepository.findOne({
-      where: { email: email },
-      select: ['id', 'email'],
-    });
-    if (!emailexsist)
-      throw new HttpException(
-        `user with email: ${email} exists, please use another unique email`,
-        HttpStatus.CONFLICT,
-      );
-    return await this.fashionmodelrepository.save({
-      email,
-      password: hashedpassword,
-      username,
-    });
-  }
+      //send mail 
+      const subject="verify your email"
+      const content=`<p>
+      To complete your onboarding, use the following OTP code
+    </p>
+    <p>
+    for verification
+    </p>
 
-  async hairmodelsignup(userdto: RegistrationDto): Promise<HairModelsEntity> {
-    const { email, password, username } = userdto;
-    const hashedpassword = await this.hashpassword(password);
-    const emailexsist = this.ordnaryuserrepository.findOne({
-      where: { email: email },
-      select: ['id', 'email'],
-    });
-    if (!emailexsist)
-      throw new HttpException(
-        `user with email: ${email} exists, please use another unique email`,
-        HttpStatus.CONFLICT,
-      );
-    return await this.hairmodelrepository.save({
-      email,
-      password: hashedpassword,
-      username,
-    });
-  }
+    <p>
+    <strong>
+        OTP: ${emiailverificationcode}
+    </strong>
+    </p>
 
-  async skincaremodelsignup(
-    userdto: RegistrationDto,
-  ): Promise<SkincareModelsEntity> {
-    const { email, password, username } = userdto;
-    const hashedpassword = await this.hashpassword(password);
-    const emailexsist = this.ordnaryuserrepository.findOne({
-      where: { email: email },
-      select: ['id', 'email'],
-    });
-    if (!emailexsist)
-      throw new HttpException(
-        `user with email: ${email} exists, please use another unique email`,
-        HttpStatus.CONFLICT,
-      );
-    return await this.skincaremodelrepository.save({
-      email,
-      password: hashedpassword,
-      username,
-    });
-  }
+    <p>
+      The code expires in five minutes.
+      If you did not initiate this action, please send an email to
+      support@Bubbles.com
+    </p>
 
-  async footwearsignup(
-    userdto: RegistrationDto,
-  ): Promise<FootwearModelsEntity> {
-    const { email, password, username } = userdto;
-    const hashedpassword = await this.hashpassword(password);
-    const emailexsist = this.ordnaryuserrepository.findOne({
-      where: { email: email },
-      select: ['id', 'email'],
-    });
-    if (!emailexsist)
-      throw new HttpException(
-        `user with email: ${email} exists, please use another unique email`,
-        HttpStatus.CONFLICT,
-      );
-    return await this.footwearrepository.save({
-      email,
-      password: hashedpassword,
-      username,
-    });
-  }
+    <p>
+      Best,
+      The Bubbles team.
+    </p>`
+      await this.mailerservice.SendMail(otp.email,subject,content)
 
-  async makeupmodelignup(
-    userdto: RegistrationDto,
-  ): Promise<MakeUpModelsEntity> {
-    const { email, password, username } = userdto;
-    const hashedpassword = await this.hashpassword(password);
-    const emailexsist = this.ordnaryuserrepository.findOne({
-      where: { email: email },
-      select: ['id', 'email'],
-    });
-    if (!emailexsist)
-      throw new HttpException(
-        `user with email: ${email} exists, please use another unique email`,
-        HttpStatus.CONFLICT,
-      );
-    return await this.makeuprepository.save({
-      email,
-      password: hashedpassword,
-      username,
-    });
-  }
+      //save the notification 
+      const notification = new Notifications()
+      notification.account= (await emailexsist).id
+      notification.subject="New Customer!"
+      notification.notification_type=NotificationType.SIGNED_UP
+      notification.message=`Hello ${(await emailexsist).username}, your customer has been created. please complete your profile `
+      await this.notificationrepository.create()
 
-  async kidsmodelsignup(
-    userdto: kidsModeleRegistrationDto,
-  ): Promise<KidsModelsEntity> {
-    const { email, password, username, manager, ManagerPhone, age } = userdto;
-    if (age < 1 || age > 12) {
-      throw new HttpException(
-        `Kid's age must be between 1 and 12 years old`,
-        HttpStatus.BAD_REQUEST,
-      );
+      return {message:"new coustomer signed up and verification otp has been sent "}
+    
+    } catch (error) {
+      throw new HttpException(`user sign up failed`,HttpStatus.BAD_REQUEST)
+      
     }
-    const hashedpassword = await this.hashpassword(password);
-    const emailexsist = this.ordnaryuserrepository.findOne({
-      where: { email: email },
-      select: ['id', 'email'],
-    });
-    if (!emailexsist)
-      throw new HttpException(
-        `user with email: ${email} exists, please use another unique email`,
-        HttpStatus.CONFLICT,
-      );
-    return await this.kidsmodelrepository.save({
-      email,
-      password: hashedpassword,
-      username,
-      manager,
-      ManagerPhone,
-      age,
-    });
+
+   
   }
+
+  
+
+  // async kidsmodelsignup(
+  //   userdto: kidsModeleRegistrationDto,
+  // ): Promise<KidsModelsEntity> {
+  //   const { email, password, username, manager, ManagerPhone, age } = userdto;
+  //   if (age < 1 || age > 12) {
+  //     throw new HttpException(
+  //       `Kid's age must be between 1 and 12 years old`,
+  //       HttpStatus.BAD_REQUEST,
+  //     );
+  //   }
+  //   const hashedpassword = await this.hashpassword(password);
+  //   const emailexsist = this.ordnaryuserrepository.findOne({
+  //     where: { email: email },
+  //     select: ['id', 'email'],
+  //   });
+  //   if (!emailexsist)
+  //     throw new HttpException(
+  //       `user with email: ${email} exists, please use another unique email`,
+  //       HttpStatus.CONFLICT,
+  //     );
+  //   return await this.kidsmodelrepository.save({
+  //     email,
+  //     password: hashedpassword,
+  //     username,
+  //     manager,
+  //     ManagerPhone,
+  //     age,
+  //   });
+  // }
+
+
 
   //login
 
@@ -278,31 +174,9 @@ export class AuthService {
 
   async login(logindto: Logindto) {
     const finduser =
-      (await this.ordnaryuserrepository.findOne({
+      (await this.customerrepository.findOne({
         where: { email: logindto.email },
       })) 
-      ||
-      (await this.fashiondesigerrepository.findOne({
-        where: { email: logindto.email },
-      })) ||
-      (await this.photographerrepository.findOne({
-        where: { email: logindto.email },
-      }))  ||
-      (await this.fashionmodelrepository.findOne({
-        where: { email: logindto.email },
-      })) ||
-      (await this.footwearrepository.findOne({
-        where: { email: logindto.email },
-      })) ||
-      (await this.hairmodelrepository.findOne({
-        where: { email: logindto.email },
-      })) ||
-      (await this.skincaremodelrepository.findOne({
-        where: { email: logindto.email },
-      })) ||
-      (await this.kidsmodelrepository.findOne({
-        where: { email: logindto.email },
-      }));
 
       if (!finduser) throw new HttpException(`invalid email address`,HttpStatus.UNAUTHORIZED)
 
