@@ -8,12 +8,14 @@ export class AuthController {
     constructor(private authservice:AuthService){}
 
     @Post('signup/customer')
-    async customersignup(@Body()dto:RegistrationDto, @Res()res):Promise<{message:"welcome to ned fashion "}>{
+    async customersignup(@Body()dto:RegistrationDto):Promise<{message:"welcome to ned fashion "}>{
         try {
             await this.authservice.CustomerSignup(dto)
-            return res.data
+            return {message:"welcome to ned fashion "}
+        
             
         } catch (error) {
+            throw error
             
         }
         

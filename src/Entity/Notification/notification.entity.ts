@@ -14,7 +14,7 @@ export class Notifications{
     account:string
 
 
-    @Column({nullable:false,type:"enum", enum:ContractDuration})
+    @Column({nullable:false,type:"enum", enum:NotificationType})
     notification_type:NotificationType
 
     @Column({nullable:false})
@@ -24,7 +24,7 @@ export class Notifications{
     @Column({nullable:false})
     subject:string
     
-    @Column({nullable:false,type:'jsonb'})
+    @Column({nullable:true,type:'jsonb'})
     metadata:Record<string,string>
 
 

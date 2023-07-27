@@ -8,6 +8,7 @@ import { ContractModule } from './contract/contract.module';
 import { UserModule } from './Users/users.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { MailService } from './mailer.service';
+import { AdminModule } from './Users/admin/admin.module';
 
 
 @Module({
@@ -18,6 +19,7 @@ import { MailService } from './mailer.service';
     ConfigModule.forRoot({isGlobal:true}),
     TypeOrmModule.forRootAsync({useClass:TypeOrmService}),
     ContractModule,
+    AdminModule,
     MailerModule.forRoot({
       transport:{
         service:"gmail",

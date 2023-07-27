@@ -65,6 +65,7 @@ export class AuthService {
       customer.email=userdto.email
       customer.password=hashedpassword
       customer.username=userdto.username
+      customer.role=userdto.role
       customer.CustomerID=this.generateIdentityNumber()
       
       const emailexsist = this.customerrepository.findOne({where: { email: userdto.email },select: ['id', 'email']});
@@ -76,12 +77,12 @@ export class AuthService {
         await this.customerrepository.save(customer);
 
       //2fa authentication 
-      const emiailverificationcode= generate2FACode4digits()
+    const emiailverificationcode= generate2FACode4digits()
 
       const otp= new UserOtp()
       otp.email=userdto.email
       otp.otp=emiailverificationcode
-      otp.role=(await emailexsist).role
+      otp.role= customer.role
       const fiveminuteslater=new Date()
       await fiveminuteslater.setMinutes(fiveminuteslater.getMinutes()+5)
       otp.expiration_time=fiveminuteslater
@@ -113,20 +114,21 @@ export class AuthService {
       Best,
       The Bubbles team.
     </p>`
-      await this.mailerservice.SendMail(otp.email,subject,content)
+      //  await this.mailerservice.SendMail(otp.email,subject,content)
 
       //save the notification 
       const notification = new Notifications()
-      notification.account= (await emailexsist).id
+      notification.account= customer.id
       notification.subject="New Customer!"
       notification.notification_type=NotificationType.SIGNED_UP
-      notification.message=`Hello ${(await emailexsist).username}, your customer has been created. please complete your profile `
+      notification.message=`Hello ${customer.username}, your customer has been created. please complete your profile `
       await this.notificationrepository.save(notification)
 
       return {message:"new coustomer signed up and verification otp has been sent "}
     
     } catch (error) {
-      throw new HttpException(`user sign up failed`,HttpStatus.BAD_REQUEST)
+      throw error
+      // throw new HttpException(`user sign up failed`,HttpStatus.BAD_REQUEST)
       
     }
 

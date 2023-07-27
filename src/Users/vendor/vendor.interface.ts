@@ -40,7 +40,6 @@ export interface IVendorResponse{
     phone1:string 
     phone2:string 
     bio:string 
-    age:number
     gender:string
     facebook:string 
     twitter:string
@@ -48,11 +47,7 @@ export interface IVendorResponse{
     instagram:string
     tiktok:string
     snapchat:string
-    pricerange: string 
-    negotiable:boolean
     display_photo:string
-    kindofmodel:KindOfModel
-    paymentplan:PaymentPlan
     VendorID:string
 
 }

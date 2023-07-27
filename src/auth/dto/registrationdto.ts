@@ -15,6 +15,10 @@ export class RegistrationDto{
     @IsString()
     @IsNotEmpty()
     username:string
+
+    @IsEnum(Roles)
+    @IsNotEmpty({message:"please select the kind of user you are"})
+    role:Roles
 }
 
 
