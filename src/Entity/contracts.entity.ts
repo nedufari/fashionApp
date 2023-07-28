@@ -1,8 +1,52 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm"; 
+import { Column, Entity, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm"; 
 import { ContractDuration } from "../Enums/contractDuration.enum";
+import { vendorEntity } from "./Users/vendor.entity";
+import { PhotographerEntity } from "./Users/photorapher.entity";
+import { ModelEntity } from "./Users/model.entity";
+import { IVendor } from "../Users/vendor/vendor.interface";
+import { IPhotographer } from "../Users/photographers/photo.interface";
+import { IModel } from "../Users/model/model.interface";
+
+
+export interface IContract{
+    id:string,
+    commence_date:Date
+    expiration_date:Date
+    contract_duration:ContractDuration
+    contract_worth:string
+    contract_validity_number:string
+    vendor:string
+    model:string
+    photographer:string
+}
+
+export interface IContractPhotographerResponse{
+    
+    commence_date:Date
+    expiration_date:Date
+    contract_duration:ContractDuration
+    contract_worth:string
+    contract_validity_number:string
+    vendor:string
+    photographer:string
+}
+
+export interface IContractModelResponse{
+    commence_date:Date
+    expiration_date:Date
+    contract_duration:ContractDuration
+    contract_worth:string
+    contract_validity_number:string
+    vendor:string
+    model:string
+    
+}
+
+
+
 
 @Entity()
-export class Contracts{
+export class Contracts implements IContract{
     @PrimaryGeneratedColumn("uuid")
     id:string
 
@@ -19,7 +63,16 @@ export class Contracts{
     @Column({nullable:false})
     contract_worth:string
 
-    // @ManyToOne(()=>FashionDesignerEntity,(contractor:FashionDesignerEntity)=>contractor.brandname)
-    // fashion_mogul:FashionDesignerEntity
+    @Column({nullable:false})
+    contract_validity_number:string
+
+   @Column({nullable:true})
+    vendor:string
+
+    @Column({nullable:true})
+    photographer:string
+
+    @Column({nullable:true})
+    model:string
 
 }

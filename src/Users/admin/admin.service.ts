@@ -1,17 +1,29 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { CustomerEntity } from "../../Entity/Users/customer.entity";
-import { AdminEntityRepository, CustomerEntityRepository, VendorEntityRepository } from "../../auth/auth.repository";
+import { AdminEntityRepository, CustomerEntityRepository, ModelEntityRepository, OtpRepository, PhotographerEntityRepository, VendorEntityRepository } from "../../auth/auth.repository";
 import { ICustomerResponse } from "../customers/customers.interface";
 import { AdminEntity } from "../../Entity/Users/admin.entity";
 import { vendorEntity } from "../../Entity/Users/vendor.entity";
 import { IVendorResponse } from "../vendor/vendor.interface";
+import { PhotographerEntity } from "../../Entity/Users/photorapher.entity";
+import { ModelEntity } from "../../Entity/Users/model.entity";
+import { UserPostsEntity } from "../../Entity/Posts/model.post.entity";
+import { UserOtp } from "../../Entity/userotp.entity";
+import { Contracts } from "../../Entity/contracts.entity";
+import { ContractRepository } from "../../contract/contrct.repository";
+import { IPhotographer } from "../photographers/photo.interface";
+import { IModel } from "../model/model.interface";
 
 @Injectable()
 export class AdminService{
     constructor(@InjectRepository(CustomerEntity)private customerrepository:CustomerEntityRepository,
     @InjectRepository(AdminEntity)private adminrepository:AdminEntityRepository,
-    @InjectRepository(vendorEntity)private vendorrepository:VendorEntityRepository,){}
+    @InjectRepository(vendorEntity)private vendorrepository:VendorEntityRepository,
+    @InjectRepository(PhotographerEntity)private photorepository:PhotographerEntityRepository,
+    @InjectRepository(ModelEntity)private modelrepository:ModelEntityRepository,
+    @InjectRepository(UserOtp)private otprepository:OtpRepository,
+    @InjectRepository(Contracts)private contractsrepository:ContractRepository,){}
 
     //get all customers
     async AdminGetAllCustomers():Promise<ICustomerResponse[]>{
@@ -137,7 +149,69 @@ export class AdminService{
             } catch (error) {
                 
             }
-            
-    
         }
+
+    //for photographers 
+    async AdminGetAllPhotographers():Promise<IPhotographer[]>{
+        try {
+                //verify admin 
+            // const admin = this.adminrepository.findOne({where:{id:id}})
+            // if (!admin) throw new HttpException(`admin with ${id} not found`,HttpStatus.NOT_FOUND)
+            const photographers= await this.photorepository.find()
+            return photographers
+        } catch (error) {
+            throw error
+            
+        }
+        
+    }
+
+    async AdminGetOnePhotographer(photoid:string):Promise<IPhotographer>{
+        try {
+                //verify admin 
+            // const admin = this.adminrepository.findOne({where:{id:id}})
+            // if (!admin) throw new HttpException(`admin with ${id} not found`,HttpStatus.NOT_FOUND)
+            const photographer= await this.photorepository.findOne({where:{PhotographerID:photoid}})
+            return photographer
+        } catch (error) {
+            throw error
+            
+        }
+        
+    }
+
+
+    //for photographers 
+    async AdminGetAllModels():Promise<IModel[]>{
+        try {
+                //verify admin 
+            // const admin = this.adminrepository.findOne({where:{id:id}})
+            // if (!admin) throw new HttpException(`admin with ${id} not found`,HttpStatus.NOT_FOUND)
+            const models= await this.modelrepository.find()
+            return models
+        } catch (error) {
+            throw error
+            
+        }
+        
+    }
+
+    async AdminGetOneModel(modelid:string):Promise<IModel>{
+        try {
+                //verify admin 
+            // const admin = this.adminrepository.findOne({where:{id:id}})
+            // if (!admin) throw new HttpException(`admin with ${id} not found`,HttpStatus.NOT_FOUND)
+            const model= await this.modelrepository.findOne({where:{ModelID:modelid}})
+            return model
+        } catch (error) {
+            throw error
+            
+        }
+        
+    }
+
+
+
+
+    
 }

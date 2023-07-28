@@ -205,7 +205,6 @@
 //         HttpStatus.BAD_REQUEST,
 //       );
 //     }
-
 //     let monthtoadd: number;
 //     switch (duration) {
 //       case ContractDuration.ONE_MONTH:
