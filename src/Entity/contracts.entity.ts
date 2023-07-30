@@ -15,6 +15,9 @@ export interface IContract{
     contract_duration:ContractDuration
     contract_worth:string
     contract_validity_number:string
+    contract_duration_extension_offer:ContractDuration
+    contract_worth_extension_offer:string
+    contract_counter_offer_proposed:boolean
     vendor:string
     model:string
     photographer:string
@@ -65,6 +68,18 @@ export class Contracts implements IContract{
 
     @Column({nullable:false})
     contract_validity_number:string
+
+    @Column({nullable:false,type:"enum", enum:ContractDuration})
+    contract_duration_extension_offer:ContractDuration
+
+    @Column({nullable:false})
+    contract_worth_extension_offer:string
+
+    @Column({type:'boolean',default:'false'})
+    contract_counter_offer_proposed:boolean
+
+    @Column({type:'boolean',default:'false'})
+    contract_counter_offer_accepted:boolean
 
    @Column({nullable:true})
     vendor:string

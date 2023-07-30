@@ -554,17 +554,73 @@ export class AuthService {
     return { accesstoken: token };
   }
 
-  async login(logindto: Logindto) {
-    const finduser =
-      (await this.customerrepository.findOne({
-        where: { email: logindto.email },
-      })) 
 
-      if (!finduser) throw new HttpException(`invalid email address`,HttpStatus.UNAUTHORIZED)
-
-      const comaprepass=await this.comaprePassword(logindto.password,finduser.password)
+  //respective logins for various users 
+  async loginCustomer(logindto: Logindto) {
+    const findcustomer =await this.customerrepository.findOne({where: { email: logindto.email },})
+      if (!findcustomer) throw new HttpException(`invalid email address`,HttpStatus.UNAUTHORIZED)
+      const comaprepass=await this.comaprePassword(logindto.password,findcustomer.password)
       if (!comaprepass) throw new HttpException(`invalid password`,HttpStatus.UNAUTHORIZED)
-      
-      return await this.signToken(finduser.id,finduser.email)
+      if (findcustomer.login_count>=5){
+        findcustomer.is_locked=true
+        findcustomer.is_locked_until= new Date(Date.now()+24*60*60*1000) //lock for 24 hours 
+        await this.customerrepository.save(findcustomer)
+      }
+      return await this.signToken(findcustomer.id,findcustomer.email)
   }
+
+
+  async loginVendor(logindto:Logindto){
+    const findvendor= await this.vendorrepository.findOne({where:{email:logindto.email}})
+    if (!findvendor) throw new HttpException(`invalid credential`,HttpStatus.NOT_FOUND)
+    const comparepass=await this.comaprePassword(logindto.password,findvendor.password)
+    if (!comparepass) throw new HttpException(`invalid credential`,HttpStatus.UNAUTHORIZED)
+    return await this.signToken(findvendor.id,findvendor.email)
+
+  }
+
+  async loginKidModel(logindto:Logindto){
+    const findkid= await this.modelrepository.findOne({where:{email:logindto.email}})
+    if (!findkid) throw new HttpException(`invalid credential`,HttpStatus.NOT_FOUND)
+    const comparepass=await this.comaprePassword(logindto.password,findkid.password)
+    if (!comparepass) throw new HttpException(`invalid credential`,HttpStatus.UNAUTHORIZED)
+    return await this.signToken(findkid.id,findkid.email)
+
+  }
+
+  async loginAdultModel(logindto:Logindto){
+    const findadult= await this.modelrepository.findOne({where:{email:logindto.email}})
+    if (!findadult) throw new HttpException(`invalid credential`,HttpStatus.NOT_FOUND)
+    const comparepass=await this.comaprePassword(logindto.password,findadult.password)
+    if (!comparepass) throw new HttpException(`invalid credential`,HttpStatus.UNAUTHORIZED)
+    return await this.signToken(findadult.id,findadult.email)
+
+  }
+
+  async loginPhotographer(logindto:Logindto){
+    const findphotographer= await this.photographerrepository.findOne({where:{email:logindto.email}})
+    if (!findphotographer) throw new HttpException(`invalid credential`,HttpStatus.NOT_FOUND)
+    const comparepass=await this.comaprePassword(logindto.password,findphotographer.password)
+    if (!comparepass) throw new HttpException(`invalid credential`,HttpStatus.UNAUTHORIZED)
+    return await this.signToken(findphotographer.id,findphotographer.email)
+
+  }
+
+  
+  async loginAdmmin(logindto:Logindto){
+    const findadmin= await this.adminrepository.findOne({where:{email:logindto.email}})
+    if (!findadmin) throw new HttpException(`invalid credential`,HttpStatus.NOT_FOUND)
+    const comparepass=await this.comaprePassword(logindto.password,findadmin.password)
+    if (!comparepass) throw new HttpException(`invalid credential`,HttpStatus.UNAUTHORIZED)
+    return await this.signToken(findadmin.id,findadmin.email)
+
+  }
+
+  
+
+
+  ///logout routes 
+  
+
+
 }

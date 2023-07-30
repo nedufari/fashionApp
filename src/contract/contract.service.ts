@@ -6,7 +6,7 @@ import { vendorEntity } from "../Entity/Users/vendor.entity";
 import { ModelEntityRepository, NotificationsRepository, PhotographerEntityRepository, VendorEntityRepository } from "../auth/auth.repository";
 import { PhotographerEntity } from "../Entity/Users/photorapher.entity";
 import { ModelEntity } from "../Entity/Users/model.entity";
-import { ContractDto } from "./cotracts.dto";
+import { AcceptContractofferDto, ContractDto, CounterOfferDto, ExtendContractDto } from "./cotracts.dto";
 import { IVendor } from "../Users/vendor/vendor.interface";
 import { IModel } from "../Users/model/model.interface";
 import { ContractDuration } from "../Enums/contractDuration.enum";
@@ -135,6 +135,217 @@ export class ContractService{
       }
 
 
+      //contract extention from vendor to model and counter offer from the model to the contract and also accepting or declining the offer
+
+      async ContractExtensionfromVendorToModel(extentiondto:ExtendContractDto,contractId:string,vendorid:string, modelid:string,){
+        try {
+
+          const contract = await this.contractrepository.findOne({where:{id:contractId}})
+        if(!contract) throw new HttpException('the contract is not found',HttpStatus.NOT_FOUND)
+        const vendor = await this.vendorrepository.findOne({where:{VendorID:vendorid}})
+          if (!vendor) throw new HttpException(`you are not a legitimate vendor on this platform and therefore you cannot proceed with this contract agreement`,HttpStatus.NOT_FOUND)
+          const model = await this.modelrepository.findOne({where:{ModelID:modelid}})
+          if (!model) throw new HttpException(`you are not a legitimate model on this platform and therefore you cannot proceed with this contract agreement`,HttpStatus.NOT_FOUND)
+  
+
+        //place the offer and save temporarily
+        contract.contract_duration_extension_offer=extentiondto.extended_contract_duration_offer
+        contract.contract_worth_extension_offer=extentiondto.extended_contract_worth_offer
+        await this.contractrepository.save(contract)
+
+           //save the notification 
+           const notification = new Notifications()
+           notification.account= contract.id
+           notification.subject="New Contract Extention sent!"
+           notification.notification_type=NotificationType.CONTRACT_EXTENSION_OFFER_SENT
+           notification.message=`Hello a contract extension offer  has been sent by  ${vendor.brandname} to ${model.username} for an extended duration of ${extentiondto.extended_contract_duration_offer} with an improved worth of ${extentiondto.extended_contract_worth_offer}`
+           await this.notificationrepository.save(notification)
+          
+        } catch (error) {
+          throw error
+        }
+      }
+
+
+
+
+      async AcceptOfferFromVendorByModel(contractid:string,vendorid:string, modelid:string,acceptofferdto:AcceptContractofferDto,counteroffer?:CounterOfferDto,):Promise<IContractModelResponse>{
+        try {
+          const contract = await this.contractrepository.findOne({where:{id:contractid}})
+        if(!contract) throw new HttpException('the contract is not found',HttpStatus.NOT_FOUND)
+        const vendor = await this.vendorrepository.findOne({where:{VendorID:vendorid}})
+        if (!vendor) throw new HttpException(`you are not a legitimate vendor on this platform and therefore you cannot proceed with this contract agreement`,HttpStatus.NOT_FOUND)
+        const model = await this.modelrepository.findOne({where:{ModelID:modelid}})
+        if (!model) throw new HttpException(`you are not a legitimate model on this platform and therefore you cannot proceed with this contract agreement`,HttpStatus.NOT_FOUND)
+
+
+        //check for contract extension first 
+        if (!contract.contract_duration_extension_offer||contract.contract_worth_extension_offer) throw new HttpException('no contract extenson offers ',HttpStatus.BAD_REQUEST)
+
+        //accept or decline 
+        if (acceptofferdto.isAccepted){
+          contract.contract_duration=contract.contract_duration_extension_offer
+          contract.contract_worth=contract.contract_worth_extension_offer
+          contract.commence_date= new Date()
+          contract.expiration_date=this.expirationdateforcontract(contract.commence_date, contract.contract_duration)
+          contract.contract_duration_extension_offer=null
+          contract.contract_worth_extension_offer=null
+          await this.contractrepository.save(contract)
+
+          //save the notification 
+          const notification = new Notifications()
+          notification.account= contract.id
+          notification.subject="New Contract extension offer accepted!"
+          notification.notification_type=NotificationType.CONTRACT_EXTENSION_ACCEPTED
+          notification.message=`Hello a contract extension offer sent by  ${vendor.brandname} to ${model.username} for an extended duration of ${contract.contract_duration_extension_offer} with an improved worth of ${contract.contract_worth_extension_offer} has been accepted and the contract would now expire at ${contract.expiration_date}`
+          await this.notificationrepository.save(notification)
+
+        }
+        else{
+          //send a counter offer 
+
+          if (counteroffer){
+            contract.contract_worth=counteroffer.counter_worth
+            contract.contract_duration=counteroffer.counter_duration
+            await this.contractrepository.save(contract)
+
+            const notification = new Notifications()
+            notification.account= contract.id
+            notification.subject="New Contract Extention counter offer sent!"
+            notification.notification_type=NotificationType.CONTRACT_EXTENSION_COUNTER_OFFER_SENT
+            notification.message=`Hello a contract extension offer sent by  ${vendor.brandname} to ${model.username} for an extended duration of ${contract.contract_duration_extension_offer} with an improved worth of ${contract.contract_worth_extension_offer} has been been countered by the model with an offer of ${counteroffer.counter_duration} with a worth of ${counteroffer.counter_worth}`
+            await this.notificationrepository.save(notification)
+          }
+
+          else{
+            //send notifaction to the vendor that the contract extendion was refused 
+            const declinedMessage="i am sorry i can't accept this offer, please lets contine with what we have or you can send in a better offer"
+
+           //save the notification 
+
+            const notification = new Notifications()
+            notification.account= contract.id
+            notification.subject="New Contract Extention offer declined!"
+            notification.notification_type=NotificationType.CONTRACT_EXTENSION_ACCEPTED
+            notification.message=`Hello a contract extension offer sent by  ${vendor.brandname} to ${model.username} for an extended duration of ${contract.contract_duration_extension_offer} with an improved worth of ${contract.contract_worth_extension_offer} has been declined and the initial contract agreement remains unchanged`
+            await this.notificationrepository.save(notification)
+
+            throw new HttpException(declinedMessage,HttpStatus.BAD_REQUEST)
+          }
+        }
+
+          //response 
+          const updatedcontractresponse:IContractModelResponse={
+            vendor:contract.vendor,
+            model:contract.model,
+            contract_duration:contract.contract_duration,
+            contract_worth:contract.contract_worth,
+            contract_validity_number:contract.contract_validity_number,
+            commence_date:contract.commence_date,
+            expiration_date:contract.expiration_date,
+           };
+           return updatedcontractresponse  
+      }
+          
+         catch (error) {
+          throw error 
+          
+        }
+        
+      }
+
+
+
+
+      async AcceptCounterofferFromModelToVendor(contractid:string,vendorid:string, modelid:string,acceptofferdto:AcceptContractofferDto,counteroffer?:CounterOfferDto,):Promise<IContractModelResponse>{
+        try {
+          const contract = await this.contractrepository.findOne({where:{id:contractid}})
+        if(!contract) throw new HttpException('the contract is not found',HttpStatus.NOT_FOUND)
+        const vendor = await this.vendorrepository.findOne({where:{VendorID:vendorid}})
+        if (!vendor) throw new HttpException(`you are not a legitimate vendor on this platform and therefore you cannot proceed with this contract agreement`,HttpStatus.NOT_FOUND)
+        const model = await this.modelrepository.findOne({where:{ModelID:modelid}})
+        if (!model) throw new HttpException(`you are not a legitimate model on this platform and therefore you cannot proceed with this contract agreement`,HttpStatus.NOT_FOUND)
+
+
+        //check for contract extension first 
+        if (!contract.contract_duration_extension_offer||contract.contract_worth_extension_offer) throw new HttpException('no contract extenson offers ',HttpStatus.BAD_REQUEST)
+
+        //accept or decline 
+        if (acceptofferdto.isAccepted){
+          contract.contract_duration=contract.contract_duration_extension_offer
+          contract.contract_worth=contract.contract_worth_extension_offer
+          contract.commence_date= new Date()
+          contract.expiration_date=this.expirationdateforcontract(contract.commence_date, contract.contract_duration)
+          contract.contract_duration_extension_offer=null
+          contract.contract_worth_extension_offer=null
+          contract.contract_counter_offer_accepted=true
+          await this.contractrepository.save(contract)
+
+          //save the notification 
+          const notification = new Notifications()
+          notification.account= contract.id
+          notification.subject="New Contract extension counter offer from model to vendor  is accepted!"
+          notification.notification_type=NotificationType.CONTRACT_EXTENSION_ACCEPTED
+          notification.message=`Hello a contract extension offer sent by  ${vendor.brandname} to ${model.username} for an extended duration of ${contract.contract_duration_extension_offer} with an improved worth of ${contract.contract_worth_extension_offer} has been accepted and the contract would now expire at ${contract.expiration_date}`
+          await this.notificationrepository.save(notification)
+
+        }
+        else{
+          //send a counter offer 
+
+          if (counteroffer){
+            contract.contract_worth=counteroffer.counter_worth
+            contract.contract_duration=counteroffer.counter_duration
+            await this.contractrepository.save(contract)
+
+            const notification = new Notifications()
+            notification.account= contract.id
+            notification.subject="New Contract Extention counter offer sent!"
+            notification.notification_type=NotificationType.CONTRACT_EXTENSION_COUNTER_OFFER_SENT
+            notification.message=`Hello a contract extension offer sent by  ${vendor.brandname} to ${model.username} for an extended duration of ${contract.contract_duration_extension_offer} with an improved worth of ${contract.contract_worth_extension_offer} has been been countered by the vendor with an offer of ${counteroffer.counter_duration} with a worth of ${counteroffer.counter_worth}`
+            await this.notificationrepository.save(notification)
+          }
+
+          else{
+            //send notifaction to the vendor that the contract extendion was refused 
+            const declinedMessage="i am sorry i can't accept this offer, please lets contine with what we have or you can send in a better counter offer"
+
+           //save the notification 
+
+            const notification = new Notifications()
+            notification.account= contract.id
+            notification.subject="New Contract Extention offer declined!"
+            notification.notification_type=NotificationType.CONTRACT_EXTENSION_ACCEPTED
+            notification.message=`Hello a contract extension offer sent by  ${vendor.brandname} to ${model.username} for an extended duration of ${contract.contract_duration_extension_offer} with an improved worth of ${contract.contract_worth_extension_offer} has been declined and the initial contract agreement remains unchanged`
+            await this.notificationrepository.save(notification)
+
+            throw new HttpException(declinedMessage,HttpStatus.BAD_REQUEST)
+          }
+        }
+
+          //response 
+          const updatedcontractresponse:IContractModelResponse={
+            vendor:contract.vendor,
+            model:contract.model,
+            contract_duration:contract.contract_duration,
+            contract_worth:contract.contract_worth,
+            contract_validity_number:contract.contract_validity_number,
+            commence_date:contract.commence_date,
+            expiration_date:contract.expiration_date,
+           };
+           return updatedcontractresponse  
+      }
+          
+         catch (error) {
+          throw error 
+          
+        }
+        
+      }
+
+
+
+
     
   private expirationdateforcontract(
     startdate: Date,
@@ -172,3 +383,5 @@ export class ContractService{
   }
 
 }
+
+//contract issue with 

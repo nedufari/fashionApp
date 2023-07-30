@@ -65,6 +65,13 @@ export class CustomerEntity implements ICustomer{
     @Column({type:"boolean", default:false,nullable:true})
     is_logged_out:boolean
 
+    @Column({type:"boolean", default:false,nullable:true})
+    is_locked:boolean
+
+    @Column()
+    is_locked_until:Date
+
+
     @Column({type:"date", nullable:true})
     last_login:Date
 
