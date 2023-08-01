@@ -9,7 +9,7 @@ export class CustomerEntity implements ICustomer{
     @PrimaryGeneratedColumn("uuid")
     id :string
 
-    @Column()
+    @Column({nullable:true})
     CustomerID:string
 
     @Column({unique:true,nullable:false})
@@ -68,7 +68,7 @@ export class CustomerEntity implements ICustomer{
     @Column({type:"boolean", default:false,nullable:true})
     is_locked:boolean
 
-    @Column()
+    @Column({nullable:true})
     is_locked_until:Date
 
 

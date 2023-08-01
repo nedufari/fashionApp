@@ -40,3 +40,13 @@ export class CounterOfferDto{
     message:string
     
 }
+
+export class TerminateDto{
+    @IsString()
+    reason:string
+}
+
+export class AcceptContractTermoinationRequestDto{
+    @IsBoolean({message:"you must accept or decline the termination request"})
+    isAccepted:boolean
+}

@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { CustomerEntity } from "../../Entity/Users/customer.entity";
-import { AdminEntityRepository, CustomerEntityRepository, ModelEntityRepository, OtpRepository, PhotographerEntityRepository, VendorEntityRepository } from "../../auth/auth.repository";
+import { AdminEntityRepository, CustomerEntityRepository, ModelEntityRepository, NotificationsRepository, OtpRepository, PhotographerEntityRepository, VendorEntityRepository } from "../../auth/auth.repository";
 import { ICustomerResponse } from "../customers/customers.interface";
 import { AdminEntity } from "../../Entity/Users/admin.entity";
 import { vendorEntity } from "../../Entity/Users/vendor.entity";
@@ -10,10 +10,11 @@ import { PhotographerEntity } from "../../Entity/Users/photorapher.entity";
 import { ModelEntity } from "../../Entity/Users/model.entity";
 import { UserPostsEntity } from "../../Entity/Posts/model.post.entity";
 import { UserOtp } from "../../Entity/userotp.entity";
-import { Contracts } from "../../Entity/contracts.entity";
+import { Contracts, IContract } from "../../Entity/contracts.entity";
 import { ContractRepository } from "../../contract/contrct.repository";
 import { IPhotographer } from "../photographers/photo.interface";
 import { IModel } from "../model/model.interface";
+import { INotification, Notifications } from "../../Entity/Notification/notification.entity";
 
 @Injectable()
 export class AdminService{
@@ -23,7 +24,8 @@ export class AdminService{
     @InjectRepository(PhotographerEntity)private photorepository:PhotographerEntityRepository,
     @InjectRepository(ModelEntity)private modelrepository:ModelEntityRepository,
     @InjectRepository(UserOtp)private otprepository:OtpRepository,
-    @InjectRepository(Contracts)private contractsrepository:ContractRepository,){}
+    @InjectRepository(Contracts)private contractsrepository:ContractRepository,
+    @InjectRepository(Notifications)private notificationrepository:NotificationsRepository,){}
 
     //get all customers
     async AdminGetAllCustomers():Promise<ICustomerResponse[]>{
@@ -203,6 +205,35 @@ export class AdminService{
             // if (!admin) throw new HttpException(`admin with ${id} not found`,HttpStatus.NOT_FOUND)
             const model= await this.modelrepository.findOne({where:{ModelID:modelid}})
             return model
+        } catch (error) {
+            throw error
+            
+        }
+        
+    }
+
+
+    async AdminGetAllNotifications():Promise<INotification[]>{
+        try {
+                //verify admin 
+            // const admin = this.adminrepository.findOne({where:{id:id}})
+            // if (!admin) throw new HttpException(`admin with ${id} not found`,HttpStatus.NOT_FOUND)
+            const notifications= await this.notificationrepository.find()
+            return notifications
+        } catch (error) {
+            throw error
+            
+        }
+        
+    }
+
+    async AdminGetAllContrats():Promise<IContract[]>{
+        try {
+                //verify admin 
+            // const admin = this.adminrepository.findOne({where:{id:id}})
+            // if (!admin) throw new HttpException(`admin with ${id} not found`,HttpStatus.NOT_FOUND)
+            const notifications= await this.contractsrepository.find()
+            return notifications
         } catch (error) {
             throw error
             

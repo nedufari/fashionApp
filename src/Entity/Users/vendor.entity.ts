@@ -102,6 +102,12 @@ export class vendorEntity implements IVendor{
     @Column({ default:0,nullable:true})
     login_count:number
 
+    @Column({type:"boolean", default:false,nullable:true})
+    is_locked:boolean
+
+    @Column({nullable:true})
+    is_locked_until:Date
+
     @OneToMany(()=>Comments,comment=>comment.vendor)
     comments:Comments[]
 

@@ -89,6 +89,8 @@ export interface IModel{
     is_logged_out:boolean
     last_login:Date
     login_count:number
+    is_locked:boolean
+    is_locked_until:Date
     comments:Comments[]
     replies:Replies[]
     

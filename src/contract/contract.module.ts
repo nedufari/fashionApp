@@ -5,12 +5,13 @@ import { Notifications } from '../Entity/Notification/notification.entity';
 import { vendorEntity } from '../Entity/Users/vendor.entity';
 import { ModelEntity } from '../Entity/Users/model.entity';
 import { PhotographerEntity } from '../Entity/Users/photorapher.entity';
-import { ContractService } from './contract.service';
+import { ContractModelService } from './contract.models.service';
 import { ContractController } from './contracts.controller';
+import { ContractPhotographerService } from './contract.photographer.service';
 
 @Module({
     imports:[TypeOrmModule.forFeature([Contracts,Notifications,vendorEntity,ModelEntity,PhotographerEntity])],
-    providers:[ContractService ],
+    providers:[ContractModelService,ContractPhotographerService ],
     controllers:[ContractController]
     
     

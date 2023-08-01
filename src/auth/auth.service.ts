@@ -90,30 +90,7 @@ export class AuthService {
       console.log('admin account created please check your mail to verify your account, by inputing the six digit OTP sent to you')
 
       //send mail 
-      const subject="verify your email"
-      const content=`<p>
-      To complete your onboarding, use the following OTP code
-    </p>
-    <p>
-    for verification
-    </p>
-
-    <p>
-    <strong>
-        OTP: ${emiailverificationcode}
-    </strong>
-    </p>
-
-    <p>
-      The code expires in five minutes.
-      If you did not initiate this action, please send an email to
-      support@Bubbles.com
-    </p>
-
-    <p>
-      Best,
-      The Bubbles team.
-    </p>`
+      await this.mailerservice.SendVerificationMail(otp.email,emiailverificationcode,admin.username)
       //  await this.mailerservice.SendMail(otp.email,subject,content)
 
       //save the notification 
@@ -134,12 +111,6 @@ export class AuthService {
 
    
   }
-
-
-
-
-
-
 
 
   async CustomerSignup(userdto: RegistrationDto,): Promise<{message:string}> {
@@ -172,32 +143,9 @@ export class AuthService {
       await this.otprepository.save(otp)
       console.log('customer account created please check your mail to verify your account, by inputing the six digit OTP sent to you')
 
-      //send mail 
-      const subject="verify your email"
-      const content=`<p>
-      To complete your onboarding, use the following OTP code
-    </p>
-    <p>
-    for verification
-    </p>
-
-    <p>
-    <strong>
-        OTP: ${emiailverificationcode}
-    </strong>
-    </p>
-
-    <p>
-      The code expires in five minutes.
-      If you did not initiate this action, please send an email to
-      support@Bubbles.com
-    </p>
-
-    <p>
-      Best,
-      The Bubbles team.
-    </p>`
-      //  await this.mailerservice.SendMail(otp.email,subject,content)
+      //send otp verification email
+     
+      await this.mailerservice.SendVerificationMail(otp.email,emiailverificationcode,customer.username)
 
       //save the notification 
       const notification = new Notifications()
@@ -206,6 +154,8 @@ export class AuthService {
       notification.notification_type=NotificationType.SIGNED_UP
       notification.message=`Hello ${customer.username}, your customer has been created. please complete your profile `
       await this.notificationrepository.save(notification)
+
+      await this.mailerservice.SendWelcomeEmail(customer.email,customer.username)
 
       return {message:"new coustomer signed up and verification otp has been sent "}
     
@@ -251,31 +201,8 @@ export class AuthService {
       console.log('vendor account created please check your mail to verify your account, by inputing the six digit OTP sent to you')
 
       //send mail 
-      const subject="verify your email"
-      const content=`<p>
-      To complete your onboarding, use the following OTP code
-    </p>
-    <p>
-    for verification
-    </p>
-
-    <p>
-    <strong>
-        OTP: ${emiailverificationcode}
-    </strong>
-    </p>
-
-    <p>
-      The code expires in five minutes.
-      If you did not initiate this action, please send an email to
-      support@NedFashion.com
-    </p>
-
-    <p>
-      Best,
-      The Bubbles team.
-    </p>`
-      //  await this.mailerservice.SendMail(otp.email,subject,content)
+      await this.mailerservice.SendVerificationMail(otp.email,emiailverificationcode,vendor.brandname)
+     
 
       //save the notification 
       const notification = new Notifications()
@@ -329,31 +256,7 @@ export class AuthService {
       console.log('customer account created please check your mail to verify your account, by inputing the six digit OTP sent to you')
 
       //send mail 
-      const subject="verify your email"
-      const content=`<p>
-      To complete your onboarding, use the following OTP code
-    </p>
-    <p>
-    for verification
-    </p>
-
-    <p>
-    <strong>
-        OTP: ${emiailverificationcode}
-    </strong>
-    </p>
-
-    <p>
-      The code expires in five minutes.
-      If you did not initiate this action, please send an email to
-      support@Bubbles.com
-    </p>
-
-    <p>
-      Best,
-      The Bubbles team.
-    </p>`
-      //  await this.mailerservice.SendMail(otp.email,subject,content)
+      await this.mailerservice.SendVerificationMail(otp.email,emiailverificationcode,customer.username)
 
       //save the notification 
       const notification = new Notifications()
@@ -398,6 +301,7 @@ export class AuthService {
     kid.ManagerPhone=kiddto.ManagerPhone
     kid.age=kiddto.age
     kid.kindofmodel=kiddto.kindofmodel
+    kid.ModelID=this.generateIdentityNumber()
     await this.modelrepository.save(kid)
 
       //2fa authentication 
@@ -414,30 +318,7 @@ export class AuthService {
       console.log('customer account created please check your mail to verify your account, by inputing the six digit OTP sent to you')
 
       //send mail 
-      const subject="verify your email"
-      const content=`<p>
-      To complete your onboarding, use the following OTP code
-    </p>
-    <p>
-    for verification
-    </p>
-
-    <p>
-    <strong>
-        OTP: ${emiailverificationcode}
-    </strong>
-    </p>
-
-    <p>
-      The code expires in five minutes.
-      If you did not initiate this action, please send an email to
-      support@Bubbles.com
-    </p>
-
-    <p>
-      Best,
-      The Bubbles team.
-    </p>`
+      await this.mailerservice.SendVerificationMail(otp.email,emiailverificationcode,kid.username)
       //  await this.mailerservice.SendMail(otp.email,subject,content)
 
       //save the notification 
@@ -471,6 +352,7 @@ export class AuthService {
     adult.password=hashedpassword
     adult.username=adultdto.username
     adult.kindofmodel=adultdto.kindofmodel
+    adult.ModelID=this.generateIdentityNumber()
    
     await this.modelrepository.save(adult)
 
@@ -488,31 +370,7 @@ export class AuthService {
       console.log('model account created please check your mail to verify your account, by inputing the six digit OTP sent to you')
 
       //send mail 
-      const subject="verify your email"
-      const content=`<p>
-      To complete your onboarding, use the following OTP code
-    </p>
-    <p>
-    for verification
-    </p>
-
-    <p>
-    <strong>
-        OTP: ${emiailverificationcode}
-    </strong>
-    </p>
-
-    <p>
-      The code expires in five minutes.
-      If you did not initiate this action, please send an email to
-      support@Bubbles.com
-    </p>
-
-    <p>
-      Best,
-      The Bubbles team.
-    </p>`
-      //  await this.mailerservice.SendMail(otp.email,subject,content)
+      await this.mailerservice.SendVerificationMail(otp.email,emiailverificationcode,adult.username)
 
       //save the notification 
       const notification = new Notifications()
@@ -560,13 +418,30 @@ export class AuthService {
     const findcustomer =await this.customerrepository.findOne({where: { email: logindto.email },})
       if (!findcustomer) throw new HttpException(`invalid email address`,HttpStatus.UNAUTHORIZED)
       const comaprepass=await this.comaprePassword(logindto.password,findcustomer.password)
-      if (!comaprepass) throw new HttpException(`invalid password`,HttpStatus.UNAUTHORIZED)
-      if (findcustomer.login_count>=5){
-        findcustomer.is_locked=true
-        findcustomer.is_locked_until= new Date(Date.now()+24*60*60*1000) //lock for 24 hours 
-        await this.customerrepository.save(findcustomer)
+      if (!comaprepass) {
+        findcustomer.login_count+=1;
+
+        if (findcustomer.login_count>=5){
+          findcustomer.is_locked=true
+          findcustomer.is_locked_until= new Date(Date.now()+24*60*60*1000) //lock for 24 hours 
+          await this.customerrepository.save(findcustomer)
+          throw new HttpException(`invalid password`,HttpStatus.UNAUTHORIZED)
+        }
+
+        //  If the customer hasn't reached the maximum login attempts, calculate the number of attempts left
+      const attemptsleft= 5 - findcustomer.login_count
+      await this.customerrepository.save(findcustomer)
+
+      throw new HttpException(`invalid credentials ${attemptsleft} attempts left before your account is locked.`,HttpStatus.UNAUTHORIZED)
+    
       }
-      return await this.signToken(findcustomer.id,findcustomer.email)
+
+       //If the password matches, reset the login_count and unlock the account if needed
+      findcustomer.login_count = 0;
+      findcustomer.is_locked = false;
+     
+      const access_token =await this.signToken(findcustomer.id,findcustomer.email)
+      return access_token
   }
 
 
@@ -574,7 +449,29 @@ export class AuthService {
     const findvendor= await this.vendorrepository.findOne({where:{email:logindto.email}})
     if (!findvendor) throw new HttpException(`invalid credential`,HttpStatus.NOT_FOUND)
     const comparepass=await this.comaprePassword(logindto.password,findvendor.password)
-    if (!comparepass) throw new HttpException(`invalid credential`,HttpStatus.UNAUTHORIZED)
+    if (!comparepass) {
+      findvendor.login_count+=1;
+
+      if (findvendor.login_count>=5){
+        findvendor.is_locked=true
+        findvendor.is_locked_until= new Date(Date.now()+24*60*60*1000) //lock for 24 hours 
+        await this.customerrepository.save(findvendor)
+        throw new HttpException(`invalid password`,HttpStatus.UNAUTHORIZED)
+      }
+
+      //  If the vendor hasn't reached the maximum login attempts, calculate the number of attempts left
+    const attemptsleft= 5 - findvendor.login_count
+    await this.customerrepository.save(findvendor)
+
+    throw new HttpException(`invalid credentials ${attemptsleft} attempts left before your account is locked.`,HttpStatus.UNAUTHORIZED)
+  
+    }
+
+     //If the password matches, reset the login_count and unlock the account if needed
+    findvendor.login_count = 0;
+    findvendor.is_locked = false;
+
+
     return await this.signToken(findvendor.id,findvendor.email)
 
   }
@@ -583,7 +480,27 @@ export class AuthService {
     const findkid= await this.modelrepository.findOne({where:{email:logindto.email}})
     if (!findkid) throw new HttpException(`invalid credential`,HttpStatus.NOT_FOUND)
     const comparepass=await this.comaprePassword(logindto.password,findkid.password)
-    if (!comparepass) throw new HttpException(`invalid credential`,HttpStatus.UNAUTHORIZED)
+    if (!comparepass) {
+      findkid.login_count+=1;
+
+      if (findkid.login_count>=5){
+        findkid.is_locked=true
+        findkid.is_locked_until= new Date(Date.now()+24*60*60*1000) //lock for 24 hours 
+        await this.customerrepository.save(findkid)
+        throw new HttpException(`invalid password`,HttpStatus.UNAUTHORIZED)
+      }
+
+      //  If the customer hasn't reached the maximum login attempts, calculate the number of attempts left
+    const attemptsleft= 5 - findkid.login_count
+    await this.customerrepository.save(findkid)
+
+    throw new HttpException(`invalid credentials ${attemptsleft} attempts left before your account is locked.`,HttpStatus.UNAUTHORIZED)
+  
+    }
+
+     //If the password matches, reset the login_count and unlock the account if needed
+    findkid.login_count = 0;
+    findkid.is_locked = false;
     return await this.signToken(findkid.id,findkid.email)
 
   }
@@ -592,7 +509,27 @@ export class AuthService {
     const findadult= await this.modelrepository.findOne({where:{email:logindto.email}})
     if (!findadult) throw new HttpException(`invalid credential`,HttpStatus.NOT_FOUND)
     const comparepass=await this.comaprePassword(logindto.password,findadult.password)
-    if (!comparepass) throw new HttpException(`invalid credential`,HttpStatus.UNAUTHORIZED)
+    if (!comparepass) {
+      findadult.login_count+=1;
+
+      if (findadult.login_count>=5){
+        findadult.is_locked=true
+        findadult.is_locked_until= new Date(Date.now()+24*60*60*1000) //lock for 24 hours 
+        await this.customerrepository.save(findadult)
+        throw new HttpException(`invalid password`,HttpStatus.UNAUTHORIZED)
+      }
+
+      //  If the customer hasn't reached the maximum login attempts, calculate the number of attempts left
+    const attemptsleft= 5 - findadult.login_count
+    await this.customerrepository.save(findadult)
+
+    throw new HttpException(`invalid credentials ${attemptsleft} attempts left before your account is locked.`,HttpStatus.UNAUTHORIZED)
+  
+    }
+
+     //If the password matches, reset the login_count and unlock the account if needed
+    findadult.login_count = 0;
+    findadult.is_locked = false;
     return await this.signToken(findadult.id,findadult.email)
 
   }
@@ -601,7 +538,27 @@ export class AuthService {
     const findphotographer= await this.photographerrepository.findOne({where:{email:logindto.email}})
     if (!findphotographer) throw new HttpException(`invalid credential`,HttpStatus.NOT_FOUND)
     const comparepass=await this.comaprePassword(logindto.password,findphotographer.password)
-    if (!comparepass) throw new HttpException(`invalid credential`,HttpStatus.UNAUTHORIZED)
+    if (!comparepass) {
+      findphotographer.login_count+=1;
+
+      if (findphotographer.login_count>=5){
+        findphotographer.is_locked=true
+        findphotographer.is_locked_until= new Date(Date.now()+24*60*60*1000) //lock for 24 hours 
+        await this.customerrepository.save(findphotographer)
+        throw new HttpException(`invalid password`,HttpStatus.UNAUTHORIZED)
+      }
+
+      //  If the customer hasn't reached the maximum login attempts, calculate the number of attempts left
+    const attemptsleft= 5 - findphotographer.login_count
+    await this.customerrepository.save(findphotographer)
+
+    throw new HttpException(`invalid credentials ${attemptsleft} attempts left before your account is locked.`,HttpStatus.UNAUTHORIZED)
+  
+    }
+
+     //If the password matches, reset the login_count and unlock the account if needed
+    findphotographer.login_count = 0;
+    findphotographer.is_locked = false;
     return await this.signToken(findphotographer.id,findphotographer.email)
 
   }
@@ -611,7 +568,27 @@ export class AuthService {
     const findadmin= await this.adminrepository.findOne({where:{email:logindto.email}})
     if (!findadmin) throw new HttpException(`invalid credential`,HttpStatus.NOT_FOUND)
     const comparepass=await this.comaprePassword(logindto.password,findadmin.password)
-    if (!comparepass) throw new HttpException(`invalid credential`,HttpStatus.UNAUTHORIZED)
+    if (!comparepass) {
+      findadmin.login_count+=1;
+
+      if (findadmin.login_count>=5){
+        findadmin.is_locked=true
+        findadmin.is_locked_until= new Date(Date.now()+24*60*60*1000) //lock for 24 hours 
+        await this.customerrepository.save(findadmin)
+        throw new HttpException(`invalid password`,HttpStatus.UNAUTHORIZED)
+      }
+
+      //  If the customer hasn't reached the maximum login attempts, calculate the number of attempts left
+    const attemptsleft= 5 - findadmin.login_count
+    await this.customerrepository.save(findadmin)
+
+    throw new HttpException(`invalid credentials ${attemptsleft} attempts left before your account is locked.`,HttpStatus.UNAUTHORIZED)
+  
+    }
+
+     //If the password matches, reset the login_count and unlock the account if needed
+    findadmin.login_count = 0;
+    findadmin.is_locked = false;
     return await this.signToken(findadmin.id,findadmin.email)
 
   }

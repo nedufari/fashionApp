@@ -13,7 +13,7 @@ export class ModelEntity implements IModel{
     @PrimaryGeneratedColumn("uuid")
     id :string
 
-    @Column()
+    @Column({nullable:true})
     ModelID:string
 
     @Column({unique:true,nullable:false})
@@ -39,7 +39,7 @@ export class ModelEntity implements IModel{
     @Column({nullable:true})
     address:string
 
-    @Column({type:"enum", enum:Roles})
+    @Column({type:"enum", enum:Roles,default:Roles.MODEL})
     role:Roles
 
     @Column({length:11,nullable:true})
@@ -286,6 +286,12 @@ caps_ize:string
 
     @Column({ default:0,nullable:true})
     login_count:number
+
+    @Column({type:"boolean", default:false,nullable:true})
+    is_locked:boolean
+
+    @Column({nullable:true})
+    is_locked_until:Date
 
     @OneToMany(()=>Comments,comment=>comment.model)
     comments:Comments[]

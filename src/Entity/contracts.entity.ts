@@ -69,17 +69,28 @@ export class Contracts implements IContract{
     @Column({nullable:false})
     contract_validity_number:string
 
-    @Column({nullable:false,type:"enum", enum:ContractDuration})
+    @Column({nullable:true,type:"enum", enum:ContractDuration,})
     contract_duration_extension_offer:ContractDuration
 
-    @Column({nullable:false})
+    @Column({nullable:true})
     contract_worth_extension_offer:string
 
-    @Column({type:'boolean',default:'false'})
+    @Column({type:'boolean',default:'false',nullable:true})
     contract_counter_offer_proposed:boolean
 
-    @Column({type:'boolean',default:'false'})
+    @Column({type:'boolean',default:'false',nullable:true})
     contract_counter_offer_accepted:boolean
+
+    @Column({type:'boolean',default:'false',nullable:true})
+    is_terminated:boolean
+
+    @Column({nullable:true})
+    termination_reason:string
+
+    @Column({nullable:true})
+    message:string
+
+
 
    @Column({nullable:true})
     vendor:string

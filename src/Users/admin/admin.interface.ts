@@ -16,6 +16,8 @@ export  interface IAdmin{
     last_login:Date
     login_count:number
     AdminID:string
+    is_locked:boolean
+    is_locked_until:Date
     comments:Comments[]
     replies:Replies[]
 }

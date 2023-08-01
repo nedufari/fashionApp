@@ -4,6 +4,8 @@ import { ICustomerResponse } from "../customers/customers.interface";
 import { IVendorResponse } from "../vendor/vendor.interface";
 import { IPhotographer } from "../photographers/photo.interface";
 import { IModel } from "../model/model.interface";
+import { INotification } from "../../Entity/Notification/notification.entity";
+import { IContract } from "../../Entity/contracts.entity";
 
 @Controller('admin')
 export class AdminController{
@@ -101,6 +103,26 @@ export class AdminController{
                  
              }
            }
+
+
+           @Get('/notifications')
+           async AdminGetAllNotifications():Promise<INotification[]>{
+             try {
+                 const models= await this.adminservice.AdminGetAllNotifications()
+                 return models
+             } catch (error) {
+                 
+             }
+           }
+
+           @Get('/contracts')
+           async AdminGetAllContracts():Promise<IContract[]>{
+             try {
+                 const models= await this.adminservice.AdminGetAllContrats()
+                 return models
+             } catch (error) {
+                 
+             }
+           }
 }
-//ETYUv_HA photo
-// psc3KmRI vendor
+

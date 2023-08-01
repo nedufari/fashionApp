@@ -3,7 +3,7 @@ import { ContractDuration } from "../../Enums/contractDuration.enum";
 import { NotificationType } from "../../Enums/notificationTypes.enum";
 
 @Entity()
-export class Notifications{
+export class Notifications implements INotification{
     @PrimaryGeneratedColumn()
     id:number
 
@@ -28,7 +28,17 @@ export class Notifications{
     metadata:Record<string,string>
 
 
-    // @ManyToOne(()=>FashionDesignerEntity,(contractor:FashionDesignerEntity)=>contractor.brandname)
-    // fashion_mogul:FashionDesignerEntity
+    
+}
 
+export interface INotification{
+    id:number
+    account:string
+    notification_type:NotificationType
+    message:string
+    subject:string
+    date:Date
+    metadata:Record<string,string>
+
+    
 }
