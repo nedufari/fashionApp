@@ -13,5 +13,11 @@ export enum NotificationType{
     CONTRACT_SIGNED_DURATION_ONE_YEAR="contract_signed_duration_one_year",
     LOGGED_OUT="logged_out",
     RECORD_UPDATED="record_updated",
+    OTP_VERIFICATION="otp_verification",
+    PASSWORD_RESET_REQUEST="password_reset_request",
+    RESET_PASSWORD="reset_password",
+    CHANGE_PASSWORD="change_password",
+    userinfo_updated="userindo_updated",
+    user_deleted="user_deleted",
 
 }

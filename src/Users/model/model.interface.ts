@@ -90,6 +90,8 @@ export interface IModel{
     last_login:Date
     login_count:number
     is_locked:boolean
+    password_reset_link:string
+    reset_link_exptime:Date
     is_locked_until:Date
     comments:Comments[]
     replies:Replies[]

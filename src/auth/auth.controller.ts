@@ -1,9 +1,10 @@
-import { Body, Controller, HttpStatus, Post, Res,UseGuards } from '@nestjs/common';
+import { Body, Controller, HttpException, HttpStatus, Param, Patch, Post, Res,UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AdultModelRegistrationDto, RegistrationDto, VendorRegistrationDto, kidsModeleRegistrationDto } from './dto/registrationdto';
-import { Logindto } from './dto/logindto';
+import { Logindto, VerifyOtpdto } from './dto/logindto';
 import { Response } from 'express';
 import { JwtGuard } from './guards/jwt.guards';
+import { ChangePasswordDto, FinallyResetPasswordDto, SendPasswordResetLinkDto } from './dto/password.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -21,6 +22,67 @@ export class AuthController {
             
         }
         
+    }
+
+
+    @Post('customer/verify-otp')
+    async verifyOtp(@Body() verifyOtpDto:VerifyOtpdto): Promise<{ isValid: boolean; accessToken: any }> {
+      try {
+        const result = await this.authservice.verifyotp(verifyOtpDto);
+        return { isValid: result.isValid, accessToken: result.accessToken};
+      } catch (error) {
+        throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+      }
+    }
+
+    @Post('vendor/verify-otp')
+    async VendorverifyOtp(@Body() verifyOtpDto:VerifyOtpdto): Promise<{ isValid: boolean; accessToken: any }> {
+      try {
+        const result = await this.authservice.verifyVendorotp(verifyOtpDto);
+        return { isValid: result.isValid, accessToken: result.accessToken};
+      } catch (error) {
+        throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+      }
+    }
+
+    @Post('photographer/verify-otp')
+    async PhotographerverifyOtp(@Body() verifyOtpDto:VerifyOtpdto): Promise<{ isValid: boolean; accessToken: any }> {
+      try {
+        const result = await this.authservice.verifyPhotographerotp(verifyOtpDto);
+        return { isValid: result.isValid, accessToken: result.accessToken};
+      } catch (error) {
+        throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+      }
+    }
+
+    @Post('kidmodel/verify-otp')
+    async KidModelverifyOtp(@Body() verifyOtpDto:VerifyOtpdto): Promise<{ isValid: boolean; accessToken: any }> {
+      try {
+        const result = await this.authservice.KidsModelverifyotp(verifyOtpDto);
+        return { isValid: result.isValid, accessToken: result.accessToken};
+      } catch (error) {
+        throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+      }
+    }
+
+    @Post('customer/verify-otp')
+    async AdultModelverifyOtp(@Body() verifyOtpDto:VerifyOtpdto): Promise<{ isValid: boolean; accessToken: any }> {
+      try {
+        const result = await this.authservice.AdultModelverifyotp(verifyOtpDto);
+        return { isValid: result.isValid, accessToken: result.accessToken};
+      } catch (error) {
+        throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+      }
+    }
+
+    @Post('admin/verify-otp')
+    async AdminverifyOtp(@Body() verifyOtpDto:VerifyOtpdto): Promise<{ isValid: boolean; accessToken: any }> {
+      try {
+        const result = await this.authservice.Adminverifyotp(verifyOtpDto);
+        return { isValid: result.isValid, accessToken: result.accessToken};
+      } catch (error) {
+        throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+      }
     }
 
     @Post('signup/vendor')
@@ -131,6 +193,114 @@ export class AuthController {
     async loginAdmin(@Body()logindto:Logindto){
         return await this.authservice.loginAdmmin(logindto)
     }
+
+
+    /////customer ////
+     
+    @Patch("/customer/changePassword")
+    async changePassword(@Body()changepassword:ChangePasswordDto,@Param('customerid')customerid:string):Promise<{message:string}>{
+        return await this.authservice.chnangepassword(changepassword,customerid)
+    }
+
+    @Post("/customer/resetlink")
+    async PasswordResetLink(@Body()email:SendPasswordResetLinkDto):Promise<{message:string}>{
+        return await this.authservice.sendPasswordResetLink(email)
+    }
+
+    @Patch("customer/resetPassword")
+    async ResetPasswordFinally(@Body()dto:FinallyResetPasswordDto):Promise<{message:string}>{
+        return await this.authservice.finallyResetPassword(dto)
+    }
+
+
+     /////vendor ////
+     
+     @Patch("/vendor/changePassword")
+     async VendorchangePassword(@Body()changepassword:ChangePasswordDto,@Param('customerid')customerid:string):Promise<{message:string}>{
+         return await this.authservice.chnangeVendorpassword(changepassword,customerid)
+     }
+ 
+     @Post("/vendor/resetlink")
+     async VendorPasswordResetLink(@Body()email:SendPasswordResetLinkDto):Promise<{message:string}>{
+         return await this.authservice.sendVendorPasswordResetLink(email)
+     }
+ 
+     @Patch("vendor/resetPassword")
+     async VendorResetPasswordFinally(@Body()dto:FinallyResetPasswordDto):Promise<{message:string}>{
+         return await this.authservice.VendorfinallyResetPassword(dto)
+     }
+
+
+      /////photographer ////
+     
+    @Patch("/photographer/changePassword")
+    async PhotographerchangePassword(@Body()changepassword:ChangePasswordDto,@Param('customerid')customerid:string):Promise<{message:string}>{
+        return await this.authservice.Photographerchnangepassword(changepassword,customerid)
+    }
+
+    @Post("/photographer/resetlink")
+    async PhotographerPasswordResetLink(@Body()email:SendPasswordResetLinkDto):Promise<{message:string}>{
+        return await this.authservice.sendPhotographerPasswordResetLink(email)
+    }
+
+    @Patch("photographer/resetPassword")
+    async PhotographerResetPasswordFinally(@Body()dto:FinallyResetPasswordDto):Promise<{message:string}>{
+        return await this.authservice.PhotographerfinallyResetPassword(dto)
+    }
+
+
+     /////kidmodel ////
+     
+     @Patch("/kidmodel/changePassword")
+     async KidmodelchangePassword(@Body()changepassword:ChangePasswordDto,@Param('customerid')customerid:string):Promise<{message:string}>{
+         return await this.authservice.KidsModelchnangepassword(changepassword,customerid)
+     }
+ 
+     @Post("/kidmodel/resetlink")
+     async KidmodelPasswordResetLink(@Body()email:SendPasswordResetLinkDto):Promise<{message:string}>{
+         return await this.authservice.KidsModelsendPasswordResetLink(email)
+     }
+ 
+     @Patch("kidmodel/resetPassword")
+     async KidmodelResetPasswordFinally(@Body()dto:FinallyResetPasswordDto):Promise<{message:string}>{
+         return await this.authservice.finallyKidsModelResetPassword(dto)
+     }
+
+      /// adult model ////
+     
+    @Patch("/customer/changePassword")
+    async AdultModelchangePassword(@Body()changepassword:ChangePasswordDto,@Param('customerid')customerid:string):Promise<{message:string}>{
+        return await this.authservice.AdultModelchnangepassword(changepassword,customerid)
+    }
+
+    @Post("/customer/resetlink")
+    async AdultModelPasswordResetLink(@Body()email:SendPasswordResetLinkDto):Promise<{message:string}>{
+        return await this.authservice.AdultModelsendPasswordResetLink(email)
+    }
+
+    @Patch("customer/resetPassword")
+    async AdultResetPasswordFinally(@Body()dto:FinallyResetPasswordDto):Promise<{message:string}>{
+        return await this.authservice.finallyAdultModelResetPassword(dto)
+    }
+
+     ///// admin ////
+     
+     @Patch("/admin/changePassword")
+     async AdminchangePassword(@Body()changepassword:ChangePasswordDto,@Param('customerid')customerid:string):Promise<{message:string}>{
+         return await this.authservice.Adminchnangepassword(changepassword,customerid)
+     }
+ 
+     @Post("/admin/resetlink")
+     async AdminPasswordResetLink(@Body()email:SendPasswordResetLinkDto):Promise<{message:string}>{
+         return await this.authservice.AdminsendPasswordResetLink(email)
+     }
+ 
+     @Patch("admin/resetPassword")
+     async AdminResetPasswordFinally(@Body()dto:FinallyResetPasswordDto):Promise<{message:string}>{
+         return await this.authservice.AdminfinallyResetPassword(dto)
+     }
+
+    
 
     //sign out of log out a user 
     @UseGuards(JwtGuard)

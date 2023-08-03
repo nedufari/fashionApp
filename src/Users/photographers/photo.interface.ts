@@ -35,6 +35,8 @@ export interface IPhotographer{
     last_login:Date
     login_count:number
     PhotographerID:string
+    password_reset_link:string
+    reset_link_exptime:Date
     comments:Comments[]
     replies:Replies[]
 

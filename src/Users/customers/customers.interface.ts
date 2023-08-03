@@ -18,6 +18,8 @@ export interface ICustomer{
     CustomerID:string
     is_locked:boolean
     is_locked_until:Date
+    password_reset_link:string
+    reset_link_exptime:Date
     comments:Comments[]
     replies:Replies[]
 }

@@ -71,6 +71,12 @@ export class CustomerEntity implements ICustomer{
     @Column({nullable:true})
     is_locked_until:Date
 
+    @Column({nullable:true})
+    password_reset_link:string
+
+    @Column({nullable:true})
+    reset_link_exptime:Date
+
 
     @Column({type:"date", nullable:true})
     last_login:Date

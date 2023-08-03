@@ -4,7 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import {AdultModelRegistrationDto, RegistrationDto,VendorRegistrationDto,kidsModeleRegistrationDto,} from './dto/registrationdto';
 import { ConfigService } from '@nestjs/config';
-import { Logindto } from './dto/logindto';
+import { Logindto, VerifyOtpdto } from './dto/logindto';
 import { AdminEntityRepository, CustomerEntityRepository, ModelEntityRepository, NotificationsRepository, OtpRepository, PhotographerEntityRepository, VendorEntityRepository } from './auth.repository';
 import { IAdminResponse } from '../Users/admin/admin.interface';
 import { ICustomerResponse } from '../Users/customers/customers.interface';
@@ -18,7 +18,8 @@ import { CustomerEntity } from '../Entity/Users/customer.entity';
 import { vendorEntity } from '../Entity/Users/vendor.entity';
 import { ModelEntity } from '../Entity/Users/model.entity';
 import { PhotographerEntity } from '../Entity/Users/photorapher.entity';
-import { nanoid } from 'nanoid';
+import { customAlphabet, nanoid } from 'nanoid';
+import { ChangePasswordDto, FinallyResetPasswordDto, SendPasswordResetLinkDto } from './dto/password.dto';
 
 
 @Injectable()
@@ -53,6 +54,11 @@ export class AuthService {
 
   private generateIdentityNumber():string{
     return nanoid(8)
+  }
+
+  private generatePasswordResetLink():string{
+    const nanoid = customAlphabet('1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ',40)
+    return nanoid()
   }
 
 
@@ -108,9 +114,130 @@ export class AuthService {
       // throw new HttpException(`user sign up failed`,HttpStatus.BAD_REQUEST)
       
     }
-
-   
   }
+
+  
+  async Adminverifyotp(verifyotpdto:VerifyOtpdto):Promise<{isValid:boolean; accessToken:any}>{
+    const findemail= await this.otprepository.findOne({where:{email:verifyotpdto.email}})
+    if (!findemail) throw new HttpException('the user does not match the owner of the otp',HttpStatus.NOT_FOUND)
+    //find the otp privided if it matches with the otp stored 
+    const findotp= await this.otprepository.findOne({where:{otp:verifyotpdto.otp}})
+    if (!findotp) throw new HttpException('you prided an invalid otp', HttpStatus.BAD_REQUEST)
+    
+    //find if the otp is expired 
+    if ( findotp.expiration_time <= new Date()) throw new HttpException('otp is expired please request for another one',HttpStatus.REQUEST_TIMEOUT)
+
+    //return valid and the access token if the user matches 
+
+    const customer = await this.adminrepository.findOne({where:{email:verifyotpdto.email}})
+    if (customer.email !== findemail.email) throw new HttpException("this email does not match the customer recod we have ", HttpStatus.NOT_FOUND)
+    else{
+      customer.is_logged_in=true
+      customer.is_verified=true
+      customer.is_active=true
+    }
+
+     const notification = new Notifications()
+      notification.account= customer.id,
+      notification.subject="OTP sent!"
+      notification.notification_type=NotificationType.OTP_VERIFICATION
+      notification.message=`Hello ${customer.username}, otp sent to this email for verification `
+      await this.notificationrepository.save(notification)
+
+
+
+    const accessToken= await this.signToken(customer.id,customer.email)
+
+    return {isValid:true, accessToken}
+
+
+  }
+
+  async Adminchnangepassword(dto:ChangePasswordDto, customerid:string):Promise<{message:string}>{
+    const customer = await this.adminrepository.findOne({where:{AdminID:customerid}})
+    if (!customer) throw new HttpException(`customer with ${customerid} does not exist and you cant be allowed to change a password`,HttpStatus.NOT_FOUND)
+
+    //confirm the oldpassword with the saved password
+    const ispasswordMatch= await this.comaprePassword(customer.password,dto.oldPassword)
+    if (!ispasswordMatch) throw new HttpException('the provided old password is not a match with the current password please provide, else you wont be allowed to perform this action', HttpStatus.NOT_ACCEPTABLE)
+
+    //input new password 
+    const newPassword= await this.hashpassword(dto.newpassword)
+    customer.password= newPassword
+
+    //compare the new and old password 
+    const isnewoldSame= await this.comaprePassword(dto.newpassword,customer.password)
+    if (isnewoldSame) throw new HttpException('your new password must be different from the old one for a stronger security',HttpStatus.NOT_ACCEPTABLE)
+    await this.adminrepository.save(customer)
+
+    const notification = new Notifications()
+    notification.account= customer.id,
+    notification.subject="Password changed!"
+    notification.notification_type=NotificationType.OTP_VERIFICATION
+    notification.message=`Hello ${customer.username}, password has been succsfully chnaged `
+    await this.notificationrepository.save(notification)
+
+
+
+    return {message:"your password has been changed successfully"}
+
+  }
+
+
+  async AdminsendPasswordResetLink(dto:SendPasswordResetLinkDto):Promise<{message:string}>{
+    const isEmailReistered= await this.adminrepository.findOne({where:{email:dto.email}})
+    if (!isEmailReistered) throw new HttpException(`this email ${dto.email} does not exist in walkway, please try another email address`,HttpStatus.NOT_FOUND)
+
+    const resetlink= this.generatePasswordResetLink()
+    const expirationTime = new Date();
+      expirationTime.setHours(expirationTime.getHours() + 1);
+
+    //send reset link to the email provided 
+    await this.mailerservice.SendPasswordResetLinkMail(dto.email,resetlink)
+
+    //save the reset link and the expiration time to the database 
+    isEmailReistered.password_reset_link=resetlink
+    isEmailReistered.reset_link_exptime=expirationTime
+    await this.adminrepository.save(isEmailReistered)
+
+    const notification = new Notifications()
+    notification.account= isEmailReistered.id,
+    notification.subject="password Reset link!"
+    notification.notification_type=NotificationType.OTP_VERIFICATION
+    notification.message=`Hello ${isEmailReistered.username}, password resent link sent `
+    await this.notificationrepository.save(notification)
+
+
+
+    return {message:"the password reset link has been sent successfully"}
+    
+  }
+
+  async AdminfinallyResetPassword(dto:FinallyResetPasswordDto):Promise<{message:string}>{
+    const verifyuser= await this.adminrepository.findOne({where:{email:dto.email}})
+    if (!verifyuser) throw new HttpException('this user is not registered on walkway',HttpStatus.NOT_FOUND)
+
+    //compare token 
+    if (verifyuser.password_reset_link !== dto.resetlink) throw new HttpException('the link is incorrect please retry or request for another link',HttpStatus.NOT_ACCEPTABLE)
+
+    //take new password 
+    const newpassword= await this.hashpassword(dto.password)
+    verifyuser.password=newpassword
+
+    await this.adminrepository.save(verifyuser)
+
+    const notification = new Notifications()
+    notification.account= verifyuser.id,
+    notification.subject="New Customer!"
+    notification.notification_type=NotificationType.OTP_VERIFICATION
+    notification.message=`Hello ${verifyuser.username}, password reset link verified and the password has been recently reseted `
+    await this.notificationrepository.save(notification)
+
+
+    return {message:"your password has been reset susscessfully"}
+  }
+
+  //////// customer ////////////////////////////////////////////
 
 
   async CustomerSignup(userdto: RegistrationDto,): Promise<{message:string}> {
@@ -168,6 +295,132 @@ export class AuthService {
    
   }
 
+  async verifyotp(verifyotpdto:VerifyOtpdto):Promise<{isValid:boolean; accessToken:any}>{
+    const findemail= await this.otprepository.findOne({where:{email:verifyotpdto.email}})
+    if (!findemail) throw new HttpException('the user does not match the owner of the otp',HttpStatus.NOT_FOUND)
+    //find the otp privided if it matches with the otp stored 
+    const findotp= await this.otprepository.findOne({where:{otp:verifyotpdto.otp}})
+    if (!findotp) throw new HttpException('you prided an invalid otp', HttpStatus.BAD_REQUEST)
+    
+    //find if the otp is expired 
+    if ( findotp.expiration_time <= new Date()) throw new HttpException('otp is expired please request for another one',HttpStatus.REQUEST_TIMEOUT)
+
+    //return valid and the access token if the user matches 
+
+    const customer = await this.customerrepository.findOne({where:{email:verifyotpdto.email}})
+    if (customer.email !== findemail.email) throw new HttpException("this email does not match the customer recod we have ", HttpStatus.NOT_FOUND)
+    else{
+      customer.is_logged_in=true
+      customer.is_verified=true
+      customer.is_active=true
+    }
+
+     const notification = new Notifications()
+      notification.account= customer.id,
+      notification.subject="OTP sent!"
+      notification.notification_type=NotificationType.OTP_VERIFICATION
+      notification.message=`Hello ${customer.username}, otp sent to this email for verification `
+      await this.notificationrepository.save(notification)
+
+
+
+    const accessToken= await this.signToken(customer.id,customer.email)
+
+    return {isValid:true, accessToken}
+
+
+  }
+
+  async chnangepassword(dto:ChangePasswordDto, customerid:string):Promise<{message:string}>{
+    const customer = await this.customerrepository.findOne({where:{CustomerID:customerid}})
+    if (!customer) throw new HttpException(`customer with ${customerid} does not exist and you cant be allowed to change a password`,HttpStatus.NOT_FOUND)
+
+    //confirm the oldpassword with the saved password
+    const ispasswordMatch= await this.comaprePassword(customer.password,dto.oldPassword)
+    if (!ispasswordMatch) throw new HttpException('the provided old password is not a match with the current password please provide, else you wont be allowed to perform this action', HttpStatus.NOT_ACCEPTABLE)
+
+    //input new password 
+    const newPassword= await this.hashpassword(dto.newpassword)
+    customer.password= newPassword
+
+    //compare the new and old password 
+    const isnewoldSame= await this.comaprePassword(dto.newpassword,customer.password)
+    if (isnewoldSame) throw new HttpException('your new password must be different from the old one for a stronger security',HttpStatus.NOT_ACCEPTABLE)
+    await this.customerrepository.save(customer)
+
+    const notification = new Notifications()
+    notification.account= customer.id,
+    notification.subject="Password changed!"
+    notification.notification_type=NotificationType.OTP_VERIFICATION
+    notification.message=`Hello ${customer.username}, password has been succsfully chnaged `
+    await this.notificationrepository.save(notification)
+
+
+
+    return {message:"your password has been changed successfully"}
+
+  }
+
+
+  async sendPasswordResetLink(dto:SendPasswordResetLinkDto):Promise<{message:string}>{
+    const isEmailReistered= await this.customerrepository.findOne({where:{email:dto.email}})
+    if (!isEmailReistered) throw new HttpException(`this email ${dto.email} does not exist in walkway, please try another email address`,HttpStatus.NOT_FOUND)
+
+    const resetlink= this.generatePasswordResetLink()
+    const expirationTime = new Date();
+      expirationTime.setHours(expirationTime.getHours() + 1);
+
+    //send reset link to the email provided 
+    await this.mailerservice.SendPasswordResetLinkMail(dto.email,resetlink)
+
+    //save the reset link and the expiration time to the database 
+    isEmailReistered.password_reset_link=resetlink
+    isEmailReistered.reset_link_exptime=expirationTime
+    await this.customerrepository.save(isEmailReistered)
+
+    const notification = new Notifications()
+    notification.account= isEmailReistered.id,
+    notification.subject="password Reset link!"
+    notification.notification_type=NotificationType.OTP_VERIFICATION
+    notification.message=`Hello ${isEmailReistered.username}, password resent link sent `
+    await this.notificationrepository.save(notification)
+
+
+
+    return {message:"the password reset link has been sent successfully"}
+    
+  }
+
+  async finallyResetPassword(dto:FinallyResetPasswordDto):Promise<{message:string}>{
+    const verifyuser= await this.customerrepository.findOne({where:{email:dto.email}})
+    if (!verifyuser) throw new HttpException('this user is not registered on walkway',HttpStatus.NOT_FOUND)
+
+    //compare token 
+    if (verifyuser.password_reset_link !== dto.resetlink) throw new HttpException('the link is incorrect please retry or request for another link',HttpStatus.NOT_ACCEPTABLE)
+
+    //take new password 
+    const newpassword= await this.hashpassword(dto.password)
+    verifyuser.password=newpassword
+
+    await this.customerrepository.save(verifyuser)
+
+    const notification = new Notifications()
+    notification.account= verifyuser.id,
+    notification.subject="New Customer!"
+    notification.notification_type=NotificationType.OTP_VERIFICATION
+    notification.message=`Hello ${verifyuser.username}, password reset link verified and the password has been recently reseted `
+    await this.notificationrepository.save(notification)
+
+
+    return {message:"your password has been reset susscessfully"}
+  }
+
+
+
+
+/////////////////////////////////// vendor ////////////////////////////////////////////
+
+
 
   /// new vendor 
   async VendorSignup(userdto: VendorRegistrationDto,): Promise<{message:string}> {
@@ -224,6 +477,133 @@ export class AuthService {
   }
 
 
+
+  
+  async verifyVendorotp(verifyotpdto:VerifyOtpdto):Promise<{isValid:boolean; accessToken:any}>{
+    const findemail= await this.otprepository.findOne({where:{email:verifyotpdto.email}})
+    if (!findemail) throw new HttpException('the user does not match the owner of the otp',HttpStatus.NOT_FOUND)
+    //find the otp privided if it matches with the otp stored 
+    const findotp= await this.otprepository.findOne({where:{otp:verifyotpdto.otp}})
+    if (!findotp) throw new HttpException('you prided an invalid otp', HttpStatus.BAD_REQUEST)
+    
+    //find if the otp is expired 
+    if ( findotp.expiration_time <= new Date()) throw new HttpException('otp is expired please request for another one',HttpStatus.REQUEST_TIMEOUT)
+
+    //return valid and the access token if the user matches 
+
+    const customer = await this.vendorrepository.findOne({where:{email:verifyotpdto.email}})
+    if (customer.email !== findemail.email) throw new HttpException("this email does not match the customer recod we have ", HttpStatus.NOT_FOUND)
+    else{
+      customer.is_logged_in=true
+      customer.is_verified=true
+      customer.is_active=true
+    }
+
+     const notification = new Notifications()
+      notification.account= customer.id,
+      notification.subject="OTP sent!"
+      notification.notification_type=NotificationType.OTP_VERIFICATION
+      notification.message=`Hello ${customer.username}, otp sent to this email for verification `
+      await this.notificationrepository.save(notification)
+
+
+
+    const accessToken= await this.signToken(customer.id,customer.email)
+
+    return {isValid:true, accessToken}
+
+
+  }
+
+  async chnangeVendorpassword(dto:ChangePasswordDto, customerid:string):Promise<{message:string}>{
+    const customer = await this.vendorrepository.findOne({where:{VendorID:customerid}})
+    if (!customer) throw new HttpException(`customer with ${customerid} does not exist and you cant be allowed to change a password`,HttpStatus.NOT_FOUND)
+
+    //confirm the oldpassword with the saved password
+    const ispasswordMatch= await this.comaprePassword(customer.password,dto.oldPassword)
+    if (!ispasswordMatch) throw new HttpException('the provided old password is not a match with the current password please provide, else you wont be allowed to perform this action', HttpStatus.NOT_ACCEPTABLE)
+
+    //input new password 
+    const newPassword= await this.hashpassword(dto.newpassword)
+    customer.password= newPassword
+
+    //compare the new and old password 
+    const isnewoldSame= await this.comaprePassword(dto.newpassword,customer.password)
+    if (isnewoldSame) throw new HttpException('your new password must be different from the old one for a stronger security',HttpStatus.NOT_ACCEPTABLE)
+    await this.vendorrepository.save(customer)
+
+    const notification = new Notifications()
+    notification.account= customer.id,
+    notification.subject="Password changed!"
+    notification.notification_type=NotificationType.OTP_VERIFICATION
+    notification.message=`Hello ${customer.username}, password has been succsfully chnaged `
+    await this.notificationrepository.save(notification)
+
+
+
+    return {message:"your password has been changed successfully"}
+
+  }
+
+
+  async sendVendorPasswordResetLink(dto:SendPasswordResetLinkDto):Promise<{message:string}>{
+    const isEmailReistered= await this.vendorrepository.findOne({where:{email:dto.email}})
+    if (!isEmailReistered) throw new HttpException(`this email ${dto.email} does not exist in walkway, please try another email address`,HttpStatus.NOT_FOUND)
+
+    const resetlink= this.generatePasswordResetLink()
+    const expirationTime = new Date();
+      expirationTime.setHours(expirationTime.getHours() + 1);
+
+    //send reset link to the email provided 
+    await this.mailerservice.SendPasswordResetLinkMail(dto.email,resetlink)
+
+    //save the reset link and the expiration time to the database 
+    isEmailReistered.password_reset_link=resetlink
+    isEmailReistered.reset_link_exptime=expirationTime
+    await this.vendorrepository.save(isEmailReistered)
+
+    const notification = new Notifications()
+    notification.account= isEmailReistered.id,
+    notification.subject="password Reset link!"
+    notification.notification_type=NotificationType.OTP_VERIFICATION
+    notification.message=`Hello ${isEmailReistered.username}, password resent link sent `
+    await this.notificationrepository.save(notification)
+
+
+
+    return {message:"the password reset link has been sent successfully"}
+    
+  }
+
+  async VendorfinallyResetPassword(dto:FinallyResetPasswordDto):Promise<{message:string}>{
+    const verifyuser= await this.vendorrepository.findOne({where:{email:dto.email}})
+    if (!verifyuser) throw new HttpException('this user is not registered on walkway',HttpStatus.NOT_FOUND)
+
+    //compare token 
+    if (verifyuser.password_reset_link !== dto.resetlink) throw new HttpException('the link is incorrect please retry or request for another link',HttpStatus.NOT_ACCEPTABLE)
+
+    //take new password 
+    const newpassword= await this.hashpassword(dto.password)
+    verifyuser.password=newpassword
+
+    await this.vendorrepository.save(verifyuser)
+
+    const notification = new Notifications()
+    notification.account= verifyuser.id,
+    notification.subject="New Customer!"
+    notification.notification_type=NotificationType.OTP_VERIFICATION
+    notification.message=`Hello ${verifyuser.username}, password reset link verified and the password has been recently reseted `
+    await this.notificationrepository.save(notification)
+
+
+    return {message:"your password has been reset susscessfully"}
+  }
+
+
+
+
+  ///////////////////////////// pgotographer /////////////////////////////////////////
+
   //photographer 
   async PhotographerSignup(userdto: RegistrationDto,): Promise<{message:string}> {
     try {
@@ -273,9 +653,134 @@ export class AuthService {
       // throw new HttpException(`user sign up failed`,HttpStatus.BAD_REQUEST)
       
     }
-
    
   }
+
+
+  
+  async verifyPhotographerotp(verifyotpdto:VerifyOtpdto):Promise<{isValid:boolean; accessToken:any}>{
+    const findemail= await this.otprepository.findOne({where:{email:verifyotpdto.email}})
+    if (!findemail) throw new HttpException('the user does not match the owner of the otp',HttpStatus.NOT_FOUND)
+    //find the otp privided if it matches with the otp stored 
+    const findotp= await this.otprepository.findOne({where:{otp:verifyotpdto.otp}})
+    if (!findotp) throw new HttpException('you prided an invalid otp', HttpStatus.BAD_REQUEST)
+    
+    //find if the otp is expired 
+    if ( findotp.expiration_time <= new Date()) throw new HttpException('otp is expired please request for another one',HttpStatus.REQUEST_TIMEOUT)
+
+    //return valid and the access token if the user matches 
+
+    const customer = await this.photographerrepository.findOne({where:{email:verifyotpdto.email}})
+    if (customer.email !== findemail.email) throw new HttpException("this email does not match the customer recod we have ", HttpStatus.NOT_FOUND)
+    else{
+      customer.is_logged_in=true
+      customer.is_verified=true
+      customer.is_active=true
+    }
+
+     const notification = new Notifications()
+      notification.account= customer.id,
+      notification.subject="OTP sent!"
+      notification.notification_type=NotificationType.OTP_VERIFICATION
+      notification.message=`Hello ${customer.username}, otp sent to this email for verification `
+      await this.notificationrepository.save(notification)
+
+
+
+    const accessToken= await this.signToken(customer.id,customer.email)
+
+    return {isValid:true, accessToken}
+
+
+  }
+
+  async Photographerchnangepassword(dto:ChangePasswordDto, customerid:string):Promise<{message:string}>{
+    const customer = await this.photographerrepository.findOne({where:{PhotographerID:customerid}})
+    if (!customer) throw new HttpException(`customer with ${customerid} does not exist and you cant be allowed to change a password`,HttpStatus.NOT_FOUND)
+
+    //confirm the oldpassword with the saved password
+    const ispasswordMatch= await this.comaprePassword(customer.password,dto.oldPassword)
+    if (!ispasswordMatch) throw new HttpException('the provided old password is not a match with the current password please provide, else you wont be allowed to perform this action', HttpStatus.NOT_ACCEPTABLE)
+
+    //input new password 
+    const newPassword= await this.hashpassword(dto.newpassword)
+    customer.password= newPassword
+
+    //compare the new and old password 
+    const isnewoldSame= await this.comaprePassword(dto.newpassword,customer.password)
+    if (isnewoldSame) throw new HttpException('your new password must be different from the old one for a stronger security',HttpStatus.NOT_ACCEPTABLE)
+    await this.photographerrepository.save(customer)
+
+    const notification = new Notifications()
+    notification.account= customer.id,
+    notification.subject="Password changed!"
+    notification.notification_type=NotificationType.OTP_VERIFICATION
+    notification.message=`Hello ${customer.username}, password has been succsfully chnaged `
+    await this.notificationrepository.save(notification)
+
+
+
+    return {message:"your password has been changed successfully"}
+
+  }
+
+
+  async sendPhotographerPasswordResetLink(dto:SendPasswordResetLinkDto):Promise<{message:string}>{
+    const isEmailReistered= await this.photographerrepository.findOne({where:{email:dto.email}})
+    if (!isEmailReistered) throw new HttpException(`this email ${dto.email} does not exist in walkway, please try another email address`,HttpStatus.NOT_FOUND)
+
+    const resetlink= this.generatePasswordResetLink()
+    const expirationTime = new Date();
+      expirationTime.setHours(expirationTime.getHours() + 1);
+
+    //send reset link to the email provided 
+    await this.mailerservice.SendPasswordResetLinkMail(dto.email,resetlink)
+
+    //save the reset link and the expiration time to the database 
+    isEmailReistered.password_reset_link=resetlink
+    isEmailReistered.reset_link_exptime=expirationTime
+    await this.photographerrepository.save(isEmailReistered)
+
+    const notification = new Notifications()
+    notification.account= isEmailReistered.id,
+    notification.subject="password Reset link!"
+    notification.notification_type=NotificationType.OTP_VERIFICATION
+    notification.message=`Hello ${isEmailReistered.username}, password resent link sent `
+    await this.notificationrepository.save(notification)
+
+
+
+    return {message:"the password reset link has been sent successfully"}
+    
+  }
+
+  async PhotographerfinallyResetPassword(dto:FinallyResetPasswordDto):Promise<{message:string}>{
+    const verifyuser= await this.photographerrepository.findOne({where:{email:dto.email}})
+    if (!verifyuser) throw new HttpException('this user is not registered on walkway',HttpStatus.NOT_FOUND)
+
+    //compare token 
+    if (verifyuser.password_reset_link !== dto.resetlink) throw new HttpException('the link is incorrect please retry or request for another link',HttpStatus.NOT_ACCEPTABLE)
+
+    //take new password 
+    const newpassword= await this.hashpassword(dto.password)
+    verifyuser.password=newpassword
+
+    await this.photographerrepository.save(verifyuser)
+
+    const notification = new Notifications()
+    notification.account= verifyuser.id,
+    notification.subject="New Customer!"
+    notification.notification_type=NotificationType.OTP_VERIFICATION
+    notification.message=`Hello ${verifyuser.username}, password reset link verified and the password has been recently reseted `
+    await this.notificationrepository.save(notification)
+
+
+    return {message:"your password has been reset susscessfully"}
+  }
+
+
+
+  ////////////////////////////////////// kid model ///////////////////////////////////////////////////////
   
 
   async kidsmodelsignup(kiddto: kidsModeleRegistrationDto): Promise<{message:string}> {
@@ -333,6 +838,133 @@ export class AuthService {
     
   }
 
+
+  
+  async KidsModelverifyotp(verifyotpdto:VerifyOtpdto):Promise<{isValid:boolean; accessToken:any}>{
+    const findemail= await this.otprepository.findOne({where:{email:verifyotpdto.email}})
+    if (!findemail) throw new HttpException('the user does not match the owner of the otp',HttpStatus.NOT_FOUND)
+    //find the otp privided if it matches with the otp stored 
+    const findotp= await this.otprepository.findOne({where:{otp:verifyotpdto.otp}})
+    if (!findotp) throw new HttpException('you prided an invalid otp', HttpStatus.BAD_REQUEST)
+    
+    //find if the otp is expired 
+    if ( findotp.expiration_time <= new Date()) throw new HttpException('otp is expired please request for another one',HttpStatus.REQUEST_TIMEOUT)
+
+    //return valid and the access token if the user matches 
+
+    const customer = await this.modelrepository.findOne({where:{email:verifyotpdto.email}})
+    if (customer.email !== findemail.email) throw new HttpException("this email does not match the customer recod we have ", HttpStatus.NOT_FOUND)
+    else{
+      customer.is_logged_in=true
+      customer.is_verified=true
+      customer.is_active=true
+    }
+
+     const notification = new Notifications()
+      notification.account= customer.id,
+      notification.subject="OTP sent!"
+      notification.notification_type=NotificationType.OTP_VERIFICATION
+      notification.message=`Hello ${customer.username}, otp sent to this email for verification `
+      await this.notificationrepository.save(notification)
+
+
+
+    const accessToken= await this.signToken(customer.id,customer.email)
+
+    return {isValid:true, accessToken}
+
+
+  }
+
+  async KidsModelchnangepassword(dto:ChangePasswordDto, customerid:string):Promise<{message:string}>{
+    const customer = await this.modelrepository.findOne({where:{ModelID:customerid}})
+    if (!customer) throw new HttpException(`customer with ${customerid} does not exist and you cant be allowed to change a password`,HttpStatus.NOT_FOUND)
+
+    //confirm the oldpassword with the saved password
+    const ispasswordMatch= await this.comaprePassword(customer.password,dto.oldPassword)
+    if (!ispasswordMatch) throw new HttpException('the provided old password is not a match with the current password please provide, else you wont be allowed to perform this action', HttpStatus.NOT_ACCEPTABLE)
+
+    //input new password 
+    const newPassword= await this.hashpassword(dto.newpassword)
+    customer.password= newPassword
+
+    //compare the new and old password 
+    const isnewoldSame= await this.comaprePassword(dto.newpassword,customer.password)
+    if (isnewoldSame) throw new HttpException('your new password must be different from the old one for a stronger security',HttpStatus.NOT_ACCEPTABLE)
+    await this.modelrepository.save(customer)
+
+    const notification = new Notifications()
+    notification.account= customer.id,
+    notification.subject="Password changed!"
+    notification.notification_type=NotificationType.OTP_VERIFICATION
+    notification.message=`Hello ${customer.username}, password has been succsfully chnaged `
+    await this.notificationrepository.save(notification)
+
+
+
+    return {message:"your password has been changed successfully"}
+
+  }
+
+
+  async KidsModelsendPasswordResetLink(dto:SendPasswordResetLinkDto):Promise<{message:string}>{
+    const isEmailReistered= await this.modelrepository.findOne({where:{email:dto.email}})
+    if (!isEmailReistered) throw new HttpException(`this email ${dto.email} does not exist in walkway, please try another email address`,HttpStatus.NOT_FOUND)
+
+    const resetlink= this.generatePasswordResetLink()
+    const expirationTime = new Date();
+      expirationTime.setHours(expirationTime.getHours() + 1);
+
+    //send reset link to the email provided 
+    await this.mailerservice.SendPasswordResetLinkMail(dto.email,resetlink)
+
+    //save the reset link and the expiration time to the database 
+    isEmailReistered.password_reset_link=resetlink
+    isEmailReistered.reset_link_exptime=expirationTime
+    await this.customerrepository.save(isEmailReistered)
+
+    const notification = new Notifications()
+    notification.account= isEmailReistered.id,
+    notification.subject="password Reset link!"
+    notification.notification_type=NotificationType.OTP_VERIFICATION
+    notification.message=`Hello ${isEmailReistered.username}, password resent link sent `
+    await this.notificationrepository.save(notification)
+
+
+
+    return {message:"the password reset link has been sent successfully"}
+    
+  }
+
+  async finallyKidsModelResetPassword(dto:FinallyResetPasswordDto):Promise<{message:string}>{
+    const verifyuser= await this.modelrepository.findOne({where:{email:dto.email}})
+    if (!verifyuser) throw new HttpException('this user is not registered on walkway',HttpStatus.NOT_FOUND)
+
+    //compare token 
+    if (verifyuser.password_reset_link !== dto.resetlink) throw new HttpException('the link is incorrect please retry or request for another link',HttpStatus.NOT_ACCEPTABLE)
+
+    //take new password 
+    const newpassword= await this.hashpassword(dto.password)
+    verifyuser.password=newpassword
+
+    await this.modelrepository.save(verifyuser)
+
+    const notification = new Notifications()
+    notification.account= verifyuser.id,
+    notification.subject="New Customer!"
+    notification.notification_type=NotificationType.OTP_VERIFICATION
+    notification.message=`Hello ${verifyuser.username}, password reset link verified and the password has been recently reseted `
+    await this.notificationrepository.save(notification)
+
+
+    return {message:"your password has been reset susscessfully"}
+  }
+
+
+
+
+  //////////////////////////////////////// adult model /////////////////////////////////////////////////
+
   async Adultmodelsignup(adultdto: AdultModelRegistrationDto): Promise<{message:string}> {
     
     
@@ -383,6 +1015,129 @@ export class AuthService {
       return {message:"new Photographer signed up and verification otp has been sent "}
     
   }
+
+  
+  async AdultModelverifyotp(verifyotpdto:VerifyOtpdto):Promise<{isValid:boolean; accessToken:any}>{
+    const findemail= await this.otprepository.findOne({where:{email:verifyotpdto.email}})
+    if (!findemail) throw new HttpException('the user does not match the owner of the otp',HttpStatus.NOT_FOUND)
+    //find the otp privided if it matches with the otp stored 
+    const findotp= await this.otprepository.findOne({where:{otp:verifyotpdto.otp}})
+    if (!findotp) throw new HttpException('you prided an invalid otp', HttpStatus.BAD_REQUEST)
+    
+    //find if the otp is expired 
+    if ( findotp.expiration_time <= new Date()) throw new HttpException('otp is expired please request for another one',HttpStatus.REQUEST_TIMEOUT)
+
+    //return valid and the access token if the user matches 
+
+    const customer = await this.modelrepository.findOne({where:{email:verifyotpdto.email}})
+    if (customer.email !== findemail.email) throw new HttpException("this email does not match the customer recod we have ", HttpStatus.NOT_FOUND)
+    else{
+      customer.is_logged_in=true
+      customer.is_verified=true
+      customer.is_active=true
+    }
+
+     const notification = new Notifications()
+      notification.account= customer.id,
+      notification.subject="OTP sent!"
+      notification.notification_type=NotificationType.OTP_VERIFICATION
+      notification.message=`Hello ${customer.username}, otp sent to this email for verification `
+      await this.notificationrepository.save(notification)
+
+
+
+    const accessToken= await this.signToken(customer.id,customer.email)
+
+    return {isValid:true, accessToken}
+
+
+  }
+
+  async AdultModelchnangepassword(dto:ChangePasswordDto, customerid:string):Promise<{message:string}>{
+    const customer = await this.modelrepository.findOne({where:{ModelID:customerid}})
+    if (!customer) throw new HttpException(`customer with ${customerid} does not exist and you cant be allowed to change a password`,HttpStatus.NOT_FOUND)
+
+    //confirm the oldpassword with the saved password
+    const ispasswordMatch= await this.comaprePassword(customer.password,dto.oldPassword)
+    if (!ispasswordMatch) throw new HttpException('the provided old password is not a match with the current password please provide, else you wont be allowed to perform this action', HttpStatus.NOT_ACCEPTABLE)
+
+    //input new password 
+    const newPassword= await this.hashpassword(dto.newpassword)
+    customer.password= newPassword
+
+    //compare the new and old password 
+    const isnewoldSame= await this.comaprePassword(dto.newpassword,customer.password)
+    if (isnewoldSame) throw new HttpException('your new password must be different from the old one for a stronger security',HttpStatus.NOT_ACCEPTABLE)
+    await this.modelrepository.save(customer)
+
+    const notification = new Notifications()
+    notification.account= customer.id,
+    notification.subject="Password changed!"
+    notification.notification_type=NotificationType.OTP_VERIFICATION
+    notification.message=`Hello ${customer.username}, password has been succsfully chnaged `
+    await this.notificationrepository.save(notification)
+
+
+
+    return {message:"your password has been changed successfully"}
+
+  }
+
+
+  async AdultModelsendPasswordResetLink(dto:SendPasswordResetLinkDto):Promise<{message:string}>{
+    const isEmailReistered= await this.modelrepository.findOne({where:{email:dto.email}})
+    if (!isEmailReistered) throw new HttpException(`this email ${dto.email} does not exist in walkway, please try another email address`,HttpStatus.NOT_FOUND)
+
+    const resetlink= this.generatePasswordResetLink()
+    const expirationTime = new Date();
+      expirationTime.setHours(expirationTime.getHours() + 1);
+
+    //send reset link to the email provided 
+    await this.mailerservice.SendPasswordResetLinkMail(dto.email,resetlink)
+
+    //save the reset link and the expiration time to the database 
+    isEmailReistered.password_reset_link=resetlink
+    isEmailReistered.reset_link_exptime=expirationTime
+    await this.customerrepository.save(isEmailReistered)
+
+    const notification = new Notifications()
+    notification.account= isEmailReistered.id,
+    notification.subject="password Reset link!"
+    notification.notification_type=NotificationType.OTP_VERIFICATION
+    notification.message=`Hello ${isEmailReistered.username}, password resent link sent `
+    await this.notificationrepository.save(notification)
+
+
+
+    return {message:"the password reset link has been sent successfully"}
+    
+  }
+
+  async finallyAdultModelResetPassword(dto:FinallyResetPasswordDto):Promise<{message:string}>{
+    const verifyuser= await this.modelrepository.findOne({where:{email:dto.email}})
+    if (!verifyuser) throw new HttpException('this user is not registered on walkway',HttpStatus.NOT_FOUND)
+
+    //compare token 
+    if (verifyuser.password_reset_link !== dto.resetlink) throw new HttpException('the link is incorrect please retry or request for another link',HttpStatus.NOT_ACCEPTABLE)
+
+    //take new password 
+    const newpassword= await this.hashpassword(dto.password)
+    verifyuser.password=newpassword
+
+    await this.modelrepository.save(verifyuser)
+
+    const notification = new Notifications()
+    notification.account= verifyuser.id,
+    notification.subject="New Customer!"
+    notification.notification_type=NotificationType.OTP_VERIFICATION
+    notification.message=`Hello ${verifyuser.username}, password reset link verified and the password has been recently reseted `
+    await this.notificationrepository.save(notification)
+
+
+    return {message:"your password has been reset susscessfully"}
+  }
+
+
 
 
 

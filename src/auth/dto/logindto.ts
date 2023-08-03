@@ -10,3 +10,16 @@ export class Logindto{
     password:string
 }
 
+
+export class VerifyOtpdto{
+    @IsEmail()
+    @IsNotEmpty()
+    email:string
+
+    @IsString()
+    @IsNotEmpty()
+    otp:string
+}
+
+
+

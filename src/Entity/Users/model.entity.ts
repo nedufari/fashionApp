@@ -293,6 +293,12 @@ caps_ize:string
     @Column({nullable:true})
     is_locked_until:Date
 
+    @Column({nullable:true})
+    password_reset_link:string
+
+    @Column({nullable:true})
+    reset_link_exptime:Date
+
     @OneToMany(()=>Comments,comment=>comment.model)
     comments:Comments[]
 
