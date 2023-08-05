@@ -90,6 +90,7 @@ export interface IModel{
     last_login:Date
     login_count:number
     is_locked:boolean
+    is_onContract:boolean
     password_reset_link:string
     reset_link_exptime:Date
     is_locked_until:Date

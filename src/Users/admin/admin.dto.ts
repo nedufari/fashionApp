@@ -3,7 +3,7 @@
 // like 
 
 
-import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength } from "class-validator";
+import { IsBoolean, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength } from "class-validator";
 import { CutomerUpgrade, Roles } from "../../Enums/roles.enum";
 import { VendorUpdatePostDto } from "../vendor/vendor.dto";
 import { UpdateModelDataDto } from "../model/model.dto";
@@ -58,4 +58,9 @@ export class UpdateAdminDataDto{
     fullname:string 
 
  
+}
+
+export class VerifyAccountDto{
+    @IsBoolean({message:"the account must be verified else once the user logs out the user wont be allowed to log in back "})
+    isVerified:boolean
 }

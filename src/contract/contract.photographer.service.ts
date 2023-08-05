@@ -9,7 +9,7 @@ import { Notifications } from "../Entity/Notification/notification.entity";
 import { customAlphabet } from "nanoid";
 import { NotificationType } from "../Enums/notificationTypes.enum";
 import { ContractDto } from "./cotracts.dto";
-import { ContractDuration } from "../Enums/contractDuration.enum";
+import { ContractDuration, TypeOfContract } from "../Enums/contractDuration.enum";
 import { add } from 'date-fns';
 
 @Injectable()
@@ -62,54 +62,111 @@ export class ContractPhotographerService{
 
 
          //contract between vendor and model 
-    async ContractBtwnPhotographerandVendor(vendorid:string, photoid:string, contractdto:ContractDto):Promise<IContractPhotographerResponse>{
-        try {
-          //verify the ids of both the model and the vendor 
-          const vendor = await this.vendorrepository.findOne({where:{VendorID:vendorid}})
-          if (!vendor) throw new HttpException(`you are not a legitimate vendor on this platform and therefore you cannot proceed with this contract agreement`,HttpStatus.NOT_FOUND)
-          const photographer = await this.photographerrepository.findOne({where:{PhotographerID:photoid}})
-          if (!photographer) throw new HttpException(`you are not a legitimate photographer on this platform and therefore you cannot proceed with this contract agreement`,HttpStatus.NOT_FOUND)
-  
-          //proceed to contract signature and agreement 
-          const contract = new Contracts()
-          contract.vendor= vendor.brandname
-          contract.photographer=photographer.username
-          contract.contract_worth=contractdto.contract_worth
-          contract.contract_duration=contractdto.contract_duration
-          contract.commence_date= new Date()
-          contract.expiration_date=this.expirationdateforcontract(contract.commence_date,contract.contract_duration),
-          contract.contract_validity_number=this.CVN()
-          await this.contractrepository.save(contract)
-  
-          //save the notification 
-        const notification = new Notifications()
-        notification.account= contract.contract_validity_number
-        notification.subject="New Contract Signed!"
-        notification.notification_type=NotificationType.CONTRACT_SIGNED
-        notification.message=`Hello a contract has been signed between  ${vendor.brandname} and ${photographer.username} for a duration of ${contractdto.contract_duration} worth ${contractdto.contract_worth} which starts ${contract.commence_date} and expires on ${contract.expiration_date}, Thnaks`
-        await this.notificationrepository.save(notification)
-  
-        //update the model table 
+         async ContractBtwnPhotographerandVendor(vendorid: string, modelid: string, contractdto: ContractDto): Promise<IContractPhotographerResponse> {
+          try {
+            const vendor = await this.vendorrepository.findOne({where:{VendorID:vendorid}})
+            if (!vendor) throw new HttpException(`you are not a legitimate vendor on this platform and therefore you cannot proceed with this contract agreement`,HttpStatus.NOT_FOUND)
         
-         photographer.is_on_contract=true
-         await this.photographerrepository.save(photographer)
-  
-         //response      
-         const contractresponse:IContractPhotographerResponse={
-          vendor:contract.vendor,
-          photographer:contract.photographer,
-          contract_duration:contract.contract_duration,
-          contract_worth:contract.contract_worth,
-          contract_validity_number:contract.contract_validity_number,
-          commence_date:contract.commence_date,
-          expiration_date:contract.expiration_date,
-         };
-         return contractresponse
-         
-        } catch (error) {
-          throw error
+            // Check if the model has a contract
+            const photographer = await this.photographerrepository.findOne({ where: { PhotographerID: modelid } });
+            if (!photographer) throw new HttpException(`you are not a legitimate model on this platform and therefore you cannot proceed with this contract agreement`, HttpStatus.NOT_FOUND);
+        
+            if (photographer.type_of_contract === TypeOfContract.EXCLUSIVE_CONTRACT && contractdto.type_of_contract === TypeOfContract.EXCLUSIVE_CONTRACT) {
+              throw new HttpException(`Sorry, ${vendor.brandname}, you can't sign a contract with this model ${photographer.username} because she has an exclusive contract. Until the contract expires, this model can't be signed by anyone else.`, HttpStatus.NOT_ACCEPTABLE);
+            }
+        
+            // If the model has an open contract, proceed to contract signature and agreement regardless of the vendor's contract
+            if (photographer.type_of_contract === TypeOfContract.OPEN_CONTRACT) {
+              // Proceed to contract signature and agreement
+              const contract = new Contracts();
+              contract.vendor = vendor.brandname;
+              contract.photographer = photographer.username;
+              contract.contract_worth = contractdto.contract_worth;
+              contract.contract_duration = contractdto.contract_duration;
+              contract.type_of_contract = contractdto.type_of_contract;
+              contract.commence_date = new Date();
+              contract.expiration_date = this.expirationdateforcontract(contract.commence_date, contract.contract_duration);
+              contract.contract_validity_number = this.CVN();
+              await this.contractrepository.save(contract);
+        
+              //update the model table and save 
+        
+              photographer.type_of_contract = contractdto.type_of_contract; // Update the contractType in the Model table
+              photographer.is_onContract = true; // Update the is_on_contract field as needed
+              await this.photographerrepository.save(photographer);
+        
+                 //save the notification 
+                 const notification = new Notifications()
+                 notification.account= contract.contract_validity_number
+                 notification.subject="New Contract Signed!"
+                 notification.notification_type=NotificationType.CONTRACT_SIGNED
+                 notification.message=`Hello a contract has been signed between  ${vendor.brandname} and ${photographer.username} for a duration of ${contractdto.contract_duration} worth ${contractdto.contract_worth} which starts ${contract.commence_date} and expires on ${contract.expiration_date}, Thnaks`
+                 await this.notificationrepository.save(notification)
+           
+        
+              const contractresponse: IContractPhotographerResponse = {
+                vendor: contract.vendor,
+                photographer: contract.photographer,
+                contract_duration: contract.contract_duration,
+                contract_worth: contract.contract_worth,
+                type_of_contract: contract.type_of_contract,
+                contract_validity_number: contract.contract_validity_number,
+                commence_date: contract.commence_date,
+                expiration_date: contract.expiration_date,
+              };
+              return contractresponse;
+            }
+        
+            // If the model has an exclusive contract, prevent the contract from being signed
+            if (photographer.type_of_contract === TypeOfContract.EXCLUSIVE_CONTRACT) {
+              throw new HttpException(`Sorry, ${vendor.brandname}, you can't sign a contract with this model ${photographer.username} because she has an exclusive contract. Until the contract expires, this model can't be signed by anyone else.`, HttpStatus.NOT_ACCEPTABLE);
+            }
+        
+            // If the model has no contract, handle the case based on the vendor's contract
+            if (!photographer.type_of_contract) {
+              
+              // Proceed to contract signature and agreement
+              const contract = new Contracts();
+              contract.vendor = vendor.brandname;
+              contract.photographer = photographer.username;
+              contract.contract_worth = contractdto.contract_worth;
+              contract.contract_duration = contractdto.contract_duration;
+              contract.type_of_contract = contractdto.type_of_contract;
+              contract.commence_date = new Date();
+              contract.expiration_date = this.expirationdateforcontract(contract.commence_date, contract.contract_duration);
+              contract.contract_validity_number = this.CVN();
+              await this.contractrepository.save(contract);
+        
+              // ... (existing code)
+        
+              photographer.type_of_contract = contractdto.type_of_contract; // Update the contractType in the Model table
+              photographer.is_onContract = true; // Update the is_on_contract field as needed
+              await this.photographerrepository.save(photographer);
+        
+                 //save the notification 
+                 const notification = new Notifications()
+                 notification.account= contract.contract_validity_number
+                 notification.subject="New Contract Signed!"
+                 notification.notification_type=NotificationType.CONTRACT_SIGNED
+                 notification.message=`Hello a contract has been signed between  ${vendor.brandname} and ${photographer.username} for a duration of ${contractdto.contract_duration} worth ${contractdto.contract_worth} which starts ${contract.commence_date} and expires on ${contract.expiration_date}, Thnaks`
+                 await this.notificationrepository.save(notification)
+           
+        
+              const contractresponse: IContractPhotographerResponse = {
+                vendor: contract.vendor,
+                photographer: contract.photographer,
+                contract_duration: contract.contract_duration,
+                contract_worth: contract.contract_worth,
+                type_of_contract: contract.type_of_contract,
+                contract_validity_number: contract.contract_validity_number,
+                commence_date: contract.commence_date,
+                expiration_date: contract.expiration_date,
+              };
+              return contractresponse;
+            }
+        
+          } catch (error) {
+            throw error;
+          }
         }
-      
       }
-}
-

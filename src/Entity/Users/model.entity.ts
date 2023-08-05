@@ -1,6 +1,6 @@
 import { Column, CreateDateColumn, Double, Entity, Generated, JoinColumn, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Roles } from "../../Enums/roles.enum";
-import { ContractDuration } from "../../Enums/contractDuration.enum";
+import { ContractDuration, TypeOfContract } from "../../Enums/contractDuration.enum";
 import { KindOfModel } from "../../Enums/modelType.enum";
 import { PaymentPlan } from "../../Enums/paymentOption.enum";
 import { UserPostsEntity } from "../Posts/model.post.entity";
@@ -298,6 +298,12 @@ caps_ize:string
 
     @Column({nullable:true})
     reset_link_exptime:Date
+
+    @Column({type:"boolean", nullable:true})
+    is_onContract:boolean
+
+    @Column({nullable:true,type:"enum", enum:TypeOfContract})
+    type_of_contract:TypeOfContract
 
     @OneToMany(()=>Comments,comment=>comment.model)
     comments:Comments[]

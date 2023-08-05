@@ -1,19 +1,20 @@
-import { Controller, Get, Param } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Patch } from "@nestjs/common";
 import { AdminService } from "./admin.service";
-import { ICustomerResponse } from "../customers/customers.interface";
+import { ICustomer, ICustomerResponse } from "../customers/customers.interface";
 import { IVendorResponse } from "../vendor/vendor.interface";
 import { IPhotographer } from "../photographers/photo.interface";
 import { IModel } from "../model/model.interface";
 import { INotification } from "../../Entity/Notification/notification.entity";
 import { IContract } from "../../Entity/contracts.entity";
+import { VerifyAccountDto } from "./admin.dto";
 
 @Controller('admin')
 export class AdminController{
     constructor(private readonly adminservice:AdminService){}
 
     //get all customer
-    @Get('/allcustomers')
-    async AdminGetAllCustomer():Promise<ICustomerResponse[]>{
+    @Get('/customers')
+    async AdminGetAllCustomer():Promise<ICustomer[]>{
         try {
             const customers= await this.adminservice.AdminGetAllCustomers()
         return customers
@@ -51,7 +52,7 @@ export class AdminController{
 
 
       //get one vendor
-      @Get('/onecustomer/:vendorid')
+      @Get('/onevendor/:vendorid')
       async AdminGetOneVendor(@Param('vendorid')vendorid:string):Promise<IVendorResponse>{
         try {
             const vendor= await this.adminservice.AdminGetOneVendor(vendorid)
@@ -124,5 +125,53 @@ export class AdminController{
                  
              }
            }
+
+          @Delete('delete/vendor/:vendorid')
+          async deletevendor(@Param('vendorid')vendorid:string):Promise<{message:string}>{
+            return await this.adminservice.deleteVendor(vendorid)
+          }
+
+          @Delete('delete/model/:modelid')
+          async deleteModel(@Param('modelid')modelid:string):Promise<{message:string}>{
+            return await this.adminservice.deleteModel(modelid)
+          }
+
+          @Delete('delete/photographer/:photoid')
+          async deletePhotographer(@Param('photoid')photoid:string):Promise<{message:string}>{
+            return await this.adminservice.deletePhotogrpher(photoid)
+          }
+
+          @Delete('delete/customer/:customerid')
+          async deleteCustomer(@Param('customerid')customerid:string):Promise<{message:string}>{
+            return await this.adminservice.deleteCustomer(customerid)
+          }
+
+          
+
+          //verify accounts 
+
+          @Patch('verify/model/:modelid')
+          async VerifyModelAccount(@Body()dto:VerifyAccountDto,@Param('modelid')modelid:string):Promise<{message:string}>{
+            return await this.adminservice.VerifyModelAccount(dto,modelid)
+            
+          }
+
+          @Patch('verify/vendor/:modelid')
+          async VerifyVendorAccount(@Body()dto:VerifyAccountDto,@Param('modelid')modelid:string):Promise<{message:string}>{
+            return await this.adminservice.VerifyVendorAccount(dto,modelid)
+            
+          }
+
+          @Patch('verify/pgotographer/:modelid')
+          async VerifyPhotographerAccount(@Body()dto:VerifyAccountDto,@Param('modelid')modelid:string):Promise<{message:string}>{
+            return await this.adminservice.VerifyPhotographerAccount(dto,modelid)
+            
+          }
+
+          @Patch('verify/customer/:modelid')
+          async VerifyCustomerAccount(@Body()dto:VerifyAccountDto,@Param('modelid')modelid:string):Promise<{message:string}>{
+            return await this.adminservice.VerifyCustomerAccount(dto,modelid)
+            
+          }
 }
 

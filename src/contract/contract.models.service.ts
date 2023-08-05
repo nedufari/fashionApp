@@ -9,7 +9,7 @@ import { ModelEntity } from "../Entity/Users/model.entity";
 import { AcceptContractTermoinationRequestDto, AcceptContractofferDto, ContractDto, CounterOfferDto, ExtendContractDto, TerminateDto } from "./cotracts.dto";
 import { IVendor } from "../Users/vendor/vendor.interface";
 import { IModel } from "../Users/model/model.interface";
-import { ContractDuration } from "../Enums/contractDuration.enum";
+import { ContractDuration, TypeOfContract } from "../Enums/contractDuration.enum";
 import { customAlphabet, nanoid } from "nanoid";
 import { Notifications } from "../Entity/Notification/notification.entity";
 import { NotificationType } from "../Enums/notificationTypes.enum";
@@ -30,60 +30,122 @@ export class ContractModelService{
     }
  
 
+    async hasExclusiveContract(modelId: string): Promise<boolean> {
+      const exclusiveContract = await this.contractrepository.findOne({
+        where: { model: modelId, type_of_contract: TypeOfContract.EXCLUSIVE_CONTRACT },
+      });
+      return !!exclusiveContract;
+    }
+    
 
 
+async ContractBtwnModelandVendor(vendorid: string, modelid: string, contractdto: ContractDto): Promise<IContractModelResponse> {
+  try {
+    const vendor = await this.vendorrepository.findOne({where:{VendorID:vendorid}})
+    if (!vendor) throw new HttpException(`you are not a legitimate vendor on this platform and therefore you cannot proceed with this contract agreement`,HttpStatus.NOT_FOUND)
 
+    // Check if the model has a contract
+    const model = await this.modelrepository.findOne({ where: { ModelID: modelid } });
+    if (!model) throw new HttpException(`you are not a legitimate model on this platform and therefore you cannot proceed with this contract agreement`, HttpStatus.NOT_FOUND);
 
-      //contract between vendor and model 
-      async ContractBtwnModelandVendor(vendorid:string, modelid:string, contractdto:ContractDto):Promise<IContractModelResponse>{
-        try {
-          //verify the ids of both the model and the vendor 
-          const vendor = await this.vendorrepository.findOne({where:{VendorID:vendorid}})
-          if (!vendor) throw new HttpException(`you are not a legitimate vendor on this platform and therefore you cannot proceed with this contract agreement`,HttpStatus.NOT_FOUND)
-          const model = await this.modelrepository.findOne({where:{ModelID:modelid}})
-          if (!model) throw new HttpException(`you are not a legitimate model on this platform and therefore you cannot proceed with this contract agreement`,HttpStatus.NOT_FOUND)
-  
-          //proceed to contract signature and agreement 
-          const contract = new Contracts()
-          contract.vendor= vendor.brandname
-          contract.model=model.username
-          contract.contract_worth=contractdto.contract_worth
-          contract.contract_duration=contractdto.contract_duration
-          contract.commence_date= new Date()
-          contract.expiration_date=this.expirationdateforcontract(contract.commence_date,contract.contract_duration),
-          contract.contract_validity_number=this.CVN()
-          await this.contractrepository.save(contract)
-  
-          //save the notification 
-        const notification = new Notifications()
-        notification.account= contract.contract_validity_number
-        notification.subject="New Contract Signed!"
-        notification.notification_type=NotificationType.CONTRACT_SIGNED
-        notification.message=`Hello a contract has been signed between  ${vendor.brandname} and ${model.username} for a duration of ${contractdto.contract_duration} worth ${contractdto.contract_worth} which starts ${contract.commence_date} and expires on ${contract.expiration_date}, Thnaks`
-        await this.notificationrepository.save(notification)
-  
-        //update the model table
+    if (model.type_of_contract === TypeOfContract.EXCLUSIVE_CONTRACT && contractdto.type_of_contract === TypeOfContract.EXCLUSIVE_CONTRACT) {
+      throw new HttpException(`Sorry, ${vendor.brandname}, you can't sign a contract with this model ${model.username} because she has an exclusive contract. Until the contract expires, this model can't be signed by anyone else.`, HttpStatus.NOT_ACCEPTABLE);
+    }
 
-         model.is_on_contract=true
-         await this.modelrepository.save(model)
-  
-         //response 
-         const contractresponse:IContractModelResponse={
-          vendor:contract.vendor,
-          model:contract.model,
-          contract_duration:contract.contract_duration,
-          contract_worth:contract.contract_worth,
-          contract_validity_number:contract.contract_validity_number,
-          commence_date:contract.commence_date,
-          expiration_date:contract.expiration_date,
-         };
-         return contractresponse
-         
-        } catch (error) {
-          throw error
-        }
+    // If the model has an open contract, proceed to contract signature and agreement regardless of the vendor's contract
+    if (model.type_of_contract === TypeOfContract.OPEN_CONTRACT) {
+      // Proceed to contract signature and agreement
+      const contract = new Contracts();
+      contract.vendor = vendor.brandname;
+      contract.model = model.username;
+      contract.contract_worth = contractdto.contract_worth;
+      contract.contract_duration = contractdto.contract_duration;
+      contract.type_of_contract = contractdto.type_of_contract;
+      contract.commence_date = new Date();
+      contract.expiration_date = this.expirationdateforcontract(contract.commence_date, contract.contract_duration);
+      contract.contract_validity_number = this.CVN();
+      await this.contractrepository.save(contract);
+
+      //update the model table and save 
+
+      model.type_of_contract = contractdto.type_of_contract; // Update the contractType in the Model table
+      model.is_onContract = true; // Update the is_on_contract field as needed
+      await this.modelrepository.save(model);
+
+         //save the notification 
+         const notification = new Notifications()
+         notification.account= contract.contract_validity_number
+         notification.subject="New Contract Signed!"
+         notification.notification_type=NotificationType.CONTRACT_SIGNED
+         notification.message=`Hello a contract has been signed between  ${vendor.brandname} and ${model.username} for a duration of ${contractdto.contract_duration} worth ${contractdto.contract_worth} which starts ${contract.commence_date} and expires on ${contract.expiration_date}, Thnaks`
+         await this.notificationrepository.save(notification)
+   
+
+      const contractresponse: IContractModelResponse = {
+        vendor: contract.vendor,
+        model: contract.model,
+        contract_duration: contract.contract_duration,
+        contract_worth: contract.contract_worth,
+        type_of_contract: contract.type_of_contract,
+        contract_validity_number: contract.contract_validity_number,
+        commence_date: contract.commence_date,
+        expiration_date: contract.expiration_date,
+      };
+      return contractresponse;
+    }
+
+    // If the model has an exclusive contract, prevent the contract from being signed
+    if (model.type_of_contract === TypeOfContract.EXCLUSIVE_CONTRACT) {
+      throw new HttpException(`Sorry, ${vendor.brandname}, you can't sign a contract with this model ${model.username} because she has an exclusive contract. Until the contract expires, this model can't be signed by anyone else.`, HttpStatus.NOT_ACCEPTABLE);
+    }
+
+    // If the model has no contract, handle the case based on the vendor's contract
+    if (!model.type_of_contract) {
       
-      }
+      // Proceed to contract signature and agreement
+      const contract = new Contracts();
+      contract.vendor = vendor.brandname;
+      contract.model = model.username;
+      contract.contract_worth = contractdto.contract_worth;
+      contract.contract_duration = contractdto.contract_duration;
+      contract.type_of_contract = contractdto.type_of_contract;
+      contract.commence_date = new Date();
+      contract.expiration_date = this.expirationdateforcontract(contract.commence_date, contract.contract_duration);
+      contract.contract_validity_number = this.CVN();
+      await this.contractrepository.save(contract);
+
+      // ... (existing code)
+
+      model.type_of_contract = contractdto.type_of_contract; // Update the contractType in the Model table
+      model.is_onContract = true; // Update the is_on_contract field as needed
+      await this.modelrepository.save(model);
+
+         //save the notification 
+         const notification = new Notifications()
+         notification.account= contract.contract_validity_number
+         notification.subject="New Contract Signed!"
+         notification.notification_type=NotificationType.CONTRACT_SIGNED
+         notification.message=`Hello a contract has been signed between  ${vendor.brandname} and ${model.username} for a duration of ${contractdto.contract_duration} worth ${contractdto.contract_worth} which starts ${contract.commence_date} and expires on ${contract.expiration_date}, Thnaks`
+         await this.notificationrepository.save(notification)
+   
+
+      const contractresponse: IContractModelResponse = {
+        vendor: contract.vendor,
+        model: contract.model,
+        contract_duration: contract.contract_duration,
+        contract_worth: contract.contract_worth,
+        type_of_contract: contract.type_of_contract,
+        contract_validity_number: contract.contract_validity_number,
+        commence_date: contract.commence_date,
+        expiration_date: contract.expiration_date,
+      };
+      return contractresponse;
+    }
+
+  } catch (error) {
+    throw error;
+  }
+}
 
 
       //contract extention from vendor to model and counter offer from the model to the contract and also accepting or declining the offer
@@ -103,6 +165,9 @@ export class ContractModelService{
         contract.contract_duration_extension_offer=extentiondto.extended_contract_duration_offer
         contract.contract_worth_extension_offer=extentiondto.extended_contract_worth_offer
         await this.contractrepository.save(contract)
+
+        //send request mail to model 
+        
 
            //save the notification 
            const notification = new Notifications()
@@ -190,6 +255,7 @@ export class ContractModelService{
             vendor:contract.vendor,
             model:contract.model,
             contract_duration:contract.contract_duration,
+            type_of_contract:contract.type_of_contract,
             contract_worth:contract.contract_worth,
             contract_validity_number:contract.contract_validity_number,
             commence_date:contract.commence_date,
@@ -280,6 +346,7 @@ export class ContractModelService{
             model:contract.model,
             contract_duration:contract.contract_duration,
             contract_worth:contract.contract_worth,
+            type_of_contract:contract.type_of_contract,
             contract_validity_number:contract.contract_validity_number,
             commence_date:contract.commence_date,
             expiration_date:contract.expiration_date,

@@ -282,8 +282,7 @@ export class AuthService {
       notification.message=`Hello ${customer.username}, your customer has been created. please complete your profile `
       await this.notificationrepository.save(notification)
 
-      await this.mailerservice.SendWelcomeEmail(customer.email,customer.username)
-
+     
       return {message:"new coustomer signed up and verification otp has been sent "}
     
     } catch (error) {
@@ -311,9 +310,10 @@ export class AuthService {
     if (customer.email !== findemail.email) throw new HttpException("this email does not match the customer recod we have ", HttpStatus.NOT_FOUND)
     else{
       customer.is_logged_in=true
-      customer.is_verified=true
       customer.is_active=true
-    }
+      customer.is_verified=true
+
+    
 
      const notification = new Notifications()
       notification.account= customer.id,
@@ -322,11 +322,17 @@ export class AuthService {
       notification.message=`Hello ${customer.username}, otp sent to this email for verification `
       await this.notificationrepository.save(notification)
 
+      await this.mailerservice.SendWelcomeEmail(customer.email,customer.username)
+
+      await this.customerrepository.save(customer)
+
+
 
 
     const accessToken= await this.signToken(customer.id,customer.email)
 
     return {isValid:true, accessToken}
+    }
 
 
   }
@@ -497,7 +503,7 @@ export class AuthService {
       customer.is_logged_in=true
       customer.is_verified=true
       customer.is_active=true
-    }
+    
 
      const notification = new Notifications()
       notification.account= customer.id,
@@ -506,11 +512,14 @@ export class AuthService {
       notification.message=`Hello ${customer.username}, otp sent to this email for verification `
       await this.notificationrepository.save(notification)
 
+      await this.mailerservice.SendWelcomeEmail(customer.email,customer.username)
 
+      await this.customerrepository.save(customer)
 
     const accessToken= await this.signToken(customer.id,customer.email)
 
     return {isValid:true, accessToken}
+    }
 
 
   }
@@ -676,7 +685,7 @@ export class AuthService {
       customer.is_logged_in=true
       customer.is_verified=true
       customer.is_active=true
-    }
+    
 
      const notification = new Notifications()
       notification.account= customer.id,
@@ -685,11 +694,15 @@ export class AuthService {
       notification.message=`Hello ${customer.username}, otp sent to this email for verification `
       await this.notificationrepository.save(notification)
 
+      await this.mailerservice.SendWelcomeEmail(customer.email,customer.username)
+
+      await this.customerrepository.save(customer)
 
 
     const accessToken= await this.signToken(customer.id,customer.email)
 
     return {isValid:true, accessToken}
+    }
 
 
   }
@@ -858,7 +871,7 @@ export class AuthService {
       customer.is_logged_in=true
       customer.is_verified=true
       customer.is_active=true
-    }
+    
 
      const notification = new Notifications()
       notification.account= customer.id,
@@ -867,11 +880,14 @@ export class AuthService {
       notification.message=`Hello ${customer.username}, otp sent to this email for verification `
       await this.notificationrepository.save(notification)
 
+      await this.mailerservice.SendWelcomeEmail(customer.email,customer.username)
 
+      await this.customerrepository.save(customer)
 
     const accessToken= await this.signToken(customer.id,customer.email)
 
     return {isValid:true, accessToken}
+    }
 
 
   }
@@ -1035,7 +1051,7 @@ export class AuthService {
       customer.is_logged_in=true
       customer.is_verified=true
       customer.is_active=true
-    }
+    
 
      const notification = new Notifications()
       notification.account= customer.id,
@@ -1044,11 +1060,16 @@ export class AuthService {
       notification.message=`Hello ${customer.username}, otp sent to this email for verification `
       await this.notificationrepository.save(notification)
 
+      await this.mailerservice.SendWelcomeEmail(customer.email,customer.username)
+
+      await this.customerrepository.save(customer)
+
 
 
     const accessToken= await this.signToken(customer.id,customer.email)
 
     return {isValid:true, accessToken}
+    }
 
 
   }

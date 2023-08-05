@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { CustomerEntity } from "../../Entity/Users/customer.entity";
 import { AdminEntityRepository, CustomerEntityRepository, ModelEntityRepository, NotificationsRepository, OtpRepository, PhotographerEntityRepository, VendorEntityRepository } from "../../auth/auth.repository";
-import { ICustomerResponse } from "../customers/customers.interface";
+import { ICustomer, ICustomerResponse } from "../customers/customers.interface";
 import { AdminEntity } from "../../Entity/Users/admin.entity";
 import { vendorEntity } from "../../Entity/Users/vendor.entity";
 import { IVendorResponse } from "../vendor/vendor.interface";
@@ -15,6 +15,8 @@ import { ContractRepository } from "../../contract/contrct.repository";
 import { IPhotographer } from "../photographers/photo.interface";
 import { IModel } from "../model/model.interface";
 import { INotification, Notifications } from "../../Entity/Notification/notification.entity";
+import { NotificationType } from "../../Enums/notificationTypes.enum";
+import { VerifyAccountDto } from "./admin.dto";
 
 @Injectable()
 export class AdminService{
@@ -28,7 +30,7 @@ export class AdminService{
     @InjectRepository(Notifications)private notificationrepository:NotificationsRepository,){}
 
     //get all customers
-    async AdminGetAllCustomers():Promise<ICustomerResponse[]>{
+    async AdminGetAllCustomers():Promise<ICustomer[]>{
         try {
              //verify admin 
         // const admin = this.adminrepository.findOne({where:{id:id}})
@@ -45,7 +47,7 @@ export class AdminService{
             replies: customer.replies,
           }));
 
-          return customerResponses 
+          return customers 
             
         } catch (error) {
             throw error
@@ -240,6 +242,227 @@ export class AdminService{
         }
         
     }
+
+    ///delete tables and records 
+
+    async deleteModel(modelid:string):Promise<{message:string}>{
+        try {
+            //verify admin 
+            // const admin = this.adminrepository.findOne({where:{id:id}})
+            // if (!admin) throw new HttpException(`admin with ${id} not found`,HttpStatus.NOT_FOUND)
+
+            const findmodel =  await this.modelrepository.findOne({where:{ModelID:modelid}})
+            if (!findmodel)throw new HttpException(`model with the id ${modelid} does not exist`,HttpStatus.NOT_FOUND)
+
+            await this.modelrepository.remove(findmodel)
+            const notification = new Notifications()
+            notification.account= modelid
+            notification.subject="Record deleted!"
+            notification.notification_type=NotificationType.account_deleted
+            notification.message=`the entire account of ${modelid} has been deleted by the admin`
+            await this.notificationrepository.save(notification)
+
+            return {message:`${findmodel.username} has been deleted as a model in walkway successfully`}
+            
+        } catch (error) {
+            throw error
+            
+        }
+    }
+
+    async deleteVendor(vendorid:string):Promise<{message:string}>{
+        try {
+            //verify admin 
+            // const admin = this.adminrepository.findOne({where:{id:id}})
+            // if (!admin) throw new HttpException(`admin with ${id} not found`,HttpStatus.NOT_FOUND)
+
+            const findvendor =  await this.vendorrepository.findOne({where:{VendorID:vendorid}})
+            if (!findvendor)throw new HttpException(`vendor with the id ${vendorid} does not exist`,HttpStatus.NOT_FOUND)
+
+            await this.vendorrepository.remove(findvendor)
+            const notification = new Notifications()
+            notification.account= vendorid
+            notification.subject="Record deleted!"
+            notification.notification_type=NotificationType.account_deleted
+            notification.message=`the entire account of ${vendorid} has been deleted by the admin`
+            await this.notificationrepository.save(notification)
+            return {message:`${findvendor.brandname} has been deleted as a vendor on walkways successfully`}
+            
+        } catch (error) {
+            
+        }
+    }
+
+    async deletePhotogrpher(photoid:string):Promise<{message:string}>{
+        try {
+            //verify admin 
+            // const admin = this.adminrepository.findOne({where:{id:id}})
+            // if (!admin) throw new HttpException(`admin with ${id} not found`,HttpStatus.NOT_FOUND)
+
+            const findphotographer =  await this.photorepository.findOne({where:{PhotographerID:photoid}})
+            if (!findphotographer)throw new HttpException(`photographer with the id ${photoid} does not exist`,HttpStatus.NOT_FOUND)
+
+            await this.photorepository.remove(findphotographer)
+            const notification = new Notifications()
+            notification.account= photoid
+            notification.subject="Record deleted!"
+            notification.notification_type=NotificationType.account_deleted
+            notification.message=`the entire account of ${photoid} has been deleted by the admin`
+            await this.notificationrepository.save(notification)
+            return {message:`${findphotographer.username} has been deleted as a photographer on walkway successfully`}
+            
+        } catch (error) {
+            
+        }
+    }
+
+    async deleteCustomer(customerid:string):Promise<{message:string}>{
+        try {
+            //verify admin 
+            // const admin = this.adminrepository.findOne({where:{id:id}})
+            // if (!admin) throw new HttpException(`admin with ${id} not found`,HttpStatus.NOT_FOUND)
+
+            const findcustomer =  await this.customerrepository.findOne({where:{CustomerID:customerid}})
+            if (!findcustomer)throw new HttpException(`customer with the id ${customerid} does not exist`,HttpStatus.NOT_FOUND)
+
+            await this.customerrepository.remove(findcustomer)
+               //save the notification 
+            const notification = new Notifications()
+            notification.account= customerid
+            notification.subject="Record deleted!"
+            notification.notification_type=NotificationType.account_deleted
+            notification.message=`the entire account of ${customerid} has been deleted by the admin`
+            await this.notificationrepository.save(notification)
+            return {message:` ${findcustomer.username} has been deleted as a customer on walkways successfully`}
+  
+            
+        } catch (error) {
+            throw error
+            
+        }
+    }
+
+
+    //verify various accounts before 
+
+    async VerifyModelAccount(dto:VerifyAccountDto, modelid:string):Promise<{message:string}>{
+        try {
+            //verify admin 
+            // const admin = this.adminrepository.findOne({where:{id:id}})
+            // if (!admin) throw new HttpException(`admin with ${id} not found`,HttpStatus.NOT_FOUND)
+
+            const findmodel =  await this.modelrepository.findOne({where:{ModelID:modelid}})
+            if (!findmodel)throw new HttpException(`model with the id ${modelid} does not exist`,HttpStatus.NOT_FOUND)
+
+            if (dto){
+                findmodel.is_verified= true 
+                await this.modelrepository.save(findmodel)
+            }
+            const notification = new Notifications()
+            notification.account= modelid
+            notification.subject="Account Verified!"
+            notification.notification_type=NotificationType.account_verified
+            notification.message=`the account of ${findmodel.username} has been verified by the admin`
+            await this.notificationrepository.save(notification)
+           
+            return {message:`${findmodel.username} has been verified as a model in walkway`}
+            
+        } catch (error) {
+            throw error
+            
+        }
+        
+    }
+
+    async VerifyPhotographerAccount(dto:VerifyAccountDto, photolid:string):Promise<{message:string}>{
+        try {
+            //verify admin 
+            // const admin = this.adminrepository.findOne({where:{id:id}})
+            // if (!admin) throw new HttpException(`admin with ${id} not found`,HttpStatus.NOT_FOUND)
+
+            const findphotographer =  await this.photorepository.findOne({where:{PhotographerID:photolid}})
+            if (!findphotographer)throw new HttpException(`photographer with the id ${photolid} does not exist`,HttpStatus.NOT_FOUND)
+
+            if (dto){
+                findphotographer.is_verified= true 
+                await this.photorepository.save(findphotographer)
+            }
+            const notification = new Notifications()
+            notification.account= photolid
+            notification.subject="Account Verified!"
+            notification.notification_type=NotificationType.account_verified
+            notification.message=`the account of ${findphotographer.username} has been verified by the admin`
+            await this.notificationrepository.save(notification)
+            return {message:`${findphotographer.username} has been verified as a photographer in walkway`}
+            
+            
+        } catch (error) {
+            throw error
+            
+        }
+        
+    }
+
+    async VerifyCustomerAccount(dto:VerifyAccountDto, customerid:string):Promise<{message:string}>{
+        try {
+            //verify admin 
+            // const admin = this.adminrepository.findOne({where:{id:id}})
+            // if (!admin) throw new HttpException(`admin with ${id} not found`,HttpStatus.NOT_FOUND)
+
+            const findcustomer =  await this.customerrepository.findOne({where:{CustomerID:customerid}})
+            if (!findcustomer)throw new HttpException(`vendor with the id ${customerid} does not exist`,HttpStatus.NOT_FOUND)
+
+            if (dto){
+                findcustomer.is_verified= true 
+                await this.customerrepository.save(findcustomer)
+            }
+            const notification = new Notifications()
+            notification.account= customerid
+            notification.subject="Account Verified!"
+            notification.notification_type=NotificationType.account_verified
+            notification.message=`the account of ${findcustomer.username} has been verified by the admin`
+            await this.notificationrepository.save(notification)
+            return {message:`${findcustomer.username} has been verified as a customer in walkway`}
+            
+        } catch (error) {
+            throw error
+            
+        }
+        
+    }
+
+    async VerifyVendorAccount(dto:VerifyAccountDto, vendorid:string):Promise<{message:string}>{
+        try {
+            //verify admin 
+            // const admin = this.adminrepository.findOne({where:{id:id}})
+            // if (!admin) throw new HttpException(`admin with ${id} not found`,HttpStatus.NOT_FOUND)
+
+            const findvendor =  await this.vendorrepository.findOne({where:{VendorID:vendorid}})
+            if (!findvendor)throw new HttpException(`vendor with the id ${vendorid} does not exist`,HttpStatus.NOT_FOUND)
+
+            if (dto){
+                findvendor.is_verified= true 
+                await this.vendorrepository.save(findvendor)
+            }
+            const notification = new Notifications()
+            notification.account= vendorid
+            notification.subject="Account Verified!"
+            notification.notification_type=NotificationType.account_verified
+            notification.message=`the account of ${findvendor.brandname} has been verified by the admin`
+            await this.notificationrepository.save(notification)
+            return {message:`${findvendor.username} has been verified as a model in walkway`}
+            
+
+
+            
+        } catch (error) {
+            throw error
+            
+        }
+        
+    }
+
+    
 
 
 

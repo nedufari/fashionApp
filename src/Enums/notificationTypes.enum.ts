@@ -18,6 +18,7 @@ export enum NotificationType{
     RESET_PASSWORD="reset_password",
     CHANGE_PASSWORD="change_password",
     userinfo_updated="userindo_updated",
-    user_deleted="user_deleted",
+    account_deleted="account_deleted",
+    account_verified="account_verified",
 
 }

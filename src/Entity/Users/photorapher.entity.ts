@@ -4,6 +4,7 @@ import { Roles } from "../../Enums/roles.enum"
 import { IPhotographer } from "../../Users/photographers/photo.interface"
 import { Comments } from "../Activities/comment.entity"
 import { Replies } from "../Activities/reply.entity"
+import { TypeOfContract } from "../../Enums/contractDuration.enum"
 
 @Entity()
 export class PhotographerEntity implements IPhotographer{
@@ -129,6 +130,12 @@ export class PhotographerEntity implements IPhotographer{
 
     @Column({nullable:true})
     reset_link_exptime:Date
+
+    @Column({type:"boolean", nullable:true})
+    is_onContract:boolean
+
+    @Column({nullable:true,type:"enum", enum:TypeOfContract})
+    type_of_contract:TypeOfContract
 
     @OneToMany(()=>Comments,comment=>comment.photographer)
     comments:Comments[]

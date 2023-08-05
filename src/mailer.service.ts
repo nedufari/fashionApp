@@ -279,4 +279,10 @@ export class MailService{
 
   await this.mailservice.sendMail({to:email,subject,html:content})
     }
+
+
+
+    
 }
+
+

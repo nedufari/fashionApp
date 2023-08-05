@@ -5,3 +5,8 @@ export enum ContractDuration{
     ONE_YEAR="one_year"
 }
 
+export enum TypeOfContract{
+    EXCLUSIVE_CONTRACT="exclusive_contract",
+    OPEN_CONTRACT="open_contract"
+}
+

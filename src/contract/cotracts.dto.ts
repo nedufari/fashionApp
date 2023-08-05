@@ -1,5 +1,5 @@
 import { IsBoolean, IsEnum, IsString } from "class-validator";
-import { ContractDuration } from "../Enums/contractDuration.enum";
+import { ContractDuration, TypeOfContract } from "../Enums/contractDuration.enum";
 
 export class ContractDto{
     
@@ -9,6 +9,9 @@ export class ContractDto{
 
     @IsEnum(ContractDuration)
     contract_duration:ContractDuration
+
+    @IsEnum(TypeOfContract)
+    type_of_contract:TypeOfContract
 
 }
 
