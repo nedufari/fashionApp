@@ -17,6 +17,8 @@ import { Notifications } from '../Entity/Notification/notification.entity';
 import { UserOtp } from '../Entity/userotp.entity';
 import { ModelEntity } from '../Entity/Users/model.entity';
 import { MailService } from '../mailer.service';
+import { Comments } from '../Entity/Activities/comment.entity';
+import { Replies } from '../Entity/Activities/reply.entity';
 
 @Module({
   providers: [JwtGuard, RolesGuard, JwtStrategy, AuthService,MailService],
@@ -29,7 +31,9 @@ import { MailService } from '../mailer.service';
       AdminEntity,
       Notifications,
       UserOtp,
-      ModelEntity     
+      ModelEntity,
+      Comments,
+      Replies,    
     ]),
     JwtModule.registerAsync({
         useFactory:()=>({

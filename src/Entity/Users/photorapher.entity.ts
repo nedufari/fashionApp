@@ -5,6 +5,7 @@ import { IPhotographer } from "../../Users/photographers/photo.interface"
 import { Comments } from "../Activities/comment.entity"
 import { Replies } from "../Activities/reply.entity"
 import { TypeOfContract } from "../../Enums/contractDuration.enum"
+import { VendorPostsEntity } from "../Posts/vendor.post.entity"
 
 @Entity()
 export class PhotographerEntity implements IPhotographer{
@@ -142,5 +143,8 @@ export class PhotographerEntity implements IPhotographer{
 
     @OneToMany(()=>Replies,reply=>reply.photographer)
     replies:Replies[]
+
+    @OneToMany(()=>VendorPostsEntity,(vendorPost)=>vendorPost.creditedPhotographer)
+    vendorPosts:VendorPostsEntity[]
 
 }

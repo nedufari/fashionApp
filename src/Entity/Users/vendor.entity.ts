@@ -4,6 +4,7 @@ import { Roles } from "../../Enums/roles.enum"
 import { IVendor } from "../../Users/vendor/vendor.interface"
 import { Comments } from "../Activities/comment.entity"
 import { Replies } from "../Activities/reply.entity"
+import { VendorPostsEntity } from "../Posts/vendor.post.entity"
 
 @Entity()
 export class vendorEntity implements IVendor{
@@ -119,5 +120,8 @@ export class vendorEntity implements IVendor{
 
     @OneToMany(()=>Replies,reply=>reply.vendor)
     replies:Replies[]
+
+    @OneToMany(()=>VendorPostsEntity,(vendorPost)=>vendorPost.owner)
+    myposts:VendorPostsEntity[]
 
 }

@@ -8,7 +8,6 @@ import { vendorEntity } from "../../Entity/Users/vendor.entity";
 import { IVendorResponse } from "../vendor/vendor.interface";
 import { PhotographerEntity } from "../../Entity/Users/photorapher.entity";
 import { ModelEntity } from "../../Entity/Users/model.entity";
-import { UserPostsEntity } from "../../Entity/Posts/model.post.entity";
 import { UserOtp } from "../../Entity/userotp.entity";
 import { Contracts, IContract } from "../../Entity/contracts.entity";
 import { ContractRepository } from "../../contract/contrct.repository";

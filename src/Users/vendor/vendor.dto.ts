@@ -5,7 +5,7 @@
 // like 
 
 
-import { IsBoolean, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength } from "class-validator";
+import { IsArray, IsBoolean, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength } from "class-validator";
 import { KindOfModel } from "../../Enums/modelType.enum";
 import { PaymentPlan } from "../../Enums/paymentOption.enum";
 import { ContractDuration } from "../../Enums/contractDuration.enum";
@@ -39,9 +39,9 @@ export class VendorMakePostDto{
     @IsNotEmpty()
     caption:string
 
-    @IsString()
-    @IsOptional({message:'you can either post a video file or any amount of predefined images '})
-    media:string
+    @IsArray()
+    @IsOptional({ message: 'you can either post a video file or any amount of predefined images' })
+    media: string[];
 }
 
 // update post
@@ -50,13 +50,11 @@ export class VendorUpdatePostDto{
     @IsOptional()
     caption:string
 
-    @IsString()
-    @IsOptional({message:'you can either post a video file or any amount of predefined images '})
-    media:string
+    @IsArray()
+    @IsOptional({ message: 'you can either post a video file or any amount of predefined images' })
+    media: string[];
+
 }
-
-
-
 // passowrd change
 export class VendorChangePasswordDto{
     @IsString()

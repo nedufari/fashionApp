@@ -21,4 +21,27 @@ export enum NotificationType{
     account_deleted="account_deleted",
     account_verified="account_verified",
 
+    vendor_Posted="vendor_Posted",
+    vendor_commented="vendor_commented",
+    vendor_Updated_a_post="vendor_Updated_a_post",
+    vendor_deleted_a_post="vendor_deleted_a_post",
+    vendor_liked_a_post="vendor_liked_a_post",
+    vendor_replied_a_comment="vendor_replied_a_comment",
+
+    model_Posted="model_Posted",
+    model_commented="model_commented",
+    model_Updated_a_post="model_Updated_a_post",
+    model_deleted_a_post="model_deleted_a_post",
+    model_liked_a_post="model_liked_a_post",
+    model_replied_a_comment="model_replied_a_comment",
+
+    photographer_Posted="photographer_Posted",
+    photographer_commented="photographer_commented",
+    photographer_Updated_a_post="photographerr_Updated_a_post",
+    photographer_deleted_a_post="photographer_deleted_a_post",
+    photographer_liked_a_post="photographer_liked_a_post",
+    photographer_replied_a_comment="photographer_replied_a_comment",
+
+
+
 }

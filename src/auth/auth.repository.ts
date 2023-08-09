@@ -6,6 +6,9 @@ import { PhotographerEntity } from "../Entity/Users/photorapher.entity";
 import { AdminEntity } from "../Entity/Users/admin.entity";
 import { UserOtp } from "../Entity/userotp.entity";
 import { Notifications } from "../Entity/Notification/notification.entity";
+import { VendorMakePostDto } from "../Users/vendor/vendor.dto";
+import { VendorPostsEntity } from "../Entity/Posts/vendor.post.entity";
+import { Comments } from "../Entity/Activities/comment.entity";
 
 
 @EntityRepository(CustomerEntity)
@@ -41,6 +44,16 @@ export class OtpRepository extends Repository <UserOtp>{
 
 @EntityRepository(Notifications)
 export class NotificationsRepository extends Repository <Notifications>{
+
+}
+
+@EntityRepository(VendorPostsEntity)
+export class VendorMakePostRepository extends Repository <VendorPostsEntity>{
+
+}
+
+@EntityRepository(Comments)
+export class CommentsRepository extends Repository <Comments>{
 
 }
 

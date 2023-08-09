@@ -3,10 +3,10 @@ import { Roles } from "../../Enums/roles.enum";
 import { ContractDuration, TypeOfContract } from "../../Enums/contractDuration.enum";
 import { KindOfModel } from "../../Enums/modelType.enum";
 import { PaymentPlan } from "../../Enums/paymentOption.enum";
-import { UserPostsEntity } from "../Posts/model.post.entity";
 import { IModel } from "../../Users/model/model.interface";
 import { Comments } from "../Activities/comment.entity";
 import { Replies } from "../Activities/reply.entity";
+import { VendorPostsEntity } from "../Posts/vendor.post.entity";
 
 @Entity()
 export class ModelEntity implements IModel{
@@ -310,6 +310,9 @@ caps_ize:string
 
     @OneToMany(()=>Replies,reply=>reply.model)
     replies:Replies[]
+
+    @OneToMany(()=>VendorPostsEntity,(vendorPost)=>vendorPost.creditedModel)
+    vendorPosts:VendorPostsEntity[]
 
     // @OneToMany(()=> UserPostsEntity, (fd:UserPostsEntity)=>fd.owner)
     // posts:UserPostsEntity[]
