@@ -12,10 +12,13 @@ import { Comments } from "../../Entity/Activities/comment.entity";
 import { Replies } from "../../Entity/Activities/reply.entity";
 import { Likes } from "../../Entity/Activities/likes.entity";
 import { VendorService } from "./vendor.service";
+import { VendorPostsEntity } from "../../Entity/Posts/vendor.post.entity";
+import { VendorController } from "./vendor.controller";
+import { ContractsOfffer } from "../../Entity/contractoffer.entity";
 
 @Module({
-    imports:[TypeOrmModule.forFeature([CustomerEntity,AdminEntity,vendorEntity,PhotographerEntity,ModelEntity,Contracts,Notifications,UserOtp,Comments,Replies,Likes])],
-    controllers:[],
+    imports:[TypeOrmModule.forFeature([CustomerEntity,AdminEntity,vendorEntity,PhotographerEntity,ModelEntity,Contracts,ContractsOfffer,Notifications,UserOtp,Comments,Replies,Likes,VendorPostsEntity])],
+    controllers:[VendorController],
     providers:[VendorService]
 })
 export class VendorModule{}

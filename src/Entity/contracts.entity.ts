@@ -1,5 +1,5 @@
 import { Column, Entity, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm"; 
-import { ContractDuration, TypeOfContract } from "../Enums/contractDuration.enum";
+import { ContractDuration, ContractOfferStatus, TypeOfContract } from "../Enums/contractDuration.enum";
 import { vendorEntity } from "./Users/vendor.entity";
 import { PhotographerEntity } from "./Users/photorapher.entity";
 import { ModelEntity } from "./Users/model.entity";
@@ -15,6 +15,7 @@ export interface IContract{
     contract_duration:ContractDuration
     contract_worth:string
     contract_validity_number:string
+    status:ContractOfferStatus
     contract_duration_extension_offer:ContractDuration
     contract_worth_extension_offer:string
     contract_counter_offer_proposed:boolean
@@ -31,6 +32,7 @@ export interface IContractPhotographerResponse{
     contract_duration:ContractDuration
     contract_worth:string
     contract_validity_number:string
+    status:ContractOfferStatus
     vendor:string
     photographer:string
     type_of_contract:TypeOfContract
@@ -42,6 +44,7 @@ export interface IContractModelResponse{
     contract_duration:ContractDuration
     contract_worth:string
     contract_validity_number:string
+    status:ContractOfferStatus
     vendor:string
     model:string
     type_of_contract:TypeOfContract
@@ -74,6 +77,10 @@ export class Contracts implements IContract{
 
     @Column({nullable:false})
     contract_validity_number:string
+
+    @Column({nullable:false,type:"enum", enum:ContractOfferStatus})
+    status:ContractOfferStatus
+
 
     @Column({nullable:true,type:"enum", enum:ContractDuration,})
     contract_duration_extension_offer:ContractDuration

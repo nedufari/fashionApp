@@ -4,6 +4,7 @@ export enum NotificationType{
     SIGNED_UP="signed_up",
     CONTRACT_SIGNED="contract_signed",
     CONTRACT_EXTENSION_OFFER_SENT="contract_extension_sent",
+    CONTRACT_OFFER_SENT="contract_offer_sent",
     CONTRACT_EXTENSION_DECLINED="contract_extension_declined",
     CONTRACT_EXTENSION_ACCEPTED="contract_extension_accepted",
     CONTRACT_EXTENSION_COUNTER_OFFER_SENT="contract_extension_counter_offer_sent",

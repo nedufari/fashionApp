@@ -7,6 +7,7 @@ import { IModel } from "../model/model.interface";
 import { INotification } from "../../Entity/Notification/notification.entity";
 import { IContract } from "../../Entity/contracts.entity";
 import { VerifyAccountDto } from "./admin.dto";
+import { IContractOffer } from "../../Entity/contractoffer.entity";
 
 @Controller('admin')
 export class AdminController{
@@ -120,6 +121,16 @@ export class AdminController{
            async AdminGetAllContracts():Promise<IContract[]>{
              try {
                  const models= await this.adminservice.AdminGetAllContrats()
+                 return models
+             } catch (error) {
+                 
+             }
+           }
+
+           @Get('/contractsoffer')
+           async AdminGetAllContractsOffer():Promise<IContractOffer[]>{
+             try {
+                 const models= await this.adminservice.AdminGetAllContratsOfffer()
                  return models
              } catch (error) {
                  

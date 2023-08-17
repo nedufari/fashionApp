@@ -7,6 +7,11 @@ import { Replies } from "./reply.entity";
 import { vendorEntity } from "../Users/vendor.entity";
 import { VendorPostsEntity } from "../Posts/vendor.post.entity";
 
+export interface ICommentResponses{
+    
+}
+
+
 @Entity()
 export class Comments {
     @PrimaryGeneratedColumn()
@@ -36,3 +41,4 @@ export class Comments {
     @OneToMany(() => Replies, reply => reply.comment)
     replies: Replies[];
 }
+

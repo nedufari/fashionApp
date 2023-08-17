@@ -10,6 +10,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { MailService } from './mailer.service';
 import { AdminModule } from './Users/admin/admin.module';
 import { VendorModule } from './Users/vendor/vendor.module';
+import { ModelModule } from './Users/model/model.module';
 
 
 @Module({
@@ -22,6 +23,7 @@ import { VendorModule } from './Users/vendor/vendor.module';
     ContractModule,
     AdminModule,
     VendorModule,
+    ModelModule,
     MailerModule.forRoot({
       transport:{
         service:"gmail",

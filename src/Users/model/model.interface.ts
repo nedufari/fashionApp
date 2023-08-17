@@ -1,4 +1,4 @@
-import { Comments, ICommentResponses } from "../../Entity/Activities/comment.entity"
+import { Comments } from "../../Entity/Activities/comment.entity"
 import { IRepliesResponses, Replies } from "../../Entity/Activities/reply.entity"
 import { KindOfModel } from "../../Enums/modelType.enum"
 import { PaymentPlan } from "../../Enums/paymentOption.enum"
@@ -104,7 +104,7 @@ export interface IModel{
 export  interface IModelResponseComment{
     digital_photo:string
     username:string 
-    comments: ICommentResponses[]
+    // comments: ICommentResponses[]
     replies:IRepliesResponses[]
 }
 
@@ -183,7 +183,7 @@ export interface IModelResponse{
     kindofmodel:KindOfModel
     paymentplan:PaymentPlan
     ModelID:string
-    comments:ICommentResponses[]
+    // comments:ICommentResponses[]
     replies:IRepliesResponses[]
 
 }

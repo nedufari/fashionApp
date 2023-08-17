@@ -7,11 +7,13 @@ import { ModelEntity } from '../Entity/Users/model.entity';
 import { PhotographerEntity } from '../Entity/Users/photorapher.entity';
 import { ContractModelService } from './contract.models.service';
 import { ContractController } from './contracts.controller';
-import { ContractPhotographerService } from './contract.photographer.service';
+// import { ContractPhotographerService } from './contract.photographer.service';
+import { ContractsOfffer } from '../Entity/contractoffer.entity';
+import { CounterContractsOfffer } from '../Entity/countercontractOffer.entity';
 
 @Module({
-    imports:[TypeOrmModule.forFeature([Contracts,Notifications,vendorEntity,ModelEntity,PhotographerEntity])],
-    providers:[ContractModelService,ContractPhotographerService ],
+    imports:[TypeOrmModule.forFeature([Contracts,Notifications,vendorEntity,ModelEntity,PhotographerEntity,ContractsOfffer,CounterContractsOfffer])],
+    providers:[ContractModelService ],
     controllers:[ContractController]
     
     

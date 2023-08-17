@@ -10,12 +10,13 @@ import { PhotographerEntity } from "../../Entity/Users/photorapher.entity";
 import { ModelEntity } from "../../Entity/Users/model.entity";
 import { UserOtp } from "../../Entity/userotp.entity";
 import { Contracts, IContract } from "../../Entity/contracts.entity";
-import { ContractRepository } from "../../contract/contrct.repository";
+import { ContractOfferRepository, ContractRepository } from "../../contract/contrct.repository";
 import { IPhotographer } from "../photographers/photo.interface";
 import { IModel } from "../model/model.interface";
 import { INotification, Notifications } from "../../Entity/Notification/notification.entity";
 import { NotificationType } from "../../Enums/notificationTypes.enum";
 import { VerifyAccountDto } from "./admin.dto";
+import { ContractsOfffer, IContractOffer } from "../../Entity/contractoffer.entity";
 
 @Injectable()
 export class AdminService{
@@ -26,6 +27,7 @@ export class AdminService{
     @InjectRepository(ModelEntity)private modelrepository:ModelEntityRepository,
     @InjectRepository(UserOtp)private otprepository:OtpRepository,
     @InjectRepository(Contracts)private contractsrepository:ContractRepository,
+    @InjectRepository(ContractsOfffer)private contractoffersrepository:ContractOfferRepository,
     @InjectRepository(Notifications)private notificationrepository:NotificationsRepository,){}
 
     //get all customers
@@ -111,7 +113,7 @@ export class AdminService{
             
           }));
 
-          return vendorResponses 
+          return vendors
             
         } catch (error) {
             throw error
@@ -234,6 +236,20 @@ export class AdminService{
             // const admin = this.adminrepository.findOne({where:{id:id}})
             // if (!admin) throw new HttpException(`admin with ${id} not found`,HttpStatus.NOT_FOUND)
             const notifications= await this.contractsrepository.find()
+            return notifications
+        } catch (error) {
+            throw error
+            
+        }
+        
+    }
+
+    async AdminGetAllContratsOfffer():Promise<IContractOffer[]>{
+        try {
+                //verify admin 
+            // const admin = this.adminrepository.findOne({where:{id:id}})
+            // if (!admin) throw new HttpException(`admin with ${id} not found`,HttpStatus.NOT_FOUND)
+            const notifications= await this.contractoffersrepository.find()
             return notifications
         } catch (error) {
             throw error

@@ -11,6 +11,7 @@ import { Contracts } from "../../Entity/contracts.entity";
 import { ContractRepository } from "../../contract/contrct.repository";
 import { Comments } from "../../Entity/Activities/comment.entity";
 import { MakeCommentDto } from "../model/model.dto";
+import { IContractOffer } from "../../Entity/contractoffer.entity";
 
 @Injectable()
 export class VendorService{
@@ -26,7 +27,7 @@ export class VendorService{
 
 
 private async verifyVendor(vendorid: string): Promise<vendorEntity> {
-    const vendor = await this.vendorrepository.findOne({ where: { VendorID: vendorid, is_verified: true } });
+    const vendor = await this.vendorrepository.findOne({ where: { VendorID: vendorid } });
     if (!vendor) {
         throw new HttpException(`The vendor is not found or not verified on this platform.`, HttpStatus.NOT_FOUND);
     }
@@ -34,7 +35,7 @@ private async verifyVendor(vendorid: string): Promise<vendorEntity> {
 }
 
 private async verifyPhotographer(photographerid: string): Promise<PhotographerEntity> {
-    const photographer = await this.photographerrepository.findOne({ where: { PhotographerID: photographerid, is_verified: true } });
+    const photographer = await this.photographerrepository.findOne({ where: { PhotographerID: photographerid } });
     if (!photographer) {
         throw new HttpException(`The photographer is not found or not verified on this platform.`, HttpStatus.NOT_FOUND);
     }
@@ -42,7 +43,7 @@ private async verifyPhotographer(photographerid: string): Promise<PhotographerEn
 }
 
 private async verifyModel(modelid: string): Promise<ModelEntity> {
-    const model = await this.modelrepository.findOne({ where: { ModelID: modelid, is_verified: true } });
+    const model = await this.modelrepository.findOne({ where: { ModelID: modelid} });
     if (!model) {
         throw new HttpException(`The model is not found or not verified on this platform.`, HttpStatus.NOT_FOUND);
     }
@@ -113,9 +114,12 @@ async MakeCommentOnpost(dto:MakeCommentDto,postid:number,vendorid:string):Promis
 
     return {message:"your comment has been sent "}
 
-    
 
 }
+
+// async get contractoffers():Promise<IContractOffer[]>{
+//     const myoffers 
+// }
 
 
 }

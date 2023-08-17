@@ -10,3 +10,9 @@ export enum TypeOfContract{
     OPEN_CONTRACT="open_contract"
 }
 
+export enum ContractOfferStatus{
+    PENDING = "pending",
+    ACCEPTED = "accepted",
+    DECLINED = "declined"
+}
+

@@ -13,9 +13,11 @@ import { UserOtp } from "../../Entity/userotp.entity";
 import { Comments } from "../../Entity/Activities/comment.entity";
 import { Replies } from "../../Entity/Activities/reply.entity";
 import { Likes } from "../../Entity/Activities/likes.entity";
+import { ContractsOfffer } from "../../Entity/contractoffer.entity";
+import { CounterContractsOfffer } from "../../Entity/countercontractOffer.entity";
 
 @Module({
-    imports:[TypeOrmModule.forFeature([CustomerEntity,AdminEntity,vendorEntity,PhotographerEntity,ModelEntity,Contracts,Notifications,UserOtp,Comments,Replies,Likes])],
+    imports:[TypeOrmModule.forFeature([CustomerEntity,AdminEntity,vendorEntity,PhotographerEntity,ModelEntity,Contracts,Notifications,UserOtp,Comments,Replies,Likes,ContractsOfffer,CounterContractsOfffer])],
     providers:[AdminService],
     controllers:[AdminController]
 })

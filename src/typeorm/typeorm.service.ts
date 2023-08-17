@@ -12,6 +12,9 @@ import { Replies } from "../Entity/Activities/reply.entity";
 import { UserOtp } from "../Entity/userotp.entity";
 import { Notifications } from "../Entity/Notification/notification.entity";
 import { Contracts } from "../Entity/contracts.entity";
+import { VendorPostsEntity } from "../Entity/Posts/vendor.post.entity";
+import { ContractsOfffer } from "../Entity/contractoffer.entity";
+import { CounterContractsOfffer } from "../Entity/countercontractOffer.entity";
 
 @Injectable()
 export class TypeOrmService implements TypeOrmOptionsFactory{
@@ -28,7 +31,7 @@ export class TypeOrmService implements TypeOrmOptionsFactory{
             database:this.configservice.get('DATABASE_NAME'),
             synchronize:true,
             logging:false,
-            entities:[ AdminEntity,ModelEntity,PhotographerEntity,vendorEntity,CustomerEntity,Comments,Likes,Replies,UserOtp,Notifications,Contracts],
+            entities:[ AdminEntity,ModelEntity,PhotographerEntity,vendorEntity,CustomerEntity,Comments,Likes,Replies,UserOtp,Notifications,Contracts,VendorPostsEntity,ContractsOfffer,CounterContractsOfffer],
             migrations:[],
             subscribers:[],
 
