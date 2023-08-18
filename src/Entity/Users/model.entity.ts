@@ -1,6 +1,6 @@
 import { Column, CreateDateColumn, Double, Entity, Generated, JoinColumn, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Roles } from "../../Enums/roles.enum";
-import { ContractDuration, TypeOfContract } from "../../Enums/contractDuration.enum";
+import { ContractDuration, TypeOfContract } from "../../Enums/contract.enum";
 import { KindOfModel } from "../../Enums/modelType.enum";
 import { PaymentPlan } from "../../Enums/paymentOption.enum";
 import { IModel } from "../../Users/model/model.interface";

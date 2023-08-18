@@ -8,10 +8,11 @@ import { ModelEntity } from "../../Entity/Users/model.entity";
 import { Notifications } from "../../Entity/Notification/notification.entity";
 import { VendorMakePostDto } from "./vendor.dto";
 import { Contracts } from "../../Entity/contracts.entity";
-import { ContractRepository } from "../../contract/contrct.repository";
+import { ContractOfferRepository, ContractRepository, CounterContractOfferRepository } from "../../contract/contrct.repository";
 import { Comments } from "../../Entity/Activities/comment.entity";
 import { MakeCommentDto } from "../model/model.dto";
-import { IContractOffer } from "../../Entity/contractoffer.entity";
+import { ContractsOfffer, IContractOffer } from "../../Entity/contractoffer.entity";
+import { CounterContractsOfffer } from "../../Entity/countercontractOffer.entity";
 
 @Injectable()
 export class VendorService{
@@ -22,6 +23,8 @@ export class VendorService{
     @InjectRepository(Notifications)private notificationrepository:NotificationsRepository,
     @InjectRepository(Contracts)private contractrepository:ContractRepository,
     @InjectRepository(Comments)private commentrepository:CommentsRepository,
+    @InjectRepository(ContractsOfffer) private readonly offerripo:ContractOfferRepository,
+    @InjectRepository(CounterContractsOfffer) private readonly counterripo:CounterContractOfferRepository
     
 ){}
 
@@ -117,9 +120,22 @@ async MakeCommentOnpost(dto:MakeCommentDto,postid:number,vendorid:string):Promis
 
 }
 
-// async get contractoffers():Promise<IContractOffer[]>{
-//     const myoffers 
-// }
+async getMyoffers(vendor: string): Promise<ContractsOfffer[]> {
+    const offersForModel = await this.offerripo.find({ where: { vendor: vendor } });
+    if (!offersForModel || offersForModel.length === 0) {
+      throw new HttpException('No offers found for the specified vendor', HttpStatus.NOT_FOUND);
+    }
+    return offersForModel;
+  }
+
+
+async getMyCounteroffers(vendor: string): Promise<CounterContractsOfffer[]> {
+    const offersForModel = await this.counterripo.find({ where: { vendor: vendor } });
+    if (!offersForModel || offersForModel.length === 0) {
+      throw new HttpException('No counter offers found for the specified vendor', HttpStatus.NOT_FOUND);
+    }
+    return offersForModel;
+  }
 
 
 }

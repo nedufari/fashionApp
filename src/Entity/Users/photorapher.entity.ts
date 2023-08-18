@@ -4,7 +4,7 @@ import { Roles } from "../../Enums/roles.enum"
 import { IPhotographer } from "../../Users/photographers/photo.interface"
 import { Comments } from "../Activities/comment.entity"
 import { Replies } from "../Activities/reply.entity"
-import { TypeOfContract } from "../../Enums/contractDuration.enum"
+import { TypeOfContract } from "../../Enums/contract.enum"
 import { VendorPostsEntity } from "../Posts/vendor.post.entity"
 
 @Entity()

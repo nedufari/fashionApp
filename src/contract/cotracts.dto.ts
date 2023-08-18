@@ -1,5 +1,5 @@
 import { IsBoolean, IsEnum, IsString } from "class-validator";
-import { ContractDuration, TypeOfContract } from "../Enums/contractDuration.enum";
+import { ContractDuration, ContractOfferResponse, TypeOfContract } from "../Enums/contract.enum";
 
 export class ContractDto{
     
@@ -28,8 +28,8 @@ export class ExtendContractDto{
 }
 
 export class AcceptContractofferDto{
-    @IsBoolean({message:"you must accept or decline the offer"})
-    isAccepted:boolean
+    @IsEnum(ContractOfferResponse)
+    response:ContractOfferResponse
 }
 
 export class CounterOfferDto{
@@ -42,6 +42,8 @@ export class CounterOfferDto{
     @IsString()
     message:string
     
+    @IsEnum(TypeOfContract)
+    type_of_contract:TypeOfContract
 }
 
 export class TerminateDto{

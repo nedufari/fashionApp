@@ -8,7 +8,7 @@
 import { IsArray, IsBoolean, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength } from "class-validator";
 import { KindOfModel } from "../../Enums/modelType.enum";
 import { PaymentPlan } from "../../Enums/paymentOption.enum";
-import { ContractDuration } from "../../Enums/contractDuration.enum";
+import { ContractDuration } from "../../Enums/contract.enum";
 
 // contract 
 export class VendorContractWithModel{

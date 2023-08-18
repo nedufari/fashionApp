@@ -1,5 +1,5 @@
 import { Column, CreateDateColumn, Entity, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm"; 
-import { ContractDuration, ContractOfferStatus, TypeOfContract } from "../Enums/contractDuration.enum";
+import { ContractDuration, ContractOfferStatus, TypeOfContract } from "../Enums/contract.enum";
 
 
 
@@ -79,9 +79,7 @@ export class CounterContractsOfffer implements ICounterContractOffer{
     @Column({nullable:true})
     model?:string
 
-    @Column({nullable:true,type:"boolean"})
-    isAccepted:boolean //declined or not 
-
+   
 
     @Column({nullable:true,type:"boolean"})
     isCountered:boolean //sent a counter ofer 

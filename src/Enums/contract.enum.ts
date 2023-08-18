@@ -16,3 +16,9 @@ export enum ContractOfferStatus{
     DECLINED = "declined"
 }
 
+export enum ContractOfferResponse{
+    AGREED = "agreed",
+    TURNED_DOWN = "turned_down",
+    
+}
+

@@ -10,10 +10,11 @@ import { ContractController } from './contracts.controller';
 // import { ContractPhotographerService } from './contract.photographer.service';
 import { ContractsOfffer } from '../Entity/contractoffer.entity';
 import { CounterContractsOfffer } from '../Entity/countercontractOffer.entity';
+import { ContractPhotographerService } from './contract.photographer.service';
 
 @Module({
     imports:[TypeOrmModule.forFeature([Contracts,Notifications,vendorEntity,ModelEntity,PhotographerEntity,ContractsOfffer,CounterContractsOfffer])],
-    providers:[ContractModelService ],
+    providers:[ContractModelService,ContractPhotographerService ],
     controllers:[ContractController]
     
     

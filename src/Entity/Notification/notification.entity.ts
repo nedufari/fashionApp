@@ -1,5 +1,5 @@
 import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm"; 
-import { ContractDuration } from "../../Enums/contractDuration.enum";
+import { ContractDuration } from "../../Enums/contract.enum";
 import { NotificationType } from "../../Enums/notificationTypes.enum";
 
 @Entity()

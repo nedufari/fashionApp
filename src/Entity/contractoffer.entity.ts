@@ -1,5 +1,5 @@
 import { Column, CreateDateColumn, Entity, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm"; 
-import { ContractDuration, ContractOfferStatus, TypeOfContract } from "../Enums/contractDuration.enum";
+import { ContractDuration, ContractOfferStatus, TypeOfContract } from "../Enums/contract.enum";
 
 
 

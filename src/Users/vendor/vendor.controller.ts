@@ -1,7 +1,9 @@
-import { Body, Controller, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { VendorService } from './vendor.service';
 import { VendorMakePostDto } from './vendor.dto';
 import { IVendorPostResponse } from '../../Entity/Posts/vendor.post.entity';
+import { ContractsOfffer } from '../../Entity/contractoffer.entity';
+import { CounterContractsOfffer } from '../../Entity/countercontractOffer.entity';
 
 @Controller('vendor')
 export class VendorController {
@@ -27,5 +29,16 @@ export class VendorController {
       cvnphotographer,
     );
     return post;
+  }
+
+  
+  @Get('myoffers/:vendor')
+  async findmyoffers(@Param('vendor')vendor:string):Promise<ContractsOfffer[]>{
+      return await this.vendorservice.getMyoffers(vendor)
+  }
+
+  @Get('mycounteroffers/:vendor')
+  async findmyCounteroffers(@Param('vendor')vendor:string):Promise<CounterContractsOfffer[]>{
+      return await this.vendorservice.getMyCounteroffers(vendor)
   }
 }
