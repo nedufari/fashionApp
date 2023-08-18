@@ -10,6 +10,60 @@ import { VendorPostsEntity } from "../Posts/vendor.post.entity";
 export interface ICommentResponses{
     
 }
+export interface IComment {
+    id: number;
+    content: string;
+    model?: ModelEntity;
+    photographer?: PhotographerEntity;
+    admin?: AdminEntity;
+    customer?: CustomerEntity;
+    vendor?: VendorPostsEntity;
+    post?: VendorPostsEntity;
+    replies: Replies[];
+}
+
+export interface IModelCommentResponse {
+    id: number;
+    content: string;
+    model: Partial<ModelEntity>;
+    replies: Replies[];
+}
+
+export interface IPhotographerCommentResponse {
+    id: number;
+    content: string;
+    photographer: Partial<PhotographerEntity>;
+    replies: Replies[];
+}
+
+export interface IAdminCommentResponse {
+    id: number;
+    content: string;
+    admin: Partial<AdminEntity>;
+    replies: Replies[];
+}
+
+interface ICustomerInfo {
+    digital_photo: string;
+    username: string;
+}
+
+export interface ICustomerCommentResponse {
+    id: number;
+    content: string;
+    customer: ICustomerInfo;
+   
+}
+
+export interface IVendorCommentResponse {
+    id: number;
+    content: string;
+    vendor: Partial<VendorPostsEntity>;
+    replies: Replies[];
+}
+
+
+
 
 
 @Entity()

@@ -11,6 +11,8 @@ import { MailService } from './mailer.service';
 import { AdminModule } from './Users/admin/admin.module';
 import { VendorModule } from './Users/vendor/vendor.module';
 import { ModelModule } from './Users/model/model.module';
+import { PhotographerModule } from './Users/photographers/photo.module';
+import { CustomerModule } from './Users/customers/customers.module';
 
 
 @Module({
@@ -24,6 +26,8 @@ import { ModelModule } from './Users/model/model.module';
     AdminModule,
     VendorModule,
     ModelModule,
+    PhotographerModule,
+    CustomerModule,
     MailerModule.forRoot({
       transport:{
         service:"gmail",

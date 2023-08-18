@@ -9,6 +9,7 @@ import { Notifications } from "../Entity/Notification/notification.entity";
 import { VendorMakePostDto } from "../Users/vendor/vendor.dto";
 import { VendorPostsEntity } from "../Entity/Posts/vendor.post.entity";
 import { Comments } from "../Entity/Activities/comment.entity";
+import { Replies } from "../Entity/Activities/reply.entity";
 
 
 @EntityRepository(CustomerEntity)
@@ -54,6 +55,12 @@ export class VendorMakePostRepository extends Repository <VendorPostsEntity>{
 
 @EntityRepository(Comments)
 export class CommentsRepository extends Repository <Comments>{
+
+}
+
+
+@EntityRepository(Replies)
+export class RepliesRepository extends Repository <Replies>{
 
 }
 

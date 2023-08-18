@@ -8,11 +8,12 @@ import { ModelEntity } from "../../Entity/Users/model.entity";
 import { Notifications } from "../../Entity/Notification/notification.entity";
 import { VendorMakePostDto } from "./vendor.dto";
 import { Contracts } from "../../Entity/contracts.entity";
-import { ContractOfferRepository, ContractRepository, CounterContractOfferRepository } from "../../contract/contrct.repository";
+import { ContractOfferRepository, ContractRepository, CounterContractOfferRepository, VendorPostRepository } from "../../contract/contrct.repository";
 import { Comments } from "../../Entity/Activities/comment.entity";
 import { MakeCommentDto } from "../model/model.dto";
 import { ContractsOfffer, IContractOffer } from "../../Entity/contractoffer.entity";
 import { CounterContractsOfffer } from "../../Entity/countercontractOffer.entity";
+import { Availability } from "../../Enums/post.enum";
 
 @Injectable()
 export class VendorService{
@@ -24,7 +25,8 @@ export class VendorService{
     @InjectRepository(Contracts)private contractrepository:ContractRepository,
     @InjectRepository(Comments)private commentrepository:CommentsRepository,
     @InjectRepository(ContractsOfffer) private readonly offerripo:ContractOfferRepository,
-    @InjectRepository(CounterContractsOfffer) private readonly counterripo:CounterContractOfferRepository
+    @InjectRepository(CounterContractsOfffer) private readonly counterripo:CounterContractOfferRepository,
+   
     
 ){}
 
@@ -53,8 +55,8 @@ private async verifyModel(modelid: string): Promise<ModelEntity> {
     return model;
 }
 
-private async verifyContract(cvn: string, entityName: string): Promise<Contracts> {
-    const contract = await this.contractrepository.findOne({ where: { contract_validity_number: cvn, [entityName]: true } });
+private async verifyContract(cvn: string): Promise<Contracts> {
+    const contract = await this.contractrepository.findOne({ where: { contract_validity_number: cvn} });
     if (!contract) {
         throw new HttpException(`The contract associated with CVN ${cvn} is not found or not valid.`, HttpStatus.NOT_FOUND);
     }
@@ -71,18 +73,23 @@ private async verifyPost(postid: number): Promise<VendorPostsEntity> {
 
 
 //make a credited post 
-async makepost(postdto: VendorMakePostDto, vendorid: string, modelid: string, photographerid: string, cvnmodel: string, cvnphotographer: string): Promise<IVendorPostResponse> {
+async makepost(postdto: VendorMakePostDto, vendorid: string): Promise<IVendorPostResponse> {
     try {
         const vendor = await this.verifyVendor(vendorid);
-        const photographer = await this.verifyPhotographer(photographerid);
-        const model = await this.verifyModel(modelid);
 
-        const contractModel = await this.verifyContract(cvnmodel, model.username);
-        const contractPhotographer = await this.verifyContract(cvnphotographer, photographer.username);
+        const cvnmodel = postdto.cvnmodel
+        const cvnphotographer =postdto.cvnphotographer
+
+        const contractModel = await this.verifyContract(cvnmodel);
+        const contractPhotographer = await this.verifyContract(cvnphotographer);
+
+
 
         const newpost = new VendorPostsEntity();
         newpost.caption = postdto.caption;
         newpost.media = postdto.media;
+        newpost.availability = postdto.availability
+        newpost.cost = postdto.cost
         newpost.creditedModel = contractModel.model;
         newpost.creditedPhotographer = contractPhotographer.photographer;
         newpost.createdDate = new Date();
@@ -91,12 +98,18 @@ async makepost(postdto: VendorMakePostDto, vendorid: string, modelid: string, ph
 
 
         const customerResponses: IVendorPostResponse = {
+            id:newpost.id,
             creditedModel: newpost.creditedModel,
             creditedPhotographer: newpost.creditedPhotographer,
             media: newpost.media,
             caption: newpost.caption,
+            cost: newpost.cost,
+            availability : newpost.availability,
             createdDate: newpost.createdDate,
-            owner: newpost.owner,
+            owner: {
+                display_photo: newpost.owner.id,
+                brandname: newpost.owner.brandname
+            }
         };
 
         return customerResponses;
@@ -104,6 +117,31 @@ async makepost(postdto: VendorMakePostDto, vendorid: string, modelid: string, ph
         throw error;
     }
 }
+
+
+// async getMyposts(): Promise<IVendorPostResponse[]> {
+    
+
+//     const myposts = await this.vendorpostrepository.find();
+
+
+//     const postResponses: IVendorPostResponse[] = myposts.map(post => ({
+//         creditedModel: post.creditedModel,
+//         creditedPhotographer: post.creditedPhotographer,
+//         media: post.media,
+//         caption: post.caption,
+//         cost: post.cost,
+//         availability: post.availability,
+//         createdDate: post.createdDate,
+//         owner: {
+//             display_photo: post.owner.id,
+//             brandname: post.owner.brandname
+//         }
+//     }));
+
+//     return myposts;
+// }
+
 
 
 async MakeCommentOnpost(dto:MakeCommentDto,postid:number,vendorid:string):Promise<{message:string}>{

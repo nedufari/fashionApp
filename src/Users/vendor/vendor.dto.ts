@@ -9,6 +9,7 @@ import { IsArray, IsBoolean, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString,
 import { KindOfModel } from "../../Enums/modelType.enum";
 import { PaymentPlan } from "../../Enums/paymentOption.enum";
 import { ContractDuration } from "../../Enums/contract.enum";
+import { Availability } from "../../Enums/post.enum";
 
 // contract 
 export class VendorContractWithModel{
@@ -42,6 +43,22 @@ export class VendorMakePostDto{
     @IsArray()
     @IsOptional({ message: 'you can either post a video file or any amount of predefined images' })
     media: string[];
+
+    @IsString()
+    @IsNotEmpty()
+    cost:string
+
+    @IsEnum(Availability)
+    availability:Availability
+
+    @IsString()
+    @IsNotEmpty()
+    cvnmodel: string
+    
+    @IsString()
+    @IsNotEmpty()
+    cvnphotographer: string
+
 }
 
 // update post

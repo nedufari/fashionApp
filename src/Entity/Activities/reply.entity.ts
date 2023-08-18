@@ -8,20 +8,38 @@ import { vendorEntity } from "../Users/vendor.entity"
 
 export interface IReplies{
     id:number 
-    content:string 
+    reply:string 
     model:ModelEntity
     admin:AdminEntity
     customer:CustomerEntity
     photographer:PhotographerEntity
-    comment:Comments[]
+    comment:Comments
 }
 
 export interface IRepliesResponses{
-    content:string 
+    reply:string 
     model:ModelEntity
     admin?:AdminEntity
     customer:CustomerEntity
     photographer:PhotographerEntity
+}
+
+interface ICustomerInfo {
+    digital_photo: string;
+    username: string;
+}
+
+interface ICommentReplied {
+    comment:string
+    
+}
+
+export interface ICustomerReplyResponse {
+    id: number
+    reply: string
+    customer: ICustomerInfo
+    comment : ICommentReplied
+   
 }
 
 @Entity()
@@ -30,7 +48,7 @@ export class Replies implements IReplies{
     id:number
 
     @Column()
-    content:string
+    reply:string
 
     @ManyToOne(()=>ModelEntity,modelentity=>modelentity.comments)
     model:ModelEntity;
@@ -47,7 +65,7 @@ export class Replies implements IReplies{
     @ManyToOne(()=>vendorEntity,vendorentity=>vendorentity.comments)
     vendor:vendorEntity
 
-    @OneToMany(()=>Comments,comment=>comment.replies)
-    comment:Comments[];
+    @ManyToOne(()=>Comments,comment=>comment.replies)
+    comment:Comments;
 
 }

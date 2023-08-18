@@ -3,26 +3,46 @@ import { vendorEntity } from "../Users/vendor.entity";
 import { ModelEntity } from "../Users/model.entity";
 import { PhotographerEntity } from "../Users/photorapher.entity";
 import { Comments } from "../Activities/comment.entity";
+import { Availability } from "../../Enums/post.enum";
 
 
 export interface IVendoPost{
     id:number,
     caption:string,
     media:string[],
+    availability:Availability,
+    cost:string
     createdDate:Date
     owner:vendorEntity
     creditedModel:string,
+    likes:number,
+    dislikes:number,
+    likedBy:string[],
+    dislikedBy:string[]
     creditedPhotographer:string
     comments?:Comments[]
+
+}
+
+interface IVendorInfo {
+    display_photo: string;
+    brandname: string;
 }
 
 export interface IVendorPostResponse{
+    id:number
     caption:string,
     media:string[],
+    availability:Availability,
+    cost:string
     createdDate:Date
-    owner:vendorEntity
+    owner:IVendorInfo
     creditedModel:string,
     creditedPhotographer:string
+    likes?:number,
+    dislikes?:number,
+    likedBy?:string[],
+    dislikedBy?:string[]
     
 
 }
@@ -30,10 +50,16 @@ export interface IVendorPostResponse{
 export interface IvndorPostResponseWithComments{
     caption:string,
     media:string[],
+    availability:Availability,
+    cost:string
     createdDate:Date
     owner:vendorEntity
     creditedModel:string,
     creditedPhotographer:string
+    likes?:number,
+    dislikes?:number,
+    likedBy?:string,
+    dislikedBy?:string
 
 }
 
@@ -52,6 +78,25 @@ export class VendorPostsEntity implements IVendoPost{
     //video or picture 
     @Column({type:'jsonb',nullable:true,})
     media:string[]
+
+    @Column({type:'enum',enum:Availability,nullable:false})
+    availability:Availability
+
+    @Column({nullable:false})
+    cost:string
+
+    @Column({nullable:true})
+    likes :number 
+
+    @Column({nullable:true})
+    dislikes:number
+
+    @Column({type:'jsonb',nullable:true})
+    likedBy:string[]
+
+    @Column({type:'jsonb',nullable:true})
+    dislikedBy:string[]
+
 
 
     //relationship
