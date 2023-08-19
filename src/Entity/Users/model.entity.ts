@@ -7,6 +7,7 @@ import { IModel } from "../../Users/model/model.interface";
 import { Comments } from "../Activities/comment.entity";
 import { Replies } from "../Activities/reply.entity";
 import { VendorPostsEntity } from "../Posts/vendor.post.entity";
+import { Interests } from "../../Enums/niche.enum";
 
 @Entity()
 export class ModelEntity implements IModel{
@@ -47,6 +48,9 @@ export class ModelEntity implements IModel{
 
     @Column({length:11,nullable:true})
     phone2:string
+
+    @Column('enum', { enum: Interests, array: true, default: [] })
+    lines: Interests[];
 
     @Column({length:11,nullable:true})
     ManagerPhone:string

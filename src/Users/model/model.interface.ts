@@ -1,6 +1,7 @@
 import { Comments } from "../../Entity/Activities/comment.entity"
 import { IRepliesResponses, Replies } from "../../Entity/Activities/reply.entity"
 import { KindOfModel } from "../../Enums/modelType.enum"
+import { Interests } from "../../Enums/niche.enum"
 import { PaymentPlan } from "../../Enums/paymentOption.enum"
 
 export interface IModel{
@@ -11,6 +12,7 @@ export interface IModel{
     address:string 
     phone1:string 
     phone2:string 
+    lines: Interests[]
     bio:string 
     fashion_genre:string 
     digital_photo:string 
@@ -114,6 +116,7 @@ export interface IModelResponse{
     address:string 
     phone1:string 
     phone2:string 
+    lines: Interests[]
     bio:string 
     fashion_genre:string 
     digital_photo:string 

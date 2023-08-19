@@ -1,6 +1,7 @@
 import { ICommentResponses } from "../../Entity/Activities/comment.entity"
 import { IRepliesResponses } from "../../Entity/Activities/reply.entity"
 import { KindOfModel } from "../../Enums/modelType.enum"
+import { Niche4Vendors } from "../../Enums/niche.enum"
 import { PaymentPlan } from "../../Enums/paymentOption.enum"
 
 export interface IVendor{
@@ -11,6 +12,7 @@ export interface IVendor{
     address:string 
     phone1:string 
     phone2:string 
+    niche: Niche4Vendors
     bio:string 
     gender:string
     facebook:string 
@@ -43,6 +45,7 @@ export interface IVendorResponse{
     address:string 
     phone1:string 
     phone2:string 
+    niche: Niche4Vendors
     bio:string 
     gender:string
     facebook:string 

@@ -18,13 +18,12 @@ export class CustomerService{
     ){}
 
     
-    //like a post 
-    //dislike a post 
+
     //send order request on a particular post 
     //mke payment 
 
 
-    //mke comments
+    //make a comment
     async makeComment(postid:number, customerid:string, commentdto:CustomerMakeCommentDto):Promise<ICustomerCommentResponse>{
         const findpost = await this.vendorpostripo.findOne({where:{id:postid}})
         if (!findpost) throw new HttpException('the post is not found',HttpStatus.NOT_FOUND)
@@ -77,41 +76,105 @@ export class CustomerService{
         }
 
         return ReplyResponse
-
-
     }
 
-    async likeAPost(postid:number,customerid:string,likedto:LikeDto):Promise<{message:string}>{
-        const findpost = await this.vendorpostripo.findOne({where:{id:postid}})
-        if (!findpost) throw new HttpException('the post is not found',HttpStatus.NOT_FOUND)
 
-        const customer = await this.customerripository.findOne({where:{CustomerID:customerid}})
-        if (!customer) throw new HttpException('the customer  is not found',HttpStatus.NOT_FOUND)
-
-        if (likedto.action == LikeAction.LIKE){
-            findpost.likes += 1,
-            // findpost.likedBy.push(customer.username)
-            await this.vendorpostripo.save(findpost)
-
+//like a post
+    async likeAPost(postid: number, customerid: string, likedto: LikeDto): Promise<{ message: string }> {
+        try {
+            const findpost = await this.vendorpostripo.findOne({ where: { id: postid } });
+        if (!findpost) {
+            throw new HttpException('The post is not found', HttpStatus.NOT_FOUND);
         }
-        return {message:"yu have liked this post"}
-
+    
+        const customer = await this.customerripository.findOne({ where: { CustomerID: customerid } });
+        if (!customer) {
+            throw new HttpException('The customer is not found', HttpStatus.NOT_FOUND);
+        }
+    
+        if (likedto.action === LikeAction.LIKE) {
+            // Check if the post has been liked by the same user before
+            if (findpost.likedBy && findpost.likedBy.includes(customer.username)) {
+                return { message: 'You have already liked this post' };
+            }
+    
+            // Check if the post has been disliked by the same user before
+            if (findpost.dislikedBy && findpost.dislikedBy.includes(customer.username)) {
+                const dislikedIndex = findpost.dislikedBy.indexOf(customer.username);
+                findpost.dislikedBy.splice(dislikedIndex, 1);
+                findpost.dislikes -= 1;
+            }
+            else {
+                // Initialize the dislikedBy array if it's null
+                findpost.dislikedBy = [];
+            }
+    
+            findpost.likes += 1;
+            findpost.likedBy = findpost.likedBy || [];
+            findpost.likedBy.push(customer.username);
+            await this.vendorpostripo.save(findpost);
+    
+            return { message: 'You have liked this post' };
+        }
     }
-
-    async DislikeAPost(postid:number,customerid:string,likedto:LikeDto):Promise<void>{
-        const findpost = await this.vendorpostripo.findOne({where:{id:postid}})
-        if (!findpost) throw new HttpException('the post is not found',HttpStatus.NOT_FOUND)
-
-        const customer = await this.customerripository.findOne({where:{CustomerID:customerid}})
-        if (!customer) throw new HttpException('the customer  is not found',HttpStatus.NOT_FOUND)
-
-        if (likedto.action == LikeAction.LIKE){
-            findpost.dislikes += 1,
-            findpost.dislikedBy.push(customer.username)
-            await this.vendorpostripo.save(findpost)
-
+       
+            
+         catch (error) {
+            throw error
+            
+        }
+        
+    }
+    
+    
+//dislike a post 
+    async DislikeAPost(postid:number,customerid:string,likedto:LikeDto):Promise<{message:string}>{
+        try {
+            const findpost = await this.vendorpostripo.findOne({ where: { id: postid } });
+        if (!findpost) {
+            throw new HttpException('The post is not found', HttpStatus.NOT_FOUND);
+        }
+    
+        const customer = await this.customerripository.findOne({ where: { CustomerID: customerid } });
+        if (!customer) {
+            throw new HttpException('The customer is not found', HttpStatus.NOT_FOUND);
+        }
+    
+        if (likedto.action === LikeAction.DISLIKE) {
+            // Check if the post has been liked by the same user before
+            if (findpost.dislikedBy && findpost.dislikedBy.includes(customer.username)) {
+                return { message: 'You have already disliked this post' };
+            }
+    
+            // Check if the post has been disliked by the same user before
+            if (findpost.likedBy && findpost.likedBy.includes(customer.username)) {
+                const likedIndex = findpost.likedBy.indexOf(customer.username);
+                findpost.likedBy.splice(likedIndex, 1);
+                findpost.likes -= 1;
+            }
+            else {
+                // Initialize the likedBy array if it's null
+                findpost.likedBy = [];
+            }
+    
+            findpost.dislikes += 1;
+            findpost.dislikedBy = findpost.likedBy || [];
+            findpost.dislikedBy.push(customer.username);
+            await this.vendorpostripo.save(findpost);
+    
+            return { message: 'You have disliked this post' };
+        }
+    }
+       
+            
+         catch (error) {
+            throw error
+            
+        }
+      
         }
 
+//create an order on a particular post 
+
     }
 
-}

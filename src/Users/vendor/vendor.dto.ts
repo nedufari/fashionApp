@@ -5,11 +5,12 @@
 // like 
 
 
-import { IsArray, IsBoolean, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength } from "class-validator";
+import { ArrayNotEmpty, IsArray, IsBoolean, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength } from "class-validator";
 import { KindOfModel } from "../../Enums/modelType.enum";
 import { PaymentPlan } from "../../Enums/paymentOption.enum";
 import { ContractDuration } from "../../Enums/contract.enum";
 import { Availability } from "../../Enums/post.enum";
+import { Interests, Niche4Vendors } from "../../Enums/niche.enum";
 
 // contract 
 export class VendorContractWithModel{
@@ -161,4 +162,11 @@ export class UpdateVendorDataDto{
     @IsString()
     @IsOptional()
     snapchat:string
+}
+
+export class AddLinesDto {
+    @IsEnum(Interests, { each: true }) // Validate each enum value in the array
+    @ArrayNotEmpty() // Ensure the array is not empty
+    lines: Interests[];
+
 }

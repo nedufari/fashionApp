@@ -6,7 +6,7 @@ import { vendorEntity } from "../../Entity/Users/vendor.entity";
 import { PhotographerEntity } from "../../Entity/Users/photorapher.entity";
 import { ModelEntity } from "../../Entity/Users/model.entity";
 import { Notifications } from "../../Entity/Notification/notification.entity";
-import { VendorMakePostDto } from "./vendor.dto";
+import { AddLinesDto, VendorMakePostDto } from "./vendor.dto";
 import { Contracts } from "../../Entity/contracts.entity";
 import { ContractOfferRepository, ContractRepository, CounterContractOfferRepository, VendorPostRepository } from "../../contract/contrct.repository";
 import { Comments } from "../../Entity/Activities/comment.entity";
@@ -14,6 +14,7 @@ import { MakeCommentDto } from "../model/model.dto";
 import { ContractsOfffer, IContractOffer } from "../../Entity/contractoffer.entity";
 import { CounterContractsOfffer } from "../../Entity/countercontractOffer.entity";
 import { Availability } from "../../Enums/post.enum";
+import { IVendorResponse } from "./vendor.interface";
 
 @Injectable()
 export class VendorService{
@@ -82,7 +83,6 @@ async makepost(postdto: VendorMakePostDto, vendorid: string): Promise<IVendorPos
 
         const contractModel = await this.verifyContract(cvnmodel);
         const contractPhotographer = await this.verifyContract(cvnphotographer);
-
 
 
         const newpost = new VendorPostsEntity();
@@ -175,6 +175,29 @@ async getMyCounteroffers(vendor: string): Promise<CounterContractsOfffer[]> {
     return offersForModel;
   }
 
+async SelectLines(vendorid:string, linesdto:AddLinesDto):Promise<IVendorResponse>{
+    try {
+        const vendor = await this.vendorrepository.findOne({ where: { VendorID: vendorid } });
+        console.log(vendor)
+        if (!vendor) {
+            throw new HttpException(`The vendor is not found or not verified on this platform.`, HttpStatus.NOT_FOUND);
+        }
+        //initialize the lines array
+        // const newone = new vendorEntity()
+        // newone.niche = linesdto.niche
+        
+        // console.log(vendor.niche)
+    
+        // await this.vendorrepository.save(newone)
+        return vendor
+        
+    }
+        
+     catch (error) {
+        throw error
+        
+    }
 
+}
 }
 

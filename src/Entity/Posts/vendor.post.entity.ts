@@ -91,10 +91,10 @@ export class VendorPostsEntity implements IVendoPost{
     @Column({nullable:true})
     dislikes:number
 
-    @Column({type:'jsonb',nullable:true})
+    @Column({type:"simple-array",nullable:true})
     likedBy:string[]
 
-    @Column({type:'jsonb',nullable:true})
+    @Column({type:"simple-array",nullable:true})
     dislikedBy:string[]
 
 

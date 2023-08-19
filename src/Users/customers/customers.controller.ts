@@ -18,8 +18,13 @@ export class CustomerControlller{
         return await this.customerservice.replycomment(commentid,customerid,dto)
     }
 
-    @Post('like/:posttid/:customerid')
+    @Post('like/:postid/:customerid')
     async likeaPost(@Param('postid')postid:number,@Param('customerid')customerid:string,@Body()dto:LikeDto):Promise<{message:string}>{
         return await this.customerservice.likeAPost(postid,customerid,dto)
+    }
+
+    @Post('dislike/:postid/:customerid')
+    async dislikeaPost(@Param('postid')postid:number,@Param('customerid')customerid:string,@Body()dto:LikeDto):Promise<{message:string}>{
+        return await this.customerservice.DislikeAPost(postid,customerid,dto)
     }
 }

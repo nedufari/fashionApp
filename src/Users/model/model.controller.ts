@@ -1,7 +1,8 @@
-import { Controller, Get, Param } from "@nestjs/common"
+import { Controller, Get, Param,Post } from "@nestjs/common"
 import { ModelService } from "./model.service";
 import { ContractsOfffer } from "../../Entity/contractoffer.entity";
 import { CounterContractsOfffer } from "../../Entity/countercontractOffer.entity";
+import { AddLinesDto } from "../vendor/vendor.dto";
 
 @Controller('model')
 export class ModelController{
@@ -16,4 +17,9 @@ export class ModelController{
     async findmyCounteroffers(@Param('model')model:string):Promise<CounterContractsOfffer[]>{
         return await this.modelservice.getMyCounteroffers(model)
     }
+
+    @Post('lines/:vendor')
+  async addlines(@Param('vendor')vendor:string,dto:AddLinesDto){
+      return await this.modelservice.nitch(vendor,dto)
+  }
 }

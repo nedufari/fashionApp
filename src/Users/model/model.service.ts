@@ -5,6 +5,7 @@ import { ContractOfferRepository, CounterContractOfferRepository } from "../../c
 import { ModelEntity } from "../../Entity/Users/model.entity";
 import { ModelEntityRepository } from "../../auth/auth.repository";
 import { CounterContractsOfffer } from "../../Entity/countercontractOffer.entity";
+import { AddLinesDto } from "../vendor/vendor.dto";
 
 @Injectable()
 export class ModelService{
@@ -28,4 +29,18 @@ export class ModelService{
         }
         return offersForModel;
       }
+
+
+      async nitch(modelid:string, dto:AddLinesDto){
+        const model = await this.modelripo.findOne({ where: { ModelID: modelid } });
+        if (!model) throw new HttpException(`you are not a legitimate model on this platform and therefore you cannot perform this task`, HttpStatus.NOT_FOUND);
+
+        model.lines = dto.lines
+        await this.modelripo.save(model)
+        return model
+
+      
+      }
     }
+
+    

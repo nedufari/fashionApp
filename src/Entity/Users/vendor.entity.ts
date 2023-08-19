@@ -5,6 +5,7 @@ import { IVendor } from "../../Users/vendor/vendor.interface"
 import { Comments } from "../Activities/comment.entity"
 import { Replies } from "../Activities/reply.entity"
 import { VendorPostsEntity } from "../Posts/vendor.post.entity"
+import { Niche4Vendors } from "../../Enums/niche.enum"
 
 @Entity()
 export class vendorEntity implements IVendor{
@@ -39,6 +40,9 @@ export class vendorEntity implements IVendor{
 
     @Column({length:11,nullable:true})
     phone1:string
+
+    @Column({type:"enum", enum:Niche4Vendors,nullable:true})
+    niche: Niche4Vendors
 
     @Column({length:11,nullable:true})
     phone2:string
