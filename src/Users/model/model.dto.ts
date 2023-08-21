@@ -6,10 +6,11 @@
 // like 
 
 
-import { IsBoolean, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength } from "class-validator";
+import { ArrayNotEmpty, IsBoolean, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength } from "class-validator";
 import { KindOfModel } from "../../Enums/modelType.enum";
 import { PaymentPlan } from "../../Enums/paymentOption.enum";
 import { ContractDuration } from "../../Enums/contract.enum";
+import { Interests } from "../../Enums/niche.enum";
 
 // passowrd change
 export class ChangePasswordDto{
@@ -67,6 +68,13 @@ export class ReplyDto{
     @IsString()
     @IsNotEmpty()
     reply:string
+}
+
+export class AddInterestsDto {
+    @IsEnum(Interests, { each: true }) // Validate each enum value in the array
+    @ArrayNotEmpty() // Ensure the array is not empty
+    interests: Interests[];
+
 }
 
 

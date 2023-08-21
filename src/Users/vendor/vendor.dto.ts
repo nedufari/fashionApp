@@ -72,6 +72,22 @@ export class VendorUpdatePostDto{
     @IsOptional({ message: 'you can either post a video file or any amount of predefined images' })
     media: string[];
 
+    @IsString()
+    @IsOptional()
+    cost:string
+
+    @IsEnum(Availability)
+    @IsOptional()
+    availability:Availability
+
+    @IsString()
+    @IsOptional()
+    cvnmodel: string
+    
+    @IsString()
+    @IsOptional()
+    cvnphotographer: string
+
 }
 // passowrd change
 export class VendorChangePasswordDto{
@@ -95,78 +111,69 @@ export class VendorReplyDto{
 
 
 // update user Data
-export class UpdateVendorDataDto{
-
+export class UpdateVendorDataDto {
     @IsString()
     @IsOptional()
-    brandname:string 
-
+    brandname: string;
+  
     @IsString()
     @IsOptional()
-    address:string 
-
+    address: string;
+  
     @IsString()
     @IsOptional()
-    phone1:string 
-
+    phone1: string;
+  
     @IsString()
     @IsOptional()
-    phone2:string 
-
+    phone2: string;
+  
     @IsString()
     @IsOptional()
     @MaxLength(300)
-    bio:string 
-
+    bio: string;
+  
     @IsString()
     @IsOptional()
-    fashion_genre:string 
-
+    digital_photo: string;
+  
     @IsString()
     @IsOptional()
-    digital_photo:string 
-
-    @IsNumber()
-    @IsOptional()
-    age:number
-
+    gender: string;
+  
     @IsString()
     @IsOptional()
-    gender:string 
-
+    facebook: string;
+  
     @IsString()
     @IsOptional()
-    complexion:string 
-
-
+    twitter: string;
+  
     @IsString()
     @IsOptional()
-    facebook:string 
-
+    thread: string;
+  
     @IsString()
     @IsOptional()
-    twitter:string
-
+    instagram: string;
+  
     @IsString()
     @IsOptional()
-    thread:string
-
+    tiktok: string;
+  
     @IsString()
     @IsOptional()
-    instagram:string
-
-    @IsString()
+    snapchat: string;
+  
+    @IsEnum(Niche4Vendors)
     @IsOptional()
-    tiktok:string
-
-    @IsString()
-    @IsOptional()
-    snapchat:string
-}
+    lines: Niche4Vendors;
+  }
 
 export class AddLinesDto {
-    @IsEnum(Interests, { each: true }) // Validate each enum value in the array
+    @IsEnum(Niche4Vendors, { each: true }) // Validate each enum value in the array
     @ArrayNotEmpty() // Ensure the array is not empty
-    lines: Interests[];
+    lines: Niche4Vendors[];
 
 }
+

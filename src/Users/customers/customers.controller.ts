@@ -1,8 +1,9 @@
-import { Body, Controller, Param, Post } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post } from "@nestjs/common";
 import { CustomerService } from "./customers.service";
 import { ICustomerCommentResponse } from "../../Entity/Activities/comment.entity";
 import { CustomerMakeCommentDto, CustomerReplyDto, LikeDto } from "./customers.dto";
 import { ICustomerReplyResponse } from "../../Entity/Activities/reply.entity";
+import { IVendorPostResponse } from "../../Entity/Posts/vendor.post.entity";
 
 @Controller('customer')
 export class CustomerControlller{
@@ -26,5 +27,10 @@ export class CustomerControlller{
     @Post('dislike/:postid/:customerid')
     async dislikeaPost(@Param('postid')postid:number,@Param('customerid')customerid:string,@Body()dto:LikeDto):Promise<{message:string}>{
         return await this.customerservice.DislikeAPost(postid,customerid,dto)
+    }
+
+    @Get('vendorposts')
+    async GetallvendorPosts(): Promise<IVendorPostResponse[]>{
+        return await this.customerservice.getAllPosts()
     }
 }

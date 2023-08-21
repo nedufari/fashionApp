@@ -4,7 +4,7 @@ import { CustomerEntity } from "../../Entity/Users/customer.entity";
 import { CommentsRepository, CustomerEntityRepository, RepliesRepository } from "../../auth/auth.repository";
 import { CustomerMakeCommentDto, CustomerReplyDto, LikeDto } from "./customers.dto";
 import { Comments, ICustomerCommentResponse } from "../../Entity/Activities/comment.entity";
-import { VendorPostsEntity } from "../../Entity/Posts/vendor.post.entity";
+import { IVendorPostResponse, VendorPostsEntity } from "../../Entity/Posts/vendor.post.entity";
 import { VendorPostRepository } from "../../contract/contrct.repository";
 import { ICustomerReplyResponse, Replies } from "../../Entity/Activities/reply.entity";
 import { LikeAction } from "../../Enums/post.enum";
@@ -174,7 +174,35 @@ export class CustomerService{
       
         }
 
-//create an order on a particular post 
+        //get all posts
+
+        async getAllPosts(): Promise<IVendorPostResponse[]> {
+            try {
+              const allPosts = await this.vendorpostripo.find({
+                relations: ['owner'], // Load the 'owner' relationship for each post
+              });
+          
+              const postResponses: IVendorPostResponse[] = allPosts.map(post => ({
+                id: post.id,
+                creditedModel: post.creditedModel,
+                creditedPhotographer: post.creditedPhotographer,
+                media: post.media,
+                caption: post.caption,
+                cost: post.cost,
+                availability: post.availability,
+                createdDate: post.createdDate,
+                owner: {
+                  display_photo: post.owner.id,
+                  brandname: post.owner.brandname,
+                },
+              }));
+          
+              return postResponses;
+            } catch (error) {
+              throw error;
+            }
+          }
+          
 
     }
 

@@ -5,9 +5,10 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { ContractsOfffer } from "../../Entity/contractoffer.entity";
 import { ModelEntity } from "../../Entity/Users/model.entity";
 import { CounterContractsOfffer } from "../../Entity/countercontractOffer.entity";
+import { VendorPostsEntity } from "../../Entity/Posts/vendor.post.entity";
 
 @Module({
-    imports:[TypeOrmModule.forFeature([ContractsOfffer,ModelEntity,CounterContractsOfffer])],
+    imports:[TypeOrmModule.forFeature([ContractsOfffer,ModelEntity,CounterContractsOfffer,VendorPostsEntity])],
     controllers:[ModelController],
     providers:[ModelService]
 })

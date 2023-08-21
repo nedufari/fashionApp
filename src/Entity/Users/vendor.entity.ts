@@ -41,8 +41,9 @@ export class vendorEntity implements IVendor{
     @Column({length:11,nullable:true})
     phone1:string
 
-    @Column({type:"enum", enum:Niche4Vendors,nullable:true})
-    niche: Niche4Vendors
+    @Column('enum', { enum: Niche4Vendors, array: true, default: [],nullable:true })
+    niche: Niche4Vendors[]
+
 
     @Column({length:11,nullable:true})
     phone2:string

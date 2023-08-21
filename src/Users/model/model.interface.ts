@@ -12,7 +12,7 @@ export interface IModel{
     address:string 
     phone1:string 
     phone2:string 
-    lines: Interests[]
+    interests: Interests[]
     bio:string 
     fashion_genre:string 
     digital_photo:string 

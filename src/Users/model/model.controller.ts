@@ -1,8 +1,10 @@
-import { Controller, Get, Param,Post } from "@nestjs/common"
+import { Body, Controller, Get, Param,Post } from "@nestjs/common"
 import { ModelService } from "./model.service";
 import { ContractsOfffer } from "../../Entity/contractoffer.entity";
 import { CounterContractsOfffer } from "../../Entity/countercontractOffer.entity";
 import { AddLinesDto } from "../vendor/vendor.dto";
+import { IVendorPostResponse } from "../../Entity/Posts/vendor.post.entity";
+import { AddInterestsDto } from "./model.dto";
 
 @Controller('model')
 export class ModelController{
@@ -19,7 +21,12 @@ export class ModelController{
     }
 
     @Post('lines/:vendor')
-  async addlines(@Param('vendor')vendor:string,dto:AddLinesDto){
-      return await this.modelservice.nitch(vendor,dto)
+  async addlines(@Param('vendor')vendor:string,@Body()dto:AddInterestsDto){
+      return await this.modelservice.niche(vendor,dto)
   }
+
+@Get('vendorposts')
+async GetallvendorPosts(): Promise<IVendorPostResponse[]>{
+    return await this.modelservice.getAllPosts()
+}
 }

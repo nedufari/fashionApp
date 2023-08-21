@@ -50,7 +50,7 @@ export class ModelEntity implements IModel{
     phone2:string
 
     @Column('enum', { enum: Interests, array: true, default: [] })
-    lines: Interests[];
+    interests: Interests[];
 
     @Column({length:11,nullable:true})
     ManagerPhone:string

@@ -12,7 +12,7 @@ export interface IVendor{
     address:string 
     phone1:string 
     phone2:string 
-    niche: Niche4Vendors
+    niche: Niche4Vendors[]
     bio:string 
     gender:string
     facebook:string 
@@ -45,7 +45,7 @@ export interface IVendorResponse{
     address:string 
     phone1:string 
     phone2:string 
-    niche: Niche4Vendors
+    niche: Niche4Vendors[]
     bio:string 
     gender:string
     facebook:string 

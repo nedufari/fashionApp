@@ -3,6 +3,7 @@ import { Controller, Get, Param } from "@nestjs/common"
 import { ContractsOfffer } from "../../Entity/contractoffer.entity";
 import { CounterContractsOfffer } from "../../Entity/countercontractOffer.entity";
 import { PhotographerService } from "./photo.service";
+import { IVendorPostResponse } from "../../Entity/Posts/vendor.post.entity";
 
 @Controller('photographer')
 export class PhotographerController{
@@ -17,4 +18,9 @@ export class PhotographerController{
     async findmyCounteroffers(@Param('photo')photo:string):Promise<CounterContractsOfffer[]>{
         return await this.photoservice.getMyCounteroffers(photo)
     }
+
+    @Get('vendorposts')
+async GetallvendorPosts(): Promise<IVendorPostResponse[]>{
+    return await this.photoservice.getAllPosts()
+}
 }
