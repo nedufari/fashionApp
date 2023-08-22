@@ -11,7 +11,7 @@ export interface IVendoPost{
     caption:string,
     media:string[],
     availability:Availability,
-    cost:string
+    cost:number
     createdDate:Date
     owner:vendorEntity
     creditedModel:string,
@@ -34,7 +34,7 @@ export interface IVendorPostResponse{
     caption:string,
     media:string[],
     availability:Availability,
-    cost:string
+    cost:number
     createdDate:Date
     owner:IVendorInfo
     creditedModel:string,
@@ -83,7 +83,7 @@ export class VendorPostsEntity implements IVendoPost{
     availability:Availability
 
     @Column({nullable:false})
-    cost:string
+    cost:number
 
     @Column({nullable:true})
     likes :number 

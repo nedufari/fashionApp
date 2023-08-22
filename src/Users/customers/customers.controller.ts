@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Query } from "@nestjs/common";
 import { CustomerService } from "./customers.service";
 import { ICustomerCommentResponse } from "../../Entity/Activities/comment.entity";
 import { CustomerMakeCommentDto, CustomerReplyDto, LikeDto } from "./customers.dto";
@@ -33,4 +33,26 @@ export class CustomerControlller{
     async GetallvendorPosts(): Promise<IVendorPostResponse[]>{
         return await this.customerservice.getAllPosts()
     }
+
+    @Get('search/vendors')
+async searchVendors(@Query('keyword') keyword: string,) {
+  try {
+    
+      return await this.customerservice.searchVendors(keyword);
+  } catch (error) {
+    throw error
+    
+  }
+}
+
+@Get('search/vendorniche')
+async searchVendorNiche(@Query('keyword') keyword: string,) {
+  try {
+    
+      return await this.customerservice.searchVendorsNiche(keyword);
+  } catch (error) {
+    throw error
+    
+  }
+}
 }

@@ -1,13 +1,17 @@
-import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { CustomerEntity } from "../../Entity/Users/customer.entity";
-import { CommentsRepository, CustomerEntityRepository, RepliesRepository } from "../../auth/auth.repository";
+import { CommentsRepository, CustomerEntityRepository, RepliesRepository, VendorEntityRepository } from "../../auth/auth.repository";
 import { CustomerMakeCommentDto, CustomerReplyDto, LikeDto } from "./customers.dto";
 import { Comments, ICustomerCommentResponse } from "../../Entity/Activities/comment.entity";
 import { IVendorPostResponse, VendorPostsEntity } from "../../Entity/Posts/vendor.post.entity";
 import { VendorPostRepository } from "../../contract/contrct.repository";
 import { ICustomerReplyResponse, Replies } from "../../Entity/Activities/reply.entity";
 import { LikeAction } from "../../Enums/post.enum";
+import { IVendor } from "../vendor/vendor.interface";
+import { Any, Like } from "typeorm";
+import { vendorEntity } from "../../Entity/Users/vendor.entity";
+import { Niche4Vendors } from "../../Enums/niche.enum";
 
 @Injectable()
 export class CustomerService{
@@ -15,6 +19,8 @@ export class CustomerService{
     @InjectRepository(VendorPostsEntity)private readonly vendorpostripo:VendorPostRepository,
     @InjectRepository(Comments)private readonly commentripo:CommentsRepository,
     @InjectRepository(Replies)private readonly replyripo:RepliesRepository,
+    @InjectRepository(vendorEntity)
+    private vendorrepository: VendorEntityRepository,
     ){}
 
     
@@ -202,7 +208,70 @@ export class CustomerService{
               throw error;
             }
           }
+
+          //advanced query for vendors 
+          async searchVendors(
+            keyword: any|string,
+          ): Promise<{ photographers: IVendor[]; totalCount: number }> {
+            const [photographers, totalCount] = await this.vendorrepository.findAndCount({
+              where: [
+                { username: Like(`%${keyword}%`) },
+                { address: Like(`%${keyword}%`) },
+                { gender: Like(`%${keyword}%`) },
+                { brandname: Like(`%${keyword}%`) },
+                { instagram: Like(`%${keyword}%`) },
+                { twitter: Like(`%${keyword}%`) },
+                { thread: Like(`%${keyword}%`) },
+                { facebook: Like(`%${keyword}%`) },
+                { bio: Like(`%${keyword}%`) },
+                // Add more columns as needed for your search
+              ],
+              cache:(false)
+            });
+        
+            if (totalCount === 0) 
+                  throw new NotFoundException(
+                    `No search results found for  "${keyword}"`,)
+                  
+            return { photographers, totalCount };
+          }
+
+
+
+        
+          
+        async searchVendorsNiche(
+            keyword: any | string,
+          ): Promise<{ photographers: IVendor[]; totalCount: number }> {
+            const query = `
+              SELECT *
+              FROM vendor_entity
+              WHERE
+                username ILIKE $1
+                OR address ILIKE $1
+                OR gender ILIKE $1
+                OR brandname ILIKE $1
+                OR instagram ILIKE $1
+                OR twitter ILIKE $1
+                OR thread ILIKE $1
+                OR facebook ILIKE $1
+                OR bio ILIKE $1
+                OR $2 = ANY(niche)
+            `;
+          
+            const values = [`%${keyword}%`, keyword];
+          
+            const photographers = await this.vendorrepository.query(query, values);
+          
+            const totalCount = photographers.length;
+          
+            if (totalCount === 0) {
+              throw new NotFoundException(`No search results found for "${keyword}"`);
+            }
+          
+            return { photographers, totalCount };
+          }
           
 
     }
-
+          

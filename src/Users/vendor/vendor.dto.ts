@@ -45,9 +45,9 @@ export class VendorMakePostDto{
     @IsOptional({ message: 'you can either post a video file or any amount of predefined images' })
     media: string[];
 
-    @IsString()
+    @IsNumber()
     @IsNotEmpty()
-    cost:string
+    cost:number
 
     @IsEnum(Availability)
     availability:Availability
@@ -72,9 +72,9 @@ export class VendorUpdatePostDto{
     @IsOptional({ message: 'you can either post a video file or any amount of predefined images' })
     media: string[];
 
-    @IsString()
+    @IsNumber()
     @IsOptional()
-    cost:string
+    cost:number
 
     @IsEnum(Availability)
     @IsOptional()

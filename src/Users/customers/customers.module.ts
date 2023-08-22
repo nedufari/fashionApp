@@ -6,9 +6,10 @@ import { VendorPostsEntity } from "../../Entity/Posts/vendor.post.entity";
 import { CustomerService } from "./customers.service";
 import { CustomerControlller } from "./customers.controller";
 import { Replies } from "../../Entity/Activities/reply.entity";
+import { vendorEntity } from "../../Entity/Users/vendor.entity";
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Comments,CustomerEntity,VendorPostsEntity,Replies])],
+    imports: [TypeOrmModule.forFeature([Comments,CustomerEntity,VendorPostsEntity,Replies,vendorEntity])],
     providers:[CustomerService],
     controllers:[CustomerControlller]
 })
