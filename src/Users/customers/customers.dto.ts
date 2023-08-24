@@ -4,7 +4,7 @@
 import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength } from "class-validator";
 import { CutomerUpgrade, Roles } from "../../Enums/roles.enum";
 import { VendorUpdatePostDto } from "../vendor/vendor.dto";
-import { UpdateModelDataDto } from "../model/model.dto";
+import { ModelPortfolioDto} from "../model/model.dto";
 import { UpdatePhotographerDataDto } from "../photographers/photo.dto";
 import { LikeAction } from "../../Enums/post.enum";
 
@@ -27,7 +27,7 @@ export class UpgradeToModel{
     @IsEnum(CutomerUpgrade)
     @IsNotEmpty({message:'please select the kind of role you want to upgrade to '})
     role=CutomerUpgrade.MODEL
-    data:UpdateModelDataDto
+    data:ModelPortfolioDto
 
 }
 

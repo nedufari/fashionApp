@@ -1,4 +1,5 @@
-import { IsNotEmpty, IsString, Matches, Validate, isStrongPassword } from "class-validator"
+import { IsNotEmpty, IsString,  IsStrongPassword,  Validate, isStrongPassword } from "class-validator"
+import { Match } from "../../match.decorator"
 
 export class ChangePasswordDto{
 
@@ -13,7 +14,7 @@ export class ChangePasswordDto{
     
     @IsString()
     @IsNotEmpty()
-    @Validate((value,args)=>value===args.object.password,{message:"confirm password must match password field"})
+    @Match('newpassword', { message: 'Confirmation password does not match the new password.' })
     confirmPassword:string 
 }
 
@@ -37,11 +38,18 @@ export class FinallyResetPasswordDto{
 
     @IsString()
     @IsNotEmpty()
+    @IsStrongPassword({
+        minLength:8,
+        minLowercase:1,
+        minNumbers:1,
+        minSymbols:1,
+        minUppercase:1
+    })
     password:string 
 
     @IsString()
     @IsNotEmpty()
-    @Validate((value,args)=>value===args.object.password,{message:"confirm password must match password field"})
+    @Match('password', { message: 'Confirmation password does not match the new password.' })
     confirmPassword:string 
 
 }

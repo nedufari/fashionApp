@@ -13,11 +13,13 @@ import { VendorModule } from './Users/vendor/vendor.module';
 import { ModelModule } from './Users/model/model.module';
 import { PhotographerModule } from './Users/photographers/photo.module';
 import { CustomerModule } from './Users/customers/customers.module';
+import { WalletModule } from './Wallet/wallet.module';
+import { UploadService } from './uploads.service';
 
 
 @Module({
   imports: [
-    TypeormModules,
+    TypeormModules, 
     AuthModule,
     UserModule,
     ConfigModule.forRoot({isGlobal:true}),
@@ -28,6 +30,7 @@ import { CustomerModule } from './Users/customers/customers.module';
     ModelModule,
     PhotographerModule,
     CustomerModule,
+    WalletModule,
     MailerModule.forRoot({
       transport:{
         service:"gmail",
@@ -42,6 +45,7 @@ import { CustomerModule } from './Users/customers/customers.module';
     })
   
   ],
-  providers:[MailService]
+  providers:[MailService,UploadService],
+  exports:[UploadService]
 })
 export class AppModule {}

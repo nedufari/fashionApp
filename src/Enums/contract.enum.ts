@@ -22,3 +22,8 @@ export enum ContractOfferResponse{
     
 }
 
+export enum Negotiable{
+    NEGOTIABLE = "negotiable",
+    NON_NEGOTIABLE = "non_negotiable"
+}
+

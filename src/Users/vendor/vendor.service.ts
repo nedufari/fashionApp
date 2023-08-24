@@ -48,6 +48,7 @@ import { Like, getRepository } from 'typeorm';
 import { IModel, IModelResponse } from '../model/model.interface';
 import { IPhotographer } from '../photographers/photo.interface';
 import { KindOfModel } from '../../Enums/modelType.enum';
+import { UploadService } from '../../uploads.service';
 
 @Injectable()
 export class VendorService {
@@ -68,6 +69,7 @@ export class VendorService {
     private readonly offerripo: ContractOfferRepository,
     @InjectRepository(CounterContractsOfffer)
     private readonly counterripo: CounterContractOfferRepository,
+    private readonly fileuploadservice:UploadService
   ) {}
 
   private async verifyVendor(vendorid: string): Promise<vendorEntity> {
@@ -138,6 +140,7 @@ export class VendorService {
   async makepost(
     postdto: VendorMakePostDto,
     vendorid: string,
+    mediaFiles:Express.Multer.File[]
   ): Promise<IVendorPostResponse> {
     try {
       const vendor = await this.verifyVendor(vendorid);
@@ -148,15 +151,25 @@ export class VendorService {
       const contractModel = await this.verifyContract(cvnmodel);
       const contractPhotographer = await this.verifyContract(cvnphotographer);
 
-      const newpost = new VendorPostsEntity();
-      newpost.caption = postdto.caption;
-      newpost.media = postdto.media;
-      newpost.availability = postdto.availability;
-      newpost.cost = postdto.cost;
-      newpost.creditedModel = contractModel.model;
-      newpost.creditedPhotographer = contractPhotographer.photographer;
-      newpost.createdDate = new Date();
-      newpost.owner = vendor;
+      const mediaurls :string[] = []
+     
+
+      for (const file of mediaFiles){
+        const mediaurl =await this.fileuploadservice.uploadFile(file)
+        mediaurls.push(`http://localhost:3000/api/v1/customer/uploadfile/puplic/${mediaurl}`)
+      }
+
+      const newpost =  this.vendorpostrepository.create({
+        caption: postdto.caption,
+        media: mediaurls,
+        availability: postdto.availability,
+        cost: postdto.cost,
+        creditedModel: contractModel.model,
+        creditedPhotographer: contractPhotographer.photographer,
+        createdDate: new Date(),
+        owner: vendor,
+      });
+
       await this.vendorpostrepository.save(newpost);
 
       const customerResponses: IVendorPostResponse = {
@@ -184,6 +197,7 @@ export class VendorService {
   async Updateepost(
     postdto: VendorUpdatePostDto,
     vendorid: string,
+    mediaFiles:Express.Multer.File[]
   ): Promise<IVendorPostResponse> {
     try {
       const vendor = await this.verifyVendor(vendorid);
@@ -194,9 +208,19 @@ export class VendorService {
       const contractModel = await this.verifyContract(cvnmodel);
       const contractPhotographer = await this.verifyContract(cvnphotographer);
 
+      
+      const mediaurls :string[] = []
+     
+
+      for (const file of mediaFiles){
+        const mediaurl =await this.fileuploadservice.uploadFile(file)
+        mediaurls.push(`http://localhost:3000/api/v1/customer/uploadfile/puplic/${mediaurl}`)
+      }
+
+
       const newpost = new VendorPostsEntity();
       newpost.caption = postdto.caption;
-      newpost.media = postdto.media;
+      newpost.media = mediaurls;
       newpost.availability = postdto.availability;
       newpost.cost = postdto.cost;
       newpost.creditedModel = contractModel.model;
@@ -250,6 +274,8 @@ export class VendorService {
         cost: post.cost,
         availability: post.availability,
         createdDate: post.createdDate,
+        likes:post.likes,
+        likedBy:post.likedBy,
         owner: {
           display_photo: post.owner.id,
           brandname: post.owner.brandname,

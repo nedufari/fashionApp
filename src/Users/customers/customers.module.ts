@@ -7,10 +7,11 @@ import { CustomerService } from "./customers.service";
 import { CustomerControlller } from "./customers.controller";
 import { Replies } from "../../Entity/Activities/reply.entity";
 import { vendorEntity } from "../../Entity/Users/vendor.entity";
+import { UploadService } from "../../uploads.service";
 
 @Module({
     imports: [TypeOrmModule.forFeature([Comments,CustomerEntity,VendorPostsEntity,Replies,vendorEntity])],
-    providers:[CustomerService],
+    providers:[CustomerService,UploadService],
     controllers:[CustomerControlller]
 })
 

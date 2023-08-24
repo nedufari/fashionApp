@@ -1,28 +1,27 @@
-import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post, Query, UploadedFiles, UseInterceptors } from '@nestjs/common';
 import { VendorService } from './vendor.service';
 import {  AddLinesDto, UpdateVendorDataDto, VendorMakePostDto, VendorUpdatePostDto } from './vendor.dto';
 import { IVendorPostResponse } from '../../Entity/Posts/vendor.post.entity';
 import { ContractsOfffer } from '../../Entity/contractoffer.entity';
 import { CounterContractsOfffer } from '../../Entity/countercontractOffer.entity';
 import { IVendorResponse } from './vendor.interface';
+import { FilesInterceptor } from '@nestjs/platform-express';
 
 @Controller('vendor')
 export class VendorController {
   constructor(private readonly vendorservice: VendorService) {}
 
-  @Post(
-    'makepost/:vendorid/',
-  )
-  async MakePost(@Param('vendorid') vendorid: string, @Body() postdto: VendorMakePostDto,): Promise<IVendorPostResponse> {
-    const post = await this.vendorservice.makepost(postdto,vendorid,);
+  @Post('makepost/:vendorid/',)
+  @UseInterceptors(FilesInterceptor("media", 10))
+  async MakePost(@Param('vendorid') vendorid: string, @Body() postdto: VendorMakePostDto,@UploadedFiles() mediaFiles: Express.Multer.File[]): Promise<IVendorPostResponse> {
+    const post = await this.vendorservice.makepost(postdto,vendorid,mediaFiles);
     return post;
   }
 
-  @Patch(
-    'updatepost/:vendorid/',
-  )
-  async UpdatePost(@Param('vendorid') vendorid: string, @Body() postdto: VendorUpdatePostDto,): Promise<IVendorPostResponse> {
-    const post = await this.vendorservice.makepost(postdto,vendorid,);
+  @Patch('updatepost/:vendorid/',)
+  @UseInterceptors(FilesInterceptor("media", 10))
+  async UpdatePost(@Param('vendorid') vendorid: string, @Body() postdto: VendorUpdatePostDto,@UploadedFiles() mediaFiles: Express.Multer.File[]): Promise<IVendorPostResponse> {
+    const post = await this.vendorservice.Updateepost(postdto,vendorid,mediaFiles);
     return post;
   }
 

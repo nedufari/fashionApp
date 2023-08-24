@@ -1,5 +1,6 @@
 import { Comments } from "../../Entity/Activities/comment.entity"
 import { IRepliesResponses, Replies } from "../../Entity/Activities/reply.entity"
+import { Negotiable } from "../../Enums/contract.enum"
 import { KindOfModel } from "../../Enums/modelType.enum"
 import { Interests } from "../../Enums/niche.enum"
 import { PaymentPlan } from "../../Enums/paymentOption.enum"
@@ -76,7 +77,7 @@ export interface IModel{
     shoe_size:string 
     alternative_shoe_size:string
     pricerange: string 
-    negotiable:boolean
+    negotiable:Negotiable
     displayPicture:string
     kindofmodel:KindOfModel
     paymentplan:PaymentPlan
@@ -116,7 +117,7 @@ export interface IModelResponse{
     address:string 
     phone1:string 
     phone2:string 
-    lines: Interests[]
+    interests: Interests[]
     bio:string 
     fashion_genre:string 
     digital_photo:string 
@@ -181,7 +182,7 @@ export interface IModelResponse{
     shoe_size:string 
     alternative_shoe_size:string
     pricerange: string 
-    negotiable:boolean
+    negotiable:Negotiable
     displayPicture:string
     kindofmodel:KindOfModel
     paymentplan:PaymentPlan

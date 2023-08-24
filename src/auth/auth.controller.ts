@@ -1,6 +1,6 @@
 import { Body, Controller, HttpException, HttpStatus, Param, Patch, Post, Res,UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { AdultModelRegistrationDto, RegistrationDto, VendorRegistrationDto, kidsModeleRegistrationDto } from './dto/registrationdto';
+import { AdultModelRegistrationDto, RegistrationDto, RequestOtpResendDto, VendorRegistrationDto, kidsModeleRegistrationDto } from './dto/registrationdto';
 import { Logindto, VerifyOtpdto } from './dto/logindto';
 import { Response } from 'express';
 import { JwtGuard } from './guards/jwt.guards';
@@ -83,6 +83,12 @@ export class AuthController {
       } catch (error) {
         throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
       }
+    }
+
+    @Post('customer/request-otp-resend')
+    async requestOtpResend(@Body() requestOtpResendDto: RequestOtpResendDto): Promise<{ message: string }> {
+      await this.authservice.resendVendorOtp(requestOtpResendDto); // Assuming you have a method to send OTP
+      return { message: 'New OTP sent successfully' };
     }
 
     @Post('signup/vendor')

@@ -10,6 +10,7 @@ import { VendorMakePostDto } from "../Users/vendor/vendor.dto";
 import { VendorPostsEntity } from "../Entity/Posts/vendor.post.entity";
 import { Comments } from "../Entity/Activities/comment.entity";
 import { Replies } from "../Entity/Activities/reply.entity";
+import { Wallet } from "../Entity/wallet/wallet.entity";
 
 
 @EntityRepository(CustomerEntity)
@@ -61,6 +62,11 @@ export class CommentsRepository extends Repository <Comments>{
 
 @EntityRepository(Replies)
 export class RepliesRepository extends Repository <Replies>{
+
+}
+
+@EntityRepository(Wallet)
+export class WalletRepository extends Repository <Wallet>{
 
 }
 

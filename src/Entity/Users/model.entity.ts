@@ -1,6 +1,6 @@
 import { Column, CreateDateColumn, Double, Entity, Generated, JoinColumn, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Roles } from "../../Enums/roles.enum";
-import { ContractDuration, TypeOfContract } from "../../Enums/contract.enum";
+import { ContractDuration, Negotiable, TypeOfContract } from "../../Enums/contract.enum";
 import { KindOfModel } from "../../Enums/modelType.enum";
 import { PaymentPlan } from "../../Enums/paymentOption.enum";
 import { IModel } from "../../Users/model/model.interface";
@@ -248,8 +248,8 @@ caps_ize:string
     @Column({nullable:true})
     pricerange: string 
 
-    @Column({type:"boolean", default:true,nullable:true})
-    negotiable:boolean
+    @Column({type: 'enum', enum:Negotiable ,nullable:true})
+    negotiable:Negotiable
 
     @Column({nullable:true})
     displayPicture:string
@@ -315,8 +315,7 @@ caps_ize:string
     @OneToMany(()=>Replies,reply=>reply.model)
     replies:Replies[]
 
-    @OneToMany(()=>VendorPostsEntity,(vendorPost)=>vendorPost.creditedModel)
-    vendorPosts:VendorPostsEntity[]
+    
 
     // @OneToMany(()=> UserPostsEntity, (fd:UserPostsEntity)=>fd.owner)
     // posts:UserPostsEntity[]

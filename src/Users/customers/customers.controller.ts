@@ -1,13 +1,16 @@
-import { Body, Controller, Get, Param, Post, Query } from "@nestjs/common";
+import { Body, Controller, Get, Param, Patch, Post, Query, UploadedFile, UseInterceptors } from "@nestjs/common";
 import { CustomerService } from "./customers.service";
 import { ICustomerCommentResponse } from "../../Entity/Activities/comment.entity";
 import { CustomerMakeCommentDto, CustomerReplyDto, LikeDto } from "./customers.dto";
 import { ICustomerReplyResponse } from "../../Entity/Activities/reply.entity";
 import { IVendorPostResponse } from "../../Entity/Posts/vendor.post.entity";
+import { FileInterceptor } from "@nestjs/platform-express";
+import { UploadService } from "../../uploads.service";
 
 @Controller('customer')
 export class CustomerControlller{
-    constructor(private readonly customerservice:CustomerService){}
+    constructor(private readonly customerservice:CustomerService,
+      private readonly fileuploadservice:UploadService){}
 
     @Post('comment/:postid/:customerid')
     async MakePost(@Param('postid')postid:number,@Param('customerid')customerid:string,@Body()dto:CustomerMakeCommentDto):Promise<ICustomerCommentResponse>{
@@ -55,4 +58,17 @@ async searchVendorNiche(@Query('keyword') keyword: string,) {
     
   }
 }
+
+@Patch("/upload/:customerid")
+@UseInterceptors(FileInterceptor('file'))
+async updatePostPhoto(
+  @Param('customerid') customerid: string,
+  @UploadedFile() file: Express.Multer.File,
+):Promise<{message:string}>{
+  const filename = await this.fileuploadservice.uploadFile(file);
+  const upload = await this.customerservice.updateProfilePics( filename,customerid,);
+  return { message: ` file  uploaded successfully.` }
+}
+
+
 }

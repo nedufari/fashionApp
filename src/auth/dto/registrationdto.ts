@@ -1,7 +1,10 @@
-import { IsEmail, IsNotEmpty, IsString,IsNumber, IsEnum } from "class-validator"
+import { IsEmail, IsNotEmpty, IsString,IsNumber, IsEnum, IsStrongPassword } from "class-validator"
 import{} from "class-transformer"
 import { Roles } from "../../Enums/roles.enum"
 import { KindOfModel } from "../../Enums/modelType.enum"
+import { Match } from "../../match.decorator"
+
+
 
 export class RegistrationDto{
     //used by all models and photographer
@@ -11,7 +14,19 @@ export class RegistrationDto{
 
     @IsString()
     @IsNotEmpty()
+    @IsStrongPassword({
+        minLength: 8,
+        minLowercase: 1,
+        minNumbers: 1,
+        minSymbols: 1,
+        minUppercase: 1,
+      })
     password:string
+
+    @IsString()
+    @IsNotEmpty()
+    @Match('password', { message: 'Confirmation password does not match the new password.' })
+    confirmPassword:string 
 
     @IsString()
     @IsNotEmpty()
@@ -26,7 +41,19 @@ export class AdultModelRegistrationDto{
 
     @IsString()
     @IsNotEmpty()
+    @IsStrongPassword({
+        minLength:8,
+        minLowercase:1,
+        minNumbers:1,
+        minSymbols:1,
+        minUppercase:1
+    })
     password:string
+
+    @IsString()
+    @IsNotEmpty()
+    @Match('password', { message: 'Confirmation password does not match the new password.' })
+    confirmPassword:string 
 
     @IsString()
     @IsNotEmpty()
@@ -45,7 +72,19 @@ export class VendorRegistrationDto{
 
     @IsString()
     @IsNotEmpty()
+    @IsStrongPassword({
+        minLength:8,
+        minLowercase:1,
+        minNumbers:1,
+        minSymbols:1,
+        minUppercase:1
+    })
     password:string
+
+    @IsString()
+    @IsNotEmpty()
+    @Match('password', { message: 'Confirmation password does not match the new password.' })
+    confirmPassword:string 
 
     @IsString()
     @IsNotEmpty()
@@ -60,7 +99,20 @@ export class kidsModeleRegistrationDto{
 
     @IsString()
     @IsNotEmpty()
+    @IsStrongPassword({
+        minLength:8,
+        minLowercase:1,
+        minNumbers:1,
+        minSymbols:1,
+        minUppercase:1
+        
+    })
     password:string
+
+    @IsString()
+    @IsNotEmpty()
+    @Match('password', { message: 'Confirmation password does not match the new password.' })
+    confirmPassword:string 
 
     @IsString()
     @IsNotEmpty()
@@ -90,4 +142,12 @@ export class kidsModeleRegistrationDto{
 
 
 }
+
+export class RequestOtpResendDto {
+    @IsEmail()
+    email: string;
+
+    // @IsEnum(Roles)
+    // role:Roles
+  }
 

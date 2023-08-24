@@ -9,7 +9,7 @@
 import { ArrayNotEmpty, IsBoolean, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength } from "class-validator";
 import { KindOfModel } from "../../Enums/modelType.enum";
 import { PaymentPlan } from "../../Enums/paymentOption.enum";
-import { ContractDuration } from "../../Enums/contract.enum";
+import { ContractDuration, Negotiable } from "../../Enums/contract.enum";
 import { Interests } from "../../Enums/niche.enum";
 
 // passowrd change
@@ -80,11 +80,11 @@ export class AddInterestsDto {
 
 
 // update user Data
-export class UpdateModelDataDto{
+export class ModelPortfolioDto{
 
     @IsString()
     @IsOptional()
-    brandname:string 
+    username:string 
 
     @IsString()
     @IsOptional()
@@ -103,9 +103,7 @@ export class UpdateModelDataDto{
     @MaxLength(300)
     bio:string 
 
-    @IsString()
-    @IsOptional()
-    fashion_genre:string 
+    
 
     @IsString()
     @IsOptional()
@@ -342,17 +340,14 @@ export class UpdateModelDataDto{
     @IsOptional()
     pricerange: string 
 
-    @IsBoolean()
+    @IsEnum(Negotiable)
     @IsNotEmpty({message:'you must indicate if you are open for negotiation of your price range '})
-    negotiable:boolean
+    negotiable:Negotiable
 
     @IsString()
     @IsOptional()
     displayPicture:string
 
-    @IsEnum(KindOfModel)
-    @IsNotEmpty({message:'please select the kind of model you are'})
-    kindofmodel:KindOfModel
 
     @IsEnum(PaymentPlan)
     @IsNotEmpty({message:'please select your payment structure preference '})

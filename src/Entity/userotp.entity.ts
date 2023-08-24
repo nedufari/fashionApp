@@ -19,7 +19,7 @@ export interface IUserOtp {
     @Column()
     email: string;
 
-    @Column({type:'enum', enum:Roles, })
+    @Column({type:'enum', enum:Roles,nullable:true })
     role:Roles
 
     @Column({type:'boolean',default:false})

@@ -4,10 +4,7 @@
 
 
 import { IsBoolean, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength } from "class-validator";
-import { CutomerUpgrade, Roles } from "../../Enums/roles.enum";
-import { VendorUpdatePostDto } from "../vendor/vendor.dto";
-import { UpdateModelDataDto } from "../model/model.dto";
-import { UpdatePhotographerDataDto } from "../photographers/photo.dto";
+
 
 
 

@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import {AdultModelRegistrationDto, RegistrationDto,VendorRegistrationDto,kidsModeleRegistrationDto,} from './dto/registrationdto';
+import {AdultModelRegistrationDto, RegistrationDto,RequestOtpResendDto,VendorRegistrationDto,kidsModeleRegistrationDto,} from './dto/registrationdto';
 import { ConfigService } from '@nestjs/config';
 import { Logindto, VerifyOtpdto } from './dto/logindto';
 import { AdminEntityRepository, CustomerEntityRepository, ModelEntityRepository, NotificationsRepository, OtpRepository, PhotographerEntityRepository, VendorEntityRepository } from './auth.repository';
@@ -80,7 +80,7 @@ export class AuthService {
           `user with email: ${userdto.email} exists, please use another unique email`,
           HttpStatus.CONFLICT,
         );
-        await this.customerrepository.save(admin);
+        await this.adminrepository.save(admin);
 
       //2fa authentication 
     const emiailverificationcode= generate2FACode4digits()
@@ -490,7 +490,7 @@ export class AuthService {
     if (!findemail) throw new HttpException('the user does not match the owner of the otp',HttpStatus.NOT_FOUND)
     //find the otp privided if it matches with the otp stored 
     const findotp= await this.otprepository.findOne({where:{otp:verifyotpdto.otp}})
-    if (!findotp) throw new HttpException('you prided an invalid otp', HttpStatus.BAD_REQUEST)
+    if (!findotp) throw new HttpException('you provided an invalid otp,please go back to your mail and confirm the OTP sent to you', HttpStatus.BAD_REQUEST)
     
     //find if the otp is expired 
     if ( findotp.expiration_time <= new Date()) throw new HttpException('otp is expired please request for another one',HttpStatus.REQUEST_TIMEOUT)
@@ -498,7 +498,7 @@ export class AuthService {
     //return valid and the access token if the user matches 
 
     const customer = await this.vendorrepository.findOne({where:{email:verifyotpdto.email}})
-    if (customer.email !== findemail.email) throw new HttpException("this email does not match the customer recod we have ", HttpStatus.NOT_FOUND)
+    if (customer.email !== findemail.email) throw new HttpException("this email does not match the customer record we have ", HttpStatus.NOT_FOUND)
     else{
       customer.is_logged_in=true
       customer.is_verified=true
@@ -521,8 +521,38 @@ export class AuthService {
     return {isValid:true, accessToken}
     }
 
-
   }
+
+  async resendVendorOtp (dto:RequestOtpResendDto):Promise<{message:string}>{
+    const emailexsist = await this.vendorrepository.findOne({where: { email: dto.email },select: ['id', 'email','role']});
+      if (!emailexsist)
+        throw new HttpException(
+          `user with email: ${dto.email} exists, please use another unique email`,
+          HttpStatus.CONFLICT,
+        );
+     // Generate a new OTP
+     const emiailverificationcode= generate2FACode4digits() // Your OTP generation logic
+
+     // Save the OTP with expiration time
+     const fiveminuteslater=new Date()
+     await fiveminuteslater.setMinutes(fiveminuteslater.getMinutes()+5)
+     // Define OTP_EXPIRATION_MINUTES
+     const newOtp = this.otprepository.create({ 
+      email:dto.email, 
+      otp:emiailverificationcode, 
+      expiration_time: fiveminuteslater,
+      role: emailexsist.role
+    });
+     await this.otprepository.save(newOtp);
+ 
+     
+       //send mail 
+       await this.mailerservice.SendVerificationMail(newOtp.email,emiailverificationcode, emailexsist.brandname)
+
+       return {message:'New OTP sent successfully'}
+       
+   }
+  
 
   async chnangeVendorpassword(dto:ChangePasswordDto, customerid:string):Promise<{message:string}>{
     const customer = await this.vendorrepository.findOne({where:{VendorID:customerid}})

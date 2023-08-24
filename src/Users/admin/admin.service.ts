@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { CustomerEntity } from "../../Entity/Users/customer.entity";
-import { AdminEntityRepository, CustomerEntityRepository, ModelEntityRepository, NotificationsRepository, OtpRepository, PhotographerEntityRepository, VendorEntityRepository } from "../../auth/auth.repository";
+import { AdminEntityRepository, CustomerEntityRepository, ModelEntityRepository, NotificationsRepository, OtpRepository, PhotographerEntityRepository, VendorEntityRepository, WalletRepository } from "../../auth/auth.repository";
 import { ICustomer, ICustomerResponse } from "../customers/customers.interface";
 import { AdminEntity } from "../../Entity/Users/admin.entity";
 import { vendorEntity } from "../../Entity/Users/vendor.entity";
@@ -17,6 +17,7 @@ import { INotification, Notifications } from "../../Entity/Notification/notifica
 import { NotificationType } from "../../Enums/notificationTypes.enum";
 import { VerifyAccountDto } from "./admin.dto";
 import { ContractsOfffer, IContractOffer } from "../../Entity/contractoffer.entity";
+import { IWallet, IWalletResponse, Wallet } from "../../Entity/wallet/wallet.entity";
 
 @Injectable()
 export class AdminService{
@@ -28,7 +29,8 @@ export class AdminService{
     @InjectRepository(UserOtp)private otprepository:OtpRepository,
     @InjectRepository(Contracts)private contractsrepository:ContractRepository,
     @InjectRepository(ContractsOfffer)private contractoffersrepository:ContractOfferRepository,
-    @InjectRepository(Notifications)private notificationrepository:NotificationsRepository,){}
+    @InjectRepository(Notifications)private notificationrepository:NotificationsRepository,
+    @InjectRepository(Wallet) private readonly walletripo:WalletRepository,){}
 
     //get all customers
     async AdminGetAllCustomers():Promise<ICustomer[]>{
@@ -253,6 +255,30 @@ export class AdminService{
             // if (!admin) throw new HttpException(`admin with ${id} not found`,HttpStatus.NOT_FOUND)
             const notifications= await this.contractoffersrepository.find()
             return notifications
+        } catch (error) {
+            throw error
+            
+        }
+        
+    }
+
+    async AdminGetAllWallets():Promise<IWalletResponse[]>{
+        try {
+                //verify admin 
+            // const admin = this.adminrepository.findOne({where:{id:id}})
+            // if (!admin) throw new HttpException(`admin with ${id} not found`,HttpStatus.NOT_FOUND)
+            const wallets= await this.walletripo.find({relations:['owner'], select: ['walletid', 'balance', 'cratedDate'],})
+           
+            return wallets.map(wallet => ({
+                walletid: wallet.walletid,
+                balance: wallet.balance,
+                cratedDate: wallet.cratedDate,
+                owner: {
+                    digital_photo:wallet.owner.digital_photo,
+                    username:wallet.owner.username
+                    
+                },
+            }))
         } catch (error) {
             throw error
             

@@ -82,7 +82,7 @@ export class VendorPostsEntity implements IVendoPost{
     @Column({type:'enum',enum:Availability,nullable:false})
     availability:Availability
 
-    @Column({nullable:false})
+    @Column({nullable:true})
     cost:number
 
     @Column({nullable:true})

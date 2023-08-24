@@ -1,10 +1,11 @@
-import { Body, Controller, Get, Param,Post } from "@nestjs/common"
+import { Body, Controller, Get, Param,Patch,Post } from "@nestjs/common"
 import { ModelService } from "./model.service";
 import { ContractsOfffer } from "../../Entity/contractoffer.entity";
 import { CounterContractsOfffer } from "../../Entity/countercontractOffer.entity";
 import { AddLinesDto } from "../vendor/vendor.dto";
 import { IVendorPostResponse } from "../../Entity/Posts/vendor.post.entity";
-import { AddInterestsDto } from "./model.dto";
+import { AddInterestsDto, ModelPortfolioDto } from "./model.dto";
+import { IModelResponse } from "./model.interface";
 
 @Controller('model')
 export class ModelController{
@@ -20,13 +21,18 @@ export class ModelController{
         return await this.modelservice.getMyCounteroffers(model)
     }
 
-    @Post('lines/:vendor')
+    @Post('Interests/:vendor')
   async addlines(@Param('vendor')vendor:string,@Body()dto:AddInterestsDto){
-      return await this.modelservice.niche(vendor,dto)
+      return await this.modelservice.AddInterests(vendor,dto)
   }
 
 @Get('vendorposts')
 async GetallvendorPosts(): Promise<IVendorPostResponse[]>{
     return await this.modelservice.getAllPosts()
+}
+
+@Patch('portfolio/:modelid')
+async ModelPortfolio(@Body()dto:ModelPortfolioDto,@Param('modelid')modelid:string):Promise<IModelResponse>{
+    return await this.modelservice.createPortfolio(modelid,dto)
 }
 }

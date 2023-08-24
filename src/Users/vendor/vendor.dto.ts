@@ -46,7 +46,7 @@ export class VendorMakePostDto{
     media: string[];
 
     @IsNumber()
-    @IsNotEmpty()
+    @IsOptional()
     cost:number
 
     @IsEnum(Availability)
