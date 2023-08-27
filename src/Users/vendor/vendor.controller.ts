@@ -18,10 +18,10 @@ export class VendorController {
     return post;
   }
 
-  @Patch('updatepost/:vendorid/',)
+  @Patch('updatepost/:vendorid/:postid',)
   @UseInterceptors(FilesInterceptor("media", 10))
-  async UpdatePost(@Param('vendorid') vendorid: string, @Body() postdto: VendorUpdatePostDto,@UploadedFiles() mediaFiles: Express.Multer.File[]): Promise<IVendorPostResponse> {
-    const post = await this.vendorservice.Updateepost(postdto,vendorid,mediaFiles);
+  async UpdatePost(@Param('vendorid') vendorid: string,@Param('postid') postid: number, @Body() postdto: VendorUpdatePostDto,@UploadedFiles() mediaFiles: Express.Multer.File[]): Promise<IVendorPostResponse> {
+    const post = await this.vendorservice.Updateepost(postdto,vendorid,postid,mediaFiles);
     return post;
   }
 

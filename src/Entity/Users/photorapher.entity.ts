@@ -4,8 +4,9 @@ import { Roles } from "../../Enums/roles.enum"
 import { IPhotographer } from "../../Users/photographers/photo.interface"
 import { Comments } from "../Activities/comment.entity"
 import { Replies } from "../Activities/reply.entity"
-import { TypeOfContract } from "../../Enums/contract.enum"
+import { Negotiable, TypeOfContract } from "../../Enums/contract.enum"
 import { VendorPostsEntity } from "../Posts/vendor.post.entity"
+import { PhotographerTimelineEntity } from "../Posts/photographer.timeline.entity"
 
 @Entity()
 export class PhotographerEntity implements IPhotographer{
@@ -19,8 +20,7 @@ export class PhotographerEntity implements IPhotographer{
     email:string
 
     
-    @Column({unique:true,nullable:true})
-    brandname:string 
+   
 
     @Column({unique:true,nullable:true})
     username:string 
@@ -80,8 +80,8 @@ export class PhotographerEntity implements IPhotographer{
     @Column({nullable:true})
     pricerange: string 
 
-    @Column({type:"boolean", default:true,nullable:true})
-    negotiable:boolean
+    @Column({type:'enum',enum:Negotiable,nullable:true})
+    negotiable:Negotiable
 
     @Column({nullable:true})
     displayPicture:string
@@ -144,7 +144,7 @@ export class PhotographerEntity implements IPhotographer{
     @OneToMany(()=>Replies,reply=>reply.photographer)
     replies:Replies[]
 
-    @OneToMany(()=>VendorPostsEntity,(vendorPost)=>vendorPost.creditedPhotographer)
-    vendorPosts:VendorPostsEntity[]
+    @OneToMany(()=>PhotographerTimelineEntity,(modeltimeline)=>modeltimeline.owner)
+    myTimeline:PhotographerTimelineEntity[]
 
 }

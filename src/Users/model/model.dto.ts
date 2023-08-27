@@ -6,7 +6,7 @@
 // like 
 
 
-import { ArrayNotEmpty, IsBoolean, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength } from "class-validator";
+import { ArrayNotEmpty, IsArray, IsBoolean, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength } from "class-validator";
 import { KindOfModel } from "../../Enums/modelType.enum";
 import { PaymentPlan } from "../../Enums/paymentOption.enum";
 import { ContractDuration, Negotiable } from "../../Enums/contract.enum";
@@ -103,7 +103,6 @@ export class ModelPortfolioDto{
     @MaxLength(300)
     bio:string 
 
-    
 
     @IsString()
     @IsOptional()
@@ -341,7 +340,7 @@ export class ModelPortfolioDto{
     pricerange: string 
 
     @IsEnum(Negotiable)
-    @IsNotEmpty({message:'you must indicate if you are open for negotiation of your price range '})
+    @IsOptional()
     negotiable:Negotiable
 
     @IsString()
@@ -350,11 +349,19 @@ export class ModelPortfolioDto{
 
 
     @IsEnum(PaymentPlan)
-    @IsNotEmpty({message:'please select your payment structure preference '})
+    @IsOptional()
     paymentplan:PaymentPlan
 
 
+}
 
+export class ModelTimelineDto{
+    @IsString()
+    @IsOptional()
+    caption:string
 
+    @IsArray()
+    @IsOptional({ message: 'you can either post multiple video or image files' })
+    media: string[];
 
 }

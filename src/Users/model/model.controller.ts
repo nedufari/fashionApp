@@ -1,11 +1,13 @@
-import { Body, Controller, Get, Param,Patch,Post } from "@nestjs/common"
+import { Body, Controller, Delete, Get, Param,ParseUUIDPipe,Patch,Post, UploadedFiles, UseInterceptors } from "@nestjs/common"
 import { ModelService } from "./model.service";
 import { ContractsOfffer } from "../../Entity/contractoffer.entity";
 import { CounterContractsOfffer } from "../../Entity/countercontractOffer.entity";
 import { AddLinesDto } from "../vendor/vendor.dto";
 import { IVendorPostResponse } from "../../Entity/Posts/vendor.post.entity";
-import { AddInterestsDto, ModelPortfolioDto } from "./model.dto";
+import { AddInterestsDto, ModelPortfolioDto, ModelTimelineDto } from "./model.dto";
 import { IModelResponse } from "./model.interface";
+import { FilesInterceptor } from "@nestjs/platform-express";
+import { IModelTimeLineResponse } from "../../Entity/Posts/model.timeline.entity";
 
 @Controller('model')
 export class ModelController{
@@ -31,8 +33,35 @@ async GetallvendorPosts(): Promise<IVendorPostResponse[]>{
     return await this.modelservice.getAllPosts()
 }
 
-@Patch('portfolio/:modelid')
+@Patch('adult/portfolio/:modelid')
 async ModelPortfolio(@Body()dto:ModelPortfolioDto,@Param('modelid')modelid:string):Promise<IModelResponse>{
     return await this.modelservice.createPortfolio(modelid,dto)
 }
+
+
+@Post('timeline/:modelid/',)
+@UseInterceptors(FilesInterceptor("media", 10))
+async CreateTimeline(@Param('modelid') modelid: string, @Body() timelinedto: ModelTimelineDto,@UploadedFiles() mediaFiles: Express.Multer.File[]): Promise<IModelTimeLineResponse> {
+  const post = await this.modelservice.createAtimeline(timelinedto,modelid,mediaFiles);
+  return post;
+}
+
+@Patch('update-timeline/:modelid/:timelineid',)
+@UseInterceptors(FilesInterceptor("media", 10))
+async UpdatePost(@Param('modelid') modelid: string,@Param('timelineid') timelineid: number, @Body() timelinedto: ModelTimelineDto,@UploadedFiles() mediaFiles: Express.Multer.File[]): Promise<IModelTimeLineResponse> {
+  const post = await this.modelservice.UpdateAtimeline(timelinedto,timelineid,modelid,mediaFiles);
+  return post;
+}
+
+@Get('mytimelines/:modelid')
+async getMytimelines(@Param('modelid',ParseUUIDPipe)modelid:string,):Promise<IModelTimeLineResponse[]>{
+    return await this.modelservice.mytimeLines(modelid)
+}
+
+@Delete('takedown-timeline/:photoid/:timelineid')
+async takedowntimeline(@Param('photoid')photoid:string,@Param('timelineid')timelineid:number):Promise<{message:string}>{
+    return await this.modelservice.TakedownTimeline(photoid,timelineid)
+    
+}
+
 }

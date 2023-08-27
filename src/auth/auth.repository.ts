@@ -11,6 +11,8 @@ import { VendorPostsEntity } from "../Entity/Posts/vendor.post.entity";
 import { Comments } from "../Entity/Activities/comment.entity";
 import { Replies } from "../Entity/Activities/reply.entity";
 import { Wallet } from "../Entity/wallet/wallet.entity";
+import { ModelTimelineEntity } from "../Entity/Posts/model.timeline.entity";
+import { PhotographerTimelineEntity } from "../Entity/Posts/photographer.timeline.entity";
 
 
 @EntityRepository(CustomerEntity)
@@ -51,6 +53,16 @@ export class NotificationsRepository extends Repository <Notifications>{
 
 @EntityRepository(VendorPostsEntity)
 export class VendorMakePostRepository extends Repository <VendorPostsEntity>{
+
+}
+
+@EntityRepository(ModelTimelineEntity)
+export class ModelTimeLineRepository extends Repository <ModelTimelineEntity>{
+
+}
+
+@EntityRepository(PhotographerTimelineEntity)
+export class PhotographerTimeLineRepository extends Repository <PhotographerTimelineEntity>{
 
 }
 

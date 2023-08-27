@@ -337,6 +337,36 @@ export class AuthService {
 
   }
 
+  async resendCustomerOtp (dto:RequestOtpResendDto):Promise<{message:string}>{
+    const emailexsist = await this.customerrepository.findOne({where: { email: dto.email },select: ['id', 'email','role']});
+      if (!emailexsist)
+        throw new HttpException(
+          `user with email: ${dto.email} exists, please use another unique email`,
+          HttpStatus.CONFLICT,
+        );
+     // Generate a new OTP
+     const emiailverificationcode= generate2FACode4digits() // Your OTP generation logic
+
+     // Save the OTP with expiration time
+     const fiveminuteslater=new Date()
+     await fiveminuteslater.setMinutes(fiveminuteslater.getMinutes()+5)
+     // Define OTP_EXPIRATION_MINUTES
+     const newOtp = this.otprepository.create({ 
+      email:dto.email, 
+      otp:emiailverificationcode, 
+      expiration_time: fiveminuteslater,
+      role: emailexsist.role
+    });
+     await this.otprepository.save(newOtp);
+ 
+     
+       //send mail 
+       await this.mailerservice.SendVerificationMail(newOtp.email,emiailverificationcode, emailexsist.username)
+
+       return {message:'New OTP sent successfully'}
+       
+   }
+
   async chnangepassword(dto:ChangePasswordDto, customerid:string):Promise<{message:string}>{
     const customer = await this.customerrepository.findOne({where:{CustomerID:customerid}})
     if (!customer) throw new HttpException(`customer with ${customerid} does not exist and you cant be allowed to change a password`,HttpStatus.NOT_FOUND)
@@ -737,6 +767,37 @@ export class AuthService {
 
   }
 
+
+  async resendPhotographerOtp (dto:RequestOtpResendDto):Promise<{message:string}>{
+    const emailexsist = await this.photographerrepository.findOne({where: { email: dto.email },select: ['id', 'email','role']});
+      if (!emailexsist)
+        throw new HttpException(
+          `user with email: ${dto.email} exists, please use another unique email`,
+          HttpStatus.CONFLICT,
+        );
+     // Generate a new OTP
+     const emiailverificationcode= generate2FACode4digits() // Your OTP generation logic
+
+     // Save the OTP with expiration time
+     const fiveminuteslater=new Date()
+     await fiveminuteslater.setMinutes(fiveminuteslater.getMinutes()+5)
+     // Define OTP_EXPIRATION_MINUTES
+     const newOtp = this.otprepository.create({ 
+      email:dto.email, 
+      otp:emiailverificationcode, 
+      expiration_time: fiveminuteslater,
+      role: emailexsist.role
+    });
+     await this.otprepository.save(newOtp);
+ 
+     
+       //send mail 
+       await this.mailerservice.SendVerificationMail(newOtp.email,emiailverificationcode, emailexsist.username)
+
+       return {message:'New OTP sent successfully'}
+       
+   }
+
   async Photographerchnangepassword(dto:ChangePasswordDto, customerid:string):Promise<{message:string}>{
     const customer = await this.photographerrepository.findOne({where:{PhotographerID:customerid}})
     if (!customer) throw new HttpException(`customer with ${customerid} does not exist and you cant be allowed to change a password`,HttpStatus.NOT_FOUND)
@@ -918,9 +979,37 @@ export class AuthService {
 
     return {isValid:true, accessToken}
     }
-
-
   }
+
+  async resendKidsModelOtp (dto:RequestOtpResendDto):Promise<{message:string}>{
+    const emailexsist = await this.modelrepository.findOne({where: { email: dto.email },select: ['id', 'email','role']});
+      if (!emailexsist)
+        throw new HttpException(
+          `user with email: ${dto.email} exists, please use another unique email`,
+          HttpStatus.CONFLICT,
+        );
+     // Generate a new OTP
+     const emiailverificationcode= generate2FACode4digits() // Your OTP generation logic
+
+     // Save the OTP with expiration time
+     const fiveminuteslater=new Date()
+     await fiveminuteslater.setMinutes(fiveminuteslater.getMinutes()+5)
+     // Define OTP_EXPIRATION_MINUTES
+     const newOtp = this.otprepository.create({ 
+      email:dto.email, 
+      otp:emiailverificationcode, 
+      expiration_time: fiveminuteslater,
+      role: emailexsist.role
+    });
+     await this.otprepository.save(newOtp);
+ 
+     
+       //send mail 
+       await this.mailerservice.SendVerificationMail(newOtp.email,emiailverificationcode, emailexsist.username)
+
+       return {message:'New OTP sent successfully'}
+       
+   }
 
   async KidsModelchnangepassword(dto:ChangePasswordDto, customerid:string):Promise<{message:string}>{
     const customer = await this.modelrepository.findOne({where:{ModelID:customerid}})
@@ -1100,9 +1189,37 @@ export class AuthService {
 
     return {isValid:true, accessToken}
     }
-
-
   }
+
+  async resendAdultModelOtp (dto:RequestOtpResendDto):Promise<{message:string}>{
+    const emailexsist = await this.modelrepository.findOne({where: { email: dto.email },select: ['id', 'email','role']});
+      if (!emailexsist)
+        throw new HttpException(
+          `user with email: ${dto.email} exists, please use another unique email`,
+          HttpStatus.CONFLICT,
+        );
+     // Generate a new OTP
+     const emiailverificationcode= generate2FACode4digits() // Your OTP generation logic
+
+     // Save the OTP with expiration time
+     const fiveminuteslater=new Date()
+     await fiveminuteslater.setMinutes(fiveminuteslater.getMinutes()+5)
+     // Define OTP_EXPIRATION_MINUTES
+     const newOtp = this.otprepository.create({ 
+      email:dto.email, 
+      otp:emiailverificationcode, 
+      expiration_time: fiveminuteslater,
+      role: emailexsist.role
+    });
+     await this.otprepository.save(newOtp);
+ 
+     
+       //send mail 
+       await this.mailerservice.SendVerificationMail(newOtp.email,emiailverificationcode, emailexsist.username)
+
+       return {message:'New OTP sent successfully'}
+       
+   }
 
   async AdultModelchnangepassword(dto:ChangePasswordDto, customerid:string):Promise<{message:string}>{
     const customer = await this.modelrepository.findOne({where:{ModelID:customerid}})

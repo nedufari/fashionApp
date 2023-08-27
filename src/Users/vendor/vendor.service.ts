@@ -197,6 +197,7 @@ export class VendorService {
   async Updateepost(
     postdto: VendorUpdatePostDto,
     vendorid: string,
+    postid:number,
     mediaFiles:Express.Multer.File[]
   ): Promise<IVendorPostResponse> {
     try {
@@ -208,7 +209,8 @@ export class VendorService {
       const contractModel = await this.verifyContract(cvnmodel);
       const contractPhotographer = await this.verifyContract(cvnphotographer);
 
-      
+      const findpost = await this.vendorpostrepository.findOne({where:{id:postid}})
+      if (!findpost) throw new HttpException ('the post with the id does not exist',HttpStatus.NOT_FOUND)
       const mediaurls :string[] = []
      
 
@@ -218,29 +220,29 @@ export class VendorService {
       }
 
 
-      const newpost = new VendorPostsEntity();
-      newpost.caption = postdto.caption;
-      newpost.media = mediaurls;
-      newpost.availability = postdto.availability;
-      newpost.cost = postdto.cost;
-      newpost.creditedModel = contractModel.model;
-      newpost.creditedPhotographer = contractPhotographer.photographer;
-      newpost.createdDate = new Date();
-      newpost.owner = vendor;
-      await this.vendorpostrepository.save(newpost);
+      ;
+      findpost.caption = postdto.caption;
+      findpost.media = mediaurls;
+      findpost.availability = postdto.availability;
+      findpost.cost = postdto.cost;
+      findpost.creditedModel = contractModel.model;
+      findpost.creditedPhotographer = contractPhotographer.photographer;
+      findpost.createdDate = new Date();
+      findpost.owner = vendor;
+      await this.vendorpostrepository.save(findpost);
 
       const customerResponses: IVendorPostResponse = {
-        id: newpost.id,
-        creditedModel: newpost.creditedModel,
-        creditedPhotographer: newpost.creditedPhotographer,
-        media: newpost.media,
-        caption: newpost.caption,
-        cost: newpost.cost,
-        availability: newpost.availability,
-        createdDate: newpost.createdDate,
+        id: findpost.id,
+        creditedModel: findpost.creditedModel,
+        creditedPhotographer: findpost.creditedPhotographer,
+        media: findpost.media,
+        caption: findpost.caption,
+        cost: findpost.cost,
+        availability: findpost.availability,
+        createdDate: findpost.createdDate,
         owner: {
-          display_photo: newpost.owner.id,
-          brandname: newpost.owner.brandname,
+          display_photo: findpost.owner.id,
+          brandname: findpost.owner.brandname,
         },
       };
 

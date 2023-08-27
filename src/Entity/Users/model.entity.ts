@@ -8,6 +8,7 @@ import { Comments } from "../Activities/comment.entity";
 import { Replies } from "../Activities/reply.entity";
 import { VendorPostsEntity } from "../Posts/vendor.post.entity";
 import { Interests } from "../../Enums/niche.enum";
+import { ModelTimelineEntity } from "../Posts/model.timeline.entity";
 
 @Entity()
 export class ModelEntity implements IModel{
@@ -308,6 +309,9 @@ caps_ize:string
 
     @Column({nullable:true,type:"enum", enum:TypeOfContract})
     type_of_contract:TypeOfContract
+
+    @OneToMany(()=>ModelTimelineEntity,(modeltimeline)=>modeltimeline.owner)
+    myTimeline:ModelTimelineEntity[]
 
     @OneToMany(()=>Comments,comment=>comment.model)
     comments:Comments[]

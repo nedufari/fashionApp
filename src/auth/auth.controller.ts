@@ -86,10 +86,36 @@ export class AuthController {
     }
 
     @Post('customer/request-otp-resend')
-    async requestOtpResend(@Body() requestOtpResendDto: RequestOtpResendDto): Promise<{ message: string }> {
+    async CustomerrequestOtpResend(@Body() requestOtpResendDto: RequestOtpResendDto): Promise<{ message: string }> {
+      await this.authservice.resendCustomerOtp(requestOtpResendDto); // Assuming you have a method to send OTP
+      return { message: 'New OTP sent successfully' };
+    }
+
+    @Post('vendor/request-otp-resend')
+    async VendorrequestOtpResend(@Body() requestOtpResendDto: RequestOtpResendDto): Promise<{ message: string }> {
       await this.authservice.resendVendorOtp(requestOtpResendDto); // Assuming you have a method to send OTP
       return { message: 'New OTP sent successfully' };
     }
+
+    @Post('adult/request-otp-resend')
+    async AdultrequestOtpResend(@Body() requestOtpResendDto: RequestOtpResendDto): Promise<{ message: string }> {
+      await this.authservice.resendAdultModelOtp(requestOtpResendDto); // Assuming you have a method to send OTP
+      return { message: 'New OTP sent successfully' };
+    }
+
+
+    @Post('kid/request-otp-resend')
+    async KidrequestOtpResend(@Body() requestOtpResendDto: RequestOtpResendDto): Promise<{ message: string }> {
+      await this.authservice.resendKidsModelOtp(requestOtpResendDto); // Assuming you have a method to send OTP
+      return { message: 'New OTP sent successfully' };
+    }
+
+    @Post('photographer/request-otp-resend')
+    async requestOtpResend(@Body() requestOtpResendDto: RequestOtpResendDto): Promise<{ message: string }> {
+      await this.authservice.resendPhotographerOtp(requestOtpResendDto); // Assuming you have a method to send OTP
+      return { message: 'New OTP sent successfully' };
+    }
+
 
     @Post('signup/vendor')
     async Vendorsignup(@Body()dto:VendorRegistrationDto):Promise<{message:"welcome to ned fashion "}>{

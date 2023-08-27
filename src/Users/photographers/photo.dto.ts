@@ -6,7 +6,7 @@
 
 import { IsBoolean, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength } from "class-validator";
 import { PaymentPlan } from "../../Enums/paymentOption.enum";
-import { ContractDuration } from "../../Enums/contract.enum";
+import { ContractDuration, Negotiable } from "../../Enums/contract.enum";
 
 // contract 
 export class PhotographerContractWithVendor{
@@ -73,7 +73,7 @@ export class UpdatePhotographerDataDto{
 
     @IsString()
     @IsOptional()
-    brandname:string 
+    username:string 
 
     @IsString()
     @IsOptional()
@@ -106,11 +106,7 @@ export class UpdatePhotographerDataDto{
     @IsOptional()
     gender:string 
 
-    @IsString()
-    @IsOptional()
-    complexion:string 
-
-
+     
     @IsString()
     @IsOptional()
     facebook:string 
@@ -140,11 +136,11 @@ export class UpdatePhotographerDataDto{
     @IsOptional()
     pricerange: string 
 
-    @IsBoolean()
-    @IsNotEmpty({message:'you must indicate if you are open for negotiation of your price range '})
-    negotiable:boolean
+    @IsEnum(Negotiable)
+    @IsOptional()
+    negotiable:Negotiable
 
     @IsEnum(PaymentPlan)
-    @IsNotEmpty({message:'please select your payment structure preference '})
+    @IsOptional()
     paymentplan:PaymentPlan
 }

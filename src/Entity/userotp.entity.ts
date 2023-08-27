@@ -16,7 +16,7 @@ export interface IUserOtp {
     @PrimaryGeneratedColumn()
     id:number
 
-    @Column()
+    @Column({unique:false}) //so that one user can improve
     email: string;
 
     @Column({type:'enum', enum:Roles,nullable:true })

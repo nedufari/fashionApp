@@ -1,5 +1,6 @@
 import { Comments, ICommentResponses } from "../../Entity/Activities/comment.entity"
 import { IRepliesResponses, Replies } from "../../Entity/Activities/reply.entity"
+import { Negotiable } from "../../Enums/contract.enum"
 import { KindOfModel } from "../../Enums/modelType.enum"
 import { PaymentPlan } from "../../Enums/paymentOption.enum"
 
@@ -7,7 +8,7 @@ export interface IPhotographer{
     id:string,
     email:string,
     password:string
-    brandname:string 
+    username:string 
     address:string 
     phone1:string 
     phone2:string 
@@ -21,7 +22,7 @@ export interface IPhotographer{
     tiktok:string
     snapchat:string
     pricerange: string 
-    negotiable:boolean
+    negotiable:Negotiable
     displayPicture:string
     paymentplan:PaymentPlan
     is_active:boolean
@@ -43,7 +44,7 @@ export interface IPhotographer{
 }
 
 export interface IPhotographerResponse{
-    brandname:string 
+    username:string 
     address:string 
     phone1:string 
     phone2:string 
@@ -57,13 +58,11 @@ export interface IPhotographerResponse{
     tiktok:string
     snapchat:string
     pricerange: string 
-    negotiable:boolean
+    negotiable:Negotiable
     displayPicture:string
-    kindofmodel:KindOfModel
     paymentplan:PaymentPlan
     PhotographerID:string
-    comment:ICommentResponses[]
-    replies:IRepliesResponses[]
+   
 
 }
 
