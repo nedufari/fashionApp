@@ -6,6 +6,7 @@ import { ICustomerReplyResponse } from "../../Entity/Activities/reply.entity";
 import { IVendorPostResponse } from "../../Entity/Posts/vendor.post.entity";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { UploadService } from "../../uploads.service";
+import { INotificationResponse } from "../../Entity/Notification/notification.entity";
 
 @Controller('customer')
 export class CustomerControlller{
@@ -25,6 +26,11 @@ export class CustomerControlller{
     @Post('like/:postid/:customerid')
     async likeaPost(@Param('postid')postid:number,@Param('customerid')customerid:string,@Body()dto:LikeDto):Promise<{message:string}>{
         return await this.customerservice.likeAPost(postid,customerid,dto)
+    }
+
+    @Get('notification/:customer')
+    async findmyNotifications(@Param('customer')customer:string):Promise<INotificationResponse[]>{
+        return await this.customerservice.getMyNotifications(customer)
     }
 
     @Post('dislike/:postid/:customerid')

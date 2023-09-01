@@ -8,6 +8,7 @@ import { AddInterestsDto, ModelPortfolioDto, ModelTimelineDto } from "./model.dt
 import { IModelResponse } from "./model.interface";
 import { FilesInterceptor } from "@nestjs/platform-express";
 import { IModelTimeLineResponse } from "../../Entity/Posts/model.timeline.entity";
+import { INotificationResponse } from "../../Entity/Notification/notification.entity";
 
 @Controller('model')
 export class ModelController{
@@ -21,6 +22,11 @@ export class ModelController{
     @Get('mycounteroffers/:model')
     async findmyCounteroffers(@Param('model')model:string):Promise<CounterContractsOfffer[]>{
         return await this.modelservice.getMyCounteroffers(model)
+    }
+
+    @Get('notification/:model')
+    async findmyNotifications(@Param('model')model:string):Promise<INotificationResponse[]>{
+        return await this.modelservice.getMyNotifications(model)
     }
 
     @Post('Interests/:vendor')

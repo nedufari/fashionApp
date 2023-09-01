@@ -29,6 +29,22 @@ export enum NotificationType{
     vendor_liked_a_post="vendor_liked_a_post",
     vendor_replied_a_comment="vendor_replied_a_comment",
 
+    customer_Posted="customer_Posted",
+    customer_commented="customer_commented",
+    customer_Updated_a_post="customer_Updated_a_post",
+    customer_Uploaded_a_profilePicture="customer_Updated_a_profilePicture",
+    customer_deleted_a_post="customer_deleted_a_post",
+    customer_liked_a_post="customer_liked_a_post",
+    customer_disliked_a_post="customer_disliked_a_post",
+    customer_replied_a_comment="customer_replied_a_comment",
+
+    admin_Posted="admin_Posted",
+    admin_commented="admin_commented",
+    admin_Updated_a_post="admin_Updated_a_post",
+    admin_deleted_a_post="admin_deleted_a_post",
+    admin_liked_a_post="admin_liked_a_post",
+    admin_replied_a_comment="admin_replied_a_comment",
+
     model_Posted="model_Posted",
     model_commented="model_commented",
     model_Updated_a_post="model_Updated_a_post",

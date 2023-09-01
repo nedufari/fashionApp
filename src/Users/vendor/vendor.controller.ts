@@ -6,6 +6,7 @@ import { ContractsOfffer } from '../../Entity/contractoffer.entity';
 import { CounterContractsOfffer } from '../../Entity/countercontractOffer.entity';
 import { IVendorResponse } from './vendor.interface';
 import { FilesInterceptor } from '@nestjs/platform-express';
+import { INotificationResponse } from '../../Entity/Notification/notification.entity';
 
 @Controller('vendor')
 export class VendorController {
@@ -34,6 +35,11 @@ export class VendorController {
   @Get('mycounteroffers/:vendor')
   async findmyCounteroffers(@Param('vendor')vendor:string):Promise<CounterContractsOfffer[]>{
       return await this.vendorservice.getMyCounteroffers(vendor)
+  }
+
+  @Get('notification/:vendor')
+  async findmyNotifications(@Param('vendor')vendor:string):Promise<INotificationResponse[]>{
+      return await this.vendorservice.getMyNotifications(vendor)
   }
 
   @Get('myposts/:vendorid')

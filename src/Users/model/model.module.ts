@@ -8,9 +8,10 @@ import { CounterContractsOfffer } from "../../Entity/countercontractOffer.entity
 import { VendorPostsEntity } from "../../Entity/Posts/vendor.post.entity";
 import { UploadService } from "../../uploads.service";
 import { ModelTimelineEntity } from "../../Entity/Posts/model.timeline.entity";
+import { Notifications } from "../../Entity/Notification/notification.entity";
 
 @Module({
-    imports:[TypeOrmModule.forFeature([ContractsOfffer,ModelEntity,CounterContractsOfffer,VendorPostsEntity,ModelTimelineEntity])],
+    imports:[TypeOrmModule.forFeature([ContractsOfffer,ModelEntity,CounterContractsOfffer,VendorPostsEntity,ModelTimelineEntity,Notifications])],
     controllers:[ModelController],
     providers:[ModelService,UploadService]
 })

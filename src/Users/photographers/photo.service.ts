@@ -3,7 +3,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { ContractsOfffer } from "../../Entity/contractoffer.entity";
 import { ContractOfferRepository, CounterContractOfferRepository, VendorPostRepository } from "../../contract/contrct.repository";
 import { ModelEntity } from "../../Entity/Users/model.entity";
-import { ModelEntityRepository, PhotographerEntityRepository, PhotographerTimeLineRepository } from "../../auth/auth.repository";
+import { ModelEntityRepository, NotificationsRepository, PhotographerEntityRepository, PhotographerTimeLineRepository } from "../../auth/auth.repository";
 import { CounterContractsOfffer } from "../../Entity/countercontractOffer.entity";
 import { PhotographerEntity } from "../../Entity/Users/photorapher.entity";
 import { IVendorPostResponse, VendorPostsEntity } from "../../Entity/Posts/vendor.post.entity";
@@ -13,6 +13,8 @@ import { IPhotographerTimeLineResponse, PhotographerTimelineEntity } from "../..
 import { UpdatePhotographerDataDto } from "./photo.dto";
 import { IPhotographerResponse } from "./photo.interface";
 import { PolicyGuards } from "rckg-shared-library";
+import { INotificationResponse, Notifications } from "../../Entity/Notification/notification.entity";
+import { NotificationType } from "../../Enums/notificationTypes.enum";
 
 @Injectable()
 export class PhotographerService{
@@ -21,6 +23,7 @@ export class PhotographerService{
     @InjectRepository(CounterContractsOfffer) private readonly counterripo:CounterContractOfferRepository,
     @InjectRepository(VendorPostsEntity)private readonly vendorpostripo:VendorPostRepository,
     private readonly fileuploadservice:UploadService,
+    @InjectRepository(Notifications)private notificationrepository:NotificationsRepository,
     @InjectRepository(PhotographerTimelineEntity)
     private readonly phototimelineripo: PhotographerTimeLineRepository,){}
 
@@ -68,11 +71,32 @@ export class PhotographerService{
         }
       }
 
+      async getMyNotifications(photographer: string): Promise<INotificationResponse[]> {
+        const mynotifications = await this.notificationrepository.find({
+          where: { account: photographer },
+        });
+        if (!mynotifications || mynotifications.length === 0) {
+          throw new HttpException(
+            'No notifications found',
+            HttpStatus.NOT_FOUND,
+          );
+        }
+        const notificationResponse :INotificationResponse[] = mynotifications.map((notifcation)=>({
+          message: notifcation.message,
+          notification_type: notifcation.notification_type,
+          subject:notifcation.subject,
+          date : notifcation.date
+        }))
+          
+        
+        return notificationResponse;
+      }
+
 
   //create timeline 
   async createAtimeline(dto:ModelTimelineDto,modelid:string,mediaFiles:Express.Multer.File[]):Promise<IPhotographerTimeLineResponse>{
     try {
-      const model = await this.photoripo.findOne({ where: { PhotographerID: modelid } });
+      const model = await this.photoripo.findOne({ where: { id: modelid } });
       if (!model) throw new HttpException('model with the id not found',HttpStatus.NOT_FOUND)
   
   
@@ -92,6 +116,14 @@ export class PhotographerService{
           owner : model
         })
         await this.phototimelineripo.save(newpost)
+
+        //save the notification
+    const notification = new Notifications();
+    notification.account = model.id;
+    notification.subject = 'made a post!';
+    notification.notification_type = NotificationType.photographer_Posted;
+    notification.message = `Hello ${model.username}, just made a post `;
+    await this.notificationrepository.save(notification);
   
         const timelineresponse : IPhotographerTimeLineResponse = {
           id:newpost.id,
@@ -113,7 +145,7 @@ export class PhotographerService{
 
   async UpdateAtimeline(dto:ModelTimelineDto,timelineid:number,modelid:string,mediaFiles:Express.Multer.File[]):Promise<IPhotographerTimeLineResponse>{
     try {
-      const model = await this.photoripo.findOne({ where: { PhotographerID: modelid } });
+      const model = await this.photoripo.findOne({ where: { id: modelid } });
       if (!model) throw new HttpException('model with the id not found',HttpStatus.NOT_FOUND)
 
       const findtimeline = await this.phototimelineripo.findOne({where:{id:timelineid}})
@@ -136,6 +168,14 @@ export class PhotographerService{
           findtimeline.owner = model
         
         await this.phototimelineripo.save(findtimeline)
+
+        //save the notification
+    const notification = new Notifications();
+    notification.account = model.id;
+    notification.subject = 'Updated a post!';
+    notification.notification_type = NotificationType.photographer_Updated_a_post;
+    notification.message = `Hello ${model.username}, just updated a post `;
+    await this.notificationrepository.save(notification);
   
         const timelineresponse : IPhotographerTimeLineResponse = {
           id:findtimeline.id,
@@ -199,6 +239,15 @@ export class PhotographerService{
 
       //remov the post 
       await this.phototimelineripo.remove(findtimeline)
+
+      //save the notification
+    const notification = new Notifications();
+    notification.account = model.id;
+    notification.subject = 'deleted a post!';
+    notification.notification_type = NotificationType.photographer_deleted_a_post;
+    notification.message = `Hello ${model.username}, just deleted a post `;
+    await this.notificationrepository.save(notification);
+
       return {message:'timeline has been removed successfully'}
   
     } catch (error) {
@@ -230,6 +279,14 @@ export class PhotographerService{
     photographer.paymentplan = dto.paymentplan
 
     await this.photoripo.save(photographer)
+
+    //save the notification
+    const notification = new Notifications();
+    notification.account = photographer.id;
+    notification.subject = 'Updated portfolio!';
+    notification.notification_type = NotificationType.RECORD_UPDATED;
+    notification.message = `Hello ${photographer.username}, just updated its portfolio `;
+    await this.notificationrepository.save(notification);
 
     const photgrapherresponse :IPhotographerResponse = {
       username : photographer.username,

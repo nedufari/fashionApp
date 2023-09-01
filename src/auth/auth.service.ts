@@ -574,6 +574,14 @@ export class AuthService {
       role: emailexsist.role
     });
      await this.otprepository.save(newOtp);
+
+     //save the notification 
+     const notification = new Notifications()
+     notification.account= emailexsist.id
+     notification.subject="New Customer!"
+     notification.notification_type=NotificationType.OTP_VERIFICATION
+     notification.message=`Hello ${emailexsist.username}, an otp has been forwarded to your mail `
+     await this.notificationrepository.save(notification)
  
      
        //send mail 
@@ -789,6 +797,14 @@ export class AuthService {
       role: emailexsist.role
     });
      await this.otprepository.save(newOtp);
+
+     //save the notification 
+     const notification = new Notifications()
+     notification.account= emailexsist.id
+     notification.subject="New Customer!"
+     notification.notification_type=NotificationType.OTP_VERIFICATION
+     notification.message=`Hello ${emailexsist.username}, an otp has been sent to your mail `
+     await this.notificationrepository.save(notification)
  
      
        //send mail 
@@ -1002,6 +1018,14 @@ export class AuthService {
       role: emailexsist.role
     });
      await this.otprepository.save(newOtp);
+
+      //save the notification 
+      const notification = new Notifications()
+      notification.account= emailexsist.id
+      notification.subject="New Customer!"
+      notification.notification_type=NotificationType.OTP_VERIFICATION
+      notification.message=`Hello ${emailexsist.username}, an otp has been sent to your mail `
+      await this.notificationrepository.save(notification)
  
      
        //send mail 
@@ -1212,6 +1236,14 @@ export class AuthService {
       role: emailexsist.role
     });
      await this.otprepository.save(newOtp);
+
+      //save the notification 
+      const notification = new Notifications()
+      notification.account= emailexsist.id
+      notification.subject="New Customer!"
+      notification.notification_type=NotificationType.OTP_VERIFICATION
+      notification.message=`Hello ${emailexsist.username}, an otp has been sent to your mail `
+      await this.notificationrepository.save(notification)
  
      
        //send mail 
@@ -1296,7 +1328,7 @@ export class AuthService {
 
     const notification = new Notifications()
     notification.account= verifyuser.id,
-    notification.subject="New Customer!"
+    notification.subject="Password reset!"
     notification.notification_type=NotificationType.OTP_VERIFICATION
     notification.message=`Hello ${verifyuser.username}, password reset link verified and the password has been recently reseted `
     await this.notificationrepository.save(notification)
@@ -1362,6 +1394,14 @@ export class AuthService {
        //If the password matches, reset the login_count and unlock the account if needed
       findcustomer.login_count = 0;
       findcustomer.is_locked = false;
+
+       //save the notification 
+     const notification = new Notifications()
+     notification.account= findcustomer.id
+     notification.subject="customer logged in!"
+     notification.notification_type=NotificationType.LOGGED_IN
+     notification.message=`Hello ${findcustomer.username}, just logged in `
+     await this.notificationrepository.save(notification)
      
       const access_token =await this.signToken(findcustomer.id,findcustomer.email)
       return access_token
@@ -1393,6 +1433,13 @@ export class AuthService {
      //If the password matches, reset the login_count and unlock the account if needed
     findvendor.login_count = 0;
     findvendor.is_locked = false;
+    //save the notification 
+    const notification = new Notifications()
+    notification.account= findvendor.id
+    notification.subject="vendor logged in!"
+    notification.notification_type=NotificationType.LOGGED_IN
+    notification.message=`Hello ${findvendor.username}, just logged in `
+    await this.notificationrepository.save(notification)
 
 
     return await this.signToken(findvendor.id,findvendor.email)
@@ -1424,6 +1471,15 @@ export class AuthService {
      //If the password matches, reset the login_count and unlock the account if needed
     findkid.login_count = 0;
     findkid.is_locked = false;
+
+      //save the notification 
+      const notification = new Notifications()
+      notification.account= findkid.id
+      notification.subject="kidmodel just logged in!"
+      notification.notification_type=NotificationType.LOGGED_IN
+      notification.message=`Hello ${findkid.username}, just logged in `
+      await this.notificationrepository.save(notification)
+
     return await this.signToken(findkid.id,findkid.email)
 
   }
@@ -1453,6 +1509,15 @@ export class AuthService {
      //If the password matches, reset the login_count and unlock the account if needed
     findadult.login_count = 0;
     findadult.is_locked = false;
+
+    //save the notification 
+    const notification = new Notifications()
+    notification.account= findadult.id
+    notification.subject="model logged in!"
+    notification.notification_type=NotificationType.LOGGED_IN
+    notification.message=`Hello ${findadult.username}, just logged in `
+    await this.notificationrepository.save(notification)
+
     return await this.signToken(findadult.id,findadult.email)
 
   }
@@ -1482,6 +1547,15 @@ export class AuthService {
      //If the password matches, reset the login_count and unlock the account if needed
     findphotographer.login_count = 0;
     findphotographer.is_locked = false;
+
+    //save the notification 
+    const notification = new Notifications()
+    notification.account= findphotographer.id
+    notification.subject="Photographer just logged in!"
+    notification.notification_type=NotificationType.LOGGED_IN
+    notification.message=`Hello ${findphotographer.username}, just logged in `
+    await this.notificationrepository.save(notification)
+
     return await this.signToken(findphotographer.id,findphotographer.email)
 
   }
@@ -1512,6 +1586,14 @@ export class AuthService {
      //If the password matches, reset the login_count and unlock the account if needed
     findadmin.login_count = 0;
     findadmin.is_locked = false;
+
+    //save the notification 
+    const notification = new Notifications()
+    notification.account= findadmin.id
+    notification.subject="Admin user just logged in!"
+    notification.notification_type=NotificationType.LOGGED_IN
+    notification.message=`Hello ${findadmin.username}, just logged in `
+    await this.notificationrepository.save(notification)
     return await this.signToken(findadmin.id,findadmin.email)
 
   }

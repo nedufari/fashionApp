@@ -20,7 +20,7 @@ import {
 import { vendorEntity } from '../../Entity/Users/vendor.entity';
 import { PhotographerEntity } from '../../Entity/Users/photorapher.entity';
 import { ModelEntity } from '../../Entity/Users/model.entity';
-import { Notifications } from '../../Entity/Notification/notification.entity';
+import { INotificationResponse, Notifications } from '../../Entity/Notification/notification.entity';
 import {
   AddLinesDto,
   UpdateVendorDataDto,
@@ -28,18 +28,10 @@ import {
   VendorUpdatePostDto,
 } from './vendor.dto';
 import { Contracts } from '../../Entity/contracts.entity';
-import {
-  ContractOfferRepository,
-  ContractRepository,
-  CounterContractOfferRepository,
-  VendorPostRepository,
-} from '../../contract/contrct.repository';
+import {ContractOfferRepository,ContractRepository,CounterContractOfferRepository,VendorPostRepository,} from '../../contract/contrct.repository';
 import { Comments } from '../../Entity/Activities/comment.entity';
 import { MakeCommentDto } from '../model/model.dto';
-import {
-  ContractsOfffer,
-  IContractOffer,
-} from '../../Entity/contractoffer.entity';
+import {ContractsOfffer,IContractOffer,} from '../../Entity/contractoffer.entity';
 import { CounterContractsOfffer } from '../../Entity/countercontractOffer.entity';
 import { Availability } from '../../Enums/post.enum';
 import { IVendor, IVendorResponse } from './vendor.interface';
@@ -49,6 +41,7 @@ import { IModel, IModelResponse } from '../model/model.interface';
 import { IPhotographer } from '../photographers/photo.interface';
 import { KindOfModel } from '../../Enums/modelType.enum';
 import { UploadService } from '../../uploads.service';
+import { NotificationType } from '../../Enums/notificationTypes.enum';
 
 @Injectable()
 export class VendorService {
@@ -89,7 +82,7 @@ export class VendorService {
     photographerid: string,
   ): Promise<PhotographerEntity> {
     const photographer = await this.photographerrepository.findOne({
-      where: { PhotographerID: photographerid },
+      where: { id: photographerid },
     });
     if (!photographer) {
       throw new HttpException(
@@ -102,7 +95,7 @@ export class VendorService {
 
   private async verifyModel(modelid: string): Promise<ModelEntity> {
     const model = await this.modelrepository.findOne({
-      where: { ModelID: modelid },
+      where: { id: modelid },
     });
     if (!model) {
       throw new HttpException(
@@ -172,6 +165,14 @@ export class VendorService {
 
       await this.vendorpostrepository.save(newpost);
 
+      //save the notification
+    const notification = new Notifications();
+    notification.account = vendor.id;
+    notification.subject = 'made a post!';
+    notification.notification_type = NotificationType.vendor_Posted;
+    notification.message = `Hello ${vendor.brandname}, just made a post `;
+    await this.notificationrepository.save(notification);
+
       const customerResponses: IVendorPostResponse = {
         id: newpost.id,
         creditedModel: newpost.creditedModel,
@@ -230,6 +231,14 @@ export class VendorService {
       findpost.createdDate = new Date();
       findpost.owner = vendor;
       await this.vendorpostrepository.save(findpost);
+
+         //save the notification
+    const notification = new Notifications();
+    notification.account = vendor.id;
+    notification.subject = 'updated a post!';
+    notification.notification_type = NotificationType.vendor_Updated_a_post;
+    notification.message = `Hello ${vendor.brandname}, just made an update on a post `;
+    await this.notificationrepository.save(notification);
 
       const customerResponses: IVendorPostResponse = {
         id: findpost.id,
@@ -303,6 +312,14 @@ export class VendorService {
       (comment.vendor = post),
       await this.commentrepository.save(comment);
 
+         //save the notification
+    const notification = new Notifications();
+    notification.account = vendor.id;
+    notification.subject = 'made a post!';
+    notification.notification_type = NotificationType.vendor_Posted;
+    notification.message = `Hello ${vendor.brandname}, just made a post `;
+    await this.notificationrepository.save(notification);
+
     return { message: 'your comment has been sent ' };
   }
 
@@ -330,6 +347,27 @@ export class VendorService {
       );
     }
     return offersForModel;
+  }
+
+  async getMyNotifications(vendor: string): Promise<INotificationResponse[]> {
+    const mynotifications = await this.notificationrepository.find({
+      where: { account: vendor },
+    });
+    if (!mynotifications || mynotifications.length === 0) {
+      throw new HttpException(
+        'No notifications found',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    const notificationResponse :INotificationResponse[] = mynotifications.map((notifcation)=>({
+      message: notifcation.message,
+      notification_type: notifcation.notification_type,
+      subject:notifcation.subject,
+      date : notifcation.date
+    }))
+      
+    
+    return notificationResponse;
   }
 
   async UpdateVendor(
@@ -378,6 +416,14 @@ export class VendorService {
 
       await this.vendorrepository.save(vendor);
 
+         //save the notification
+    const notification = new Notifications();
+    notification.account = vendor.id;
+    notification.subject = 'update record!';
+    notification.notification_type = NotificationType.RECORD_UPDATED;
+    notification.message = `Hello ${vendor.brandname}, just made a an update in its records `;
+    await this.notificationrepository.save(notification);
+
       return vendor;
     } catch (error) {
       console.error('Error:', error);
@@ -405,6 +451,14 @@ export class VendorService {
 
       await this.vendorpostrepository.remove(post);
 
+         //save the notification
+    const notification = new Notifications();
+    notification.account = vendor.id;
+    notification.subject = 'deleted a post!';
+    notification.notification_type = NotificationType.vendor_deleted_a_post;
+    notification.message = `Hello ${vendor.brandname}, just deleted a post `;
+    await this.notificationrepository.save(notification);
+
       return {
         message: `post with id ${postid} has been deleted by ${vendor.brandname}`,
       };
@@ -415,7 +469,7 @@ export class VendorService {
 
   async niche(modelid: string, dto: AddLinesDto) {
     const vendor = await this.vendorrepository.findOne({
-      where: { VendorID: modelid },
+      where: { id: modelid },
     });
     if (!vendor)
       throw new HttpException(
@@ -463,6 +517,7 @@ export class VendorService {
       where: [
         { username: Like(`%${keyword}%`) },
         { kindofmodel: KindOfModel.KID},
+        { kindofmodel: KindOfModel.ADULT},
         { address: Like(`%${keyword}%`) },
         { gender: Like(`%${keyword}%`) },
         { complexion: Like(`%${keyword}%`) },

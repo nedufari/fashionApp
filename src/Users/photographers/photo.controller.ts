@@ -9,6 +9,7 @@ import { IPhotographerTimeLineResponse } from "../../Entity/Posts/photographer.t
 import { ModelTimelineDto } from "../model/model.dto";
 import { PhotographerUpdatePostDto, UpdatePhotographerDataDto } from "./photo.dto";
 import { IPhotographerResponse } from "./photo.interface";
+import { INotificationResponse } from "../../Entity/Notification/notification.entity";
 
 @Controller('photographer')
 export class PhotographerController{
@@ -46,6 +47,11 @@ async UpdatePost(@Param('modelid') modelid: string,@Param('timelineid') timeline
 @Get('mytimelines/:modelid')
 async getMytimelines(@Param('modelid',ParseUUIDPipe)modelid:string,):Promise<IPhotographerTimeLineResponse[]>{
     return await this.photoservice.mytimeLines(modelid)
+}
+
+@Get('notification/:photographer')
+async findmyNotifications(@Param('photographer')photographer:string):Promise<INotificationResponse[]>{
+    return await this.photoservice.getMyNotifications(photographer)
 }
 
 @Delete('takedown-timeline')

@@ -10,9 +10,10 @@ import { PhotographerEntity } from "../../Entity/Users/photorapher.entity";
 import { VendorPostsEntity } from "../../Entity/Posts/vendor.post.entity";
 import { PhotographerTimelineEntity } from "../../Entity/Posts/photographer.timeline.entity";
 import { UploadService } from "../../uploads.service";
+import { Notifications } from "../../Entity/Notification/notification.entity";
 
 @Module({
-    imports:[TypeOrmModule.forFeature([ContractsOfffer,ModelEntity,CounterContractsOfffer,PhotographerEntity,VendorPostsEntity,PhotographerTimelineEntity])],
+    imports:[TypeOrmModule.forFeature([ContractsOfffer,ModelEntity,CounterContractsOfffer,PhotographerEntity,VendorPostsEntity,PhotographerTimelineEntity,Notifications])],
     controllers:[PhotographerController],
     providers:[PhotographerService,UploadService]
 })

@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { CustomerEntity } from "../../Entity/Users/customer.entity";
-import { CommentsRepository, CustomerEntityRepository, RepliesRepository, VendorEntityRepository } from "../../auth/auth.repository";
+import { CommentsRepository, CustomerEntityRepository, NotificationsRepository, RepliesRepository, VendorEntityRepository } from "../../auth/auth.repository";
 import { CustomerMakeCommentDto, CustomerReplyDto, LikeDto, UpdateCustomerDataDto } from "./customers.dto";
 import { Comments, ICustomerCommentResponse } from "../../Entity/Activities/comment.entity";
 import { IVendorPostResponse, VendorPostsEntity } from "../../Entity/Posts/vendor.post.entity";
@@ -12,6 +12,8 @@ import { IVendor } from "../vendor/vendor.interface";
 import { Any, Like } from "typeorm";
 import { vendorEntity } from "../../Entity/Users/vendor.entity";
 import { Niche4Vendors } from "../../Enums/niche.enum";
+import { INotificationResponse, Notifications } from "../../Entity/Notification/notification.entity";
+import { NotificationType } from "../../Enums/notificationTypes.enum";
 
 @Injectable()
 export class CustomerService{
@@ -22,6 +24,7 @@ export class CustomerService{
     @InjectRepository(VendorPostsEntity)private readonly vendorpostripo:VendorPostRepository,
     @InjectRepository(Comments)private readonly commentripo:CommentsRepository,
     @InjectRepository(Replies)private readonly replyripo:RepliesRepository,
+    @InjectRepository(Notifications)private notificationrepository:NotificationsRepository,
     @InjectRepository(vendorEntity)
     private vendorrepository: VendorEntityRepository,
     ){}
@@ -46,6 +49,14 @@ export class CustomerService{
             comment.content = commentdto.comment,
             comment.customer =  customer
             await this.commentripo.save(comment)
+
+            //save the notification 
+      const notification = new Notifications()
+      notification.account= customer.id
+      notification.subject="made a comment!"
+      notification.notification_type=NotificationType.customer_commented
+      notification.message=`Hello ${customer.username}, just made a comment `
+      await this.notificationrepository.save(notification)
     
             const commentResponse : ICustomerCommentResponse = {
                 id: comment.id,
@@ -76,7 +87,7 @@ export class CustomerService{
             const findcomment = await this.commentripo.findOne({where:{id:commentid}})
         if (!findcomment) throw new HttpException('the post is not found',HttpStatus.NOT_FOUND)
 
-        const customer = await this.customerripository.findOne({where:{CustomerID:customerid}})
+        const customer = await this.customerripository.findOne({where:{id:customerid}})
         if (!customer) throw new HttpException('the customer  is not found',HttpStatus.NOT_FOUND)
 
         const reply = new Replies()
@@ -84,6 +95,14 @@ export class CustomerService{
         reply.comment = findcomment
         reply.customer = customer,
         await this.replyripo.save(reply)
+
+                  //save the notification 
+      const notification = new Notifications()
+      notification.account= customer.id
+      notification.subject="replied a comment!"
+      notification.notification_type=NotificationType.customer_replied_a_comment
+      notification.message=`Hello ${customer.username}, just replied a comment `
+      await this.notificationrepository.save(notification)
 
         const ReplyResponse : ICustomerReplyResponse = {
             id :reply.id,
@@ -118,7 +137,7 @@ export class CustomerService{
             throw new HttpException('The post is not found', HttpStatus.NOT_FOUND);
         }
     
-        const customer = await this.customerripository.findOne({ where: { CustomerID: customerid } });
+        const customer = await this.customerripository.findOne({ where: { id: customerid } });
         if (!customer) {
             throw new HttpException('The customer is not found', HttpStatus.NOT_FOUND);
         }
@@ -145,6 +164,14 @@ export class CustomerService{
             findpost.likedBy.push(customer.username);
             await this.vendorpostripo.save(findpost);
 
+                      //save the notification 
+      const notification = new Notifications()
+      notification.account= customer.id
+      notification.subject="liked a post!"
+      notification.notification_type=NotificationType.customer_liked_a_post
+      notification.message=`Hello ${customer.username}, just liked a post `
+      await this.notificationrepository.save(notification)
+
             this.logger.log(`this post ${findpost.caption} just got a like from ${customer.username} and the total number of like for the post is ${findpost.likes}`)
     
             return { message: 'You have liked this post' };
@@ -159,6 +186,27 @@ export class CustomerService{
         }
         
     }
+
+    async getMyNotifications(customer: string): Promise<INotificationResponse[]> {
+        const mynotifications = await this.notificationrepository.find({
+          where: { account: customer },
+        });
+        if (!mynotifications || mynotifications.length === 0) {
+          throw new HttpException(
+            'No notifications found',
+            HttpStatus.NOT_FOUND,
+          );
+        }
+        const notificationResponse :INotificationResponse[] = mynotifications.map((notifcation)=>({
+          message: notifcation.message,
+          notification_type: notifcation.notification_type,
+          subject:notifcation.subject,
+          date : notifcation.date
+        }))
+          
+        
+        return notificationResponse;
+      }
     
     
 //dislike a post 
@@ -169,7 +217,7 @@ export class CustomerService{
             throw new HttpException('The post is not found', HttpStatus.NOT_FOUND);
         }
     
-        const customer = await this.customerripository.findOne({ where: { CustomerID: customerid } });
+        const customer = await this.customerripository.findOne({ where: { id: customerid } });
         if (!customer) {
             throw new HttpException('The customer is not found', HttpStatus.NOT_FOUND);
         }
@@ -195,6 +243,14 @@ export class CustomerService{
             findpost.dislikedBy = findpost.likedBy || [];
             findpost.dislikedBy.push(customer.username);
             await this.vendorpostripo.save(findpost);
+
+                      //save the notification 
+      const notification = new Notifications()
+      notification.account= customer.id
+      notification.subject="disliked a post!"
+      notification.notification_type=NotificationType.customer_disliked_a_post
+      notification.message=`Hello ${customer.username}, just disliked a post `
+      await this.notificationrepository.save(notification)
 
             this.logger.log(`this post ${findpost.caption} just got a dislike from ${customer.username} and the total number of like for the post is ${findpost.likes}`)
     
@@ -341,6 +397,14 @@ export class CustomerService{
                 //update picture 
                 customer.digital_photo = fileurl
                 await this.customerripository.save(customer)
+
+                          //save the notification 
+      const notification = new Notifications()
+      notification.account= customer.id
+      notification.subject="uploaded a profile picture!"
+      notification.notification_type=NotificationType.customer_Uploaded_a_profilePicture
+      notification.message=`Hello ${customer.username}, just uploaded a profile picture `
+      await this.notificationrepository.save(notification)
 
                 return {message: customer.digital_photo}
                 

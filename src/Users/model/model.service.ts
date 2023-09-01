@@ -7,18 +7,31 @@ import {
   VendorPostRepository,
 } from '../../contract/contrct.repository';
 import { ModelEntity } from '../../Entity/Users/model.entity';
-import { ModelEntityRepository, ModelTimeLineRepository } from '../../auth/auth.repository';
+import {
+  ModelEntityRepository,
+  ModelTimeLineRepository,
+  NotificationsRepository,
+} from '../../auth/auth.repository';
 import { CounterContractsOfffer } from '../../Entity/countercontractOffer.entity';
 import { AddLinesDto } from '../vendor/vendor.dto';
-import { AddInterestsDto, ModelPortfolioDto, ModelTimelineDto } from './model.dto';
+import {
+  AddInterestsDto,
+  ModelPortfolioDto,
+  ModelTimelineDto,
+} from './model.dto';
 import {
   IVendorPostResponse,
   VendorPostsEntity,
 } from '../../Entity/Posts/vendor.post.entity';
 import { IModelResponse } from './model.interface';
 import { loggers } from 'winston';
-import { IModelTimeLineResponse, ModelTimelineEntity } from '../../Entity/Posts/model.timeline.entity';
+import {
+  IModelTimeLineResponse,
+  ModelTimelineEntity,
+} from '../../Entity/Posts/model.timeline.entity';
 import { UploadService } from '../../uploads.service';
+import { INotificationResponse, Notifications } from '../../Entity/Notification/notification.entity';
+import { NotificationType } from '../../Enums/notificationTypes.enum';
 
 @Injectable()
 export class ModelService {
@@ -33,7 +46,9 @@ export class ModelService {
     private readonly vendorpostripo: VendorPostRepository,
     @InjectRepository(ModelTimelineEntity)
     private readonly modeltimelineripo: ModelTimeLineRepository,
-    private readonly fileuploadservice:UploadService
+    private readonly fileuploadservice: UploadService,
+    @InjectRepository(Notifications)
+    private notificationrepository: NotificationsRepository,
   ) {}
 
   async getMyoffers(model: string): Promise<ContractsOfffer[]> {
@@ -63,7 +78,7 @@ export class ModelService {
   }
 
   async AddInterests(modelid: string, dto: AddInterestsDto) {
-    const model = await this.modelripo.findOne({ where: { ModelID: modelid } });
+    const model = await this.modelripo.findOne({ where: { id: modelid } });
     if (!model)
       throw new HttpException(
         `you are not a legitimate model on this platform and therefore you cannot perform this task`,
@@ -72,6 +87,14 @@ export class ModelService {
 
     model.interests = dto.interests;
     await this.modelripo.save(model);
+
+    //save the notification
+    const notification = new Notifications();
+    notification.account = model.id;
+    notification.subject = 'Updated portfolio!';
+    notification.notification_type = NotificationType.RECORD_UPDATED;
+    notification.message = `Hello ${model.username}, just updated its portfolio `;
+    await this.notificationrepository.save(notification);
     return model;
   }
 
@@ -106,7 +129,7 @@ export class ModelService {
     modelid: string,
     dto: ModelPortfolioDto,
   ): Promise<IModelResponse> {
-    const model = await this.modelripo.findOne({ where: { ModelID: modelid } });
+    const model = await this.modelripo.findOne({ where: { id: modelid } });
     if (!model)
       throw new HttpException(
         `you are not a legitimate model on this platform and therefore you cannot perform this task`,
@@ -172,149 +195,229 @@ export class ModelService {
       (model.cratedDate = new Date()),
       await this.modelripo.save(model);
 
+      //save the notification
+    const notification = new Notifications();
+    notification.account = model.id;
+    notification.subject = 'Updated portfolio!';
+    notification.notification_type = NotificationType.RECORD_UPDATED;
+    notification.message = `Hello ${model.username}, just updated its portfolio `;
+    await this.notificationrepository.save(notification);
+
     return model;
   }
 
-
-  //create timeline 
-  async createAtimeline(dto:ModelTimelineDto,modelid:string,mediaFiles:Express.Multer.File[]):Promise<IModelTimeLineResponse>{
-    try {
-      const model = await this.modelripo.findOne({ where: { ModelID: modelid } });
-      if (!model) throw new HttpException('model with the id not found',HttpStatus.NOT_FOUND)
-  
-  
-      const mediaurls :string[] = []
-       
-  
-        for (const file of mediaFiles){
-          const mediaurl =await this.fileuploadservice.uploadFile(file)
-          mediaurls.push(`http://localhost:3000/api/v1/customer/uploadfile/puplic/${mediaurl}`)
-        }
-  
-        //create a post 
-        const newpost = await this.modeltimelineripo.create({
-          caption : dto.caption,
-          media : mediaurls,
-          createdDate : new Date(),
-          owner : model
-        })
-        await this.modeltimelineripo.save(newpost)
-  
-        const timelineresponse : IModelTimeLineResponse = {
-          id:newpost.id,
-          media : newpost.media,
-          caption : newpost.caption,
-          createdDate : newpost.createdDate,
-          owner :{
-            digital_photo : newpost.owner.digital_photo,
-            username : newpost.owner.username
-          }
-        }
-        return timelineresponse
-      
-    } catch (error) {
-      throw error  
-    }
-  }
-
-
-  async UpdateAtimeline(dto:ModelTimelineDto,timelineid:number,modelid:string,mediaFiles:Express.Multer.File[]):Promise<IModelTimeLineResponse>{
-    try {
-      const model = await this.modelripo.findOne({ where: { ModelID: modelid } });
-      if (!model) throw new HttpException('model with the id not found',HttpStatus.NOT_FOUND)
-
-      const findtimeline = await this.modeltimelineripo.findOne({where:{id:timelineid}})
-      if (!findtimeline) throw new HttpException ('the post with the id does not exist',HttpStatus.NOT_FOUND)
-  
-  
-      const mediaurls :string[] = []
-       
-  
-        for (const file of mediaFiles){
-          const mediaurl =await this.fileuploadservice.uploadFile(file)
-          mediaurls.push(`http://localhost:3000/api/v1/customer/uploadfile/puplic/${mediaurl}`)
-        }
-  
-        //create a post 
-        
-          findtimeline.caption = dto.caption,
-          findtimeline.media = mediaurls,
-          findtimeline.createdDate = new Date(),
-          findtimeline.owner = model
-        
-        await this.modeltimelineripo.save(findtimeline)
-  
-        const timelineresponse : IModelTimeLineResponse = {
-          id:findtimeline.id,
-          media : findtimeline.media,
-          caption : findtimeline.caption,
-          createdDate : findtimeline.createdDate,
-          owner :{
-            digital_photo : findtimeline.owner.digital_photo,
-            username : findtimeline.owner.username
-          }
-        }
-        return timelineresponse
-      
-    } catch (error) {
-      throw error  
-    }
-  }
-
-
-  async  mytimeLines(modelid:string):Promise<IModelTimeLineResponse[]>{
+  //create timeline
+  async createAtimeline(
+    dto: ModelTimelineDto,
+    modelid: string,
+    mediaFiles: Express.Multer.File[],
+  ): Promise<IModelTimeLineResponse> {
     try {
       const model = await this.modelripo.findOne({ where: { id: modelid } });
-      if (!model) throw new HttpException('model with the id not found',HttpStatus.NOT_FOUND)
+      if (!model)
+        throw new HttpException(
+          'model with the id not found',
+          HttpStatus.NOT_FOUND,
+        );
+
+      const mediaurls: string[] = [];
+
+      for (const file of mediaFiles) {
+        const mediaurl = await this.fileuploadservice.uploadFile(file);
+        mediaurls.push(
+          `http://localhost:3000/api/v1/customer/uploadfile/puplic/${mediaurl}`,
+        );
+      }
+
+      //create a post
+      const newpost = await this.modeltimelineripo.create({
+        caption: dto.caption,
+        media: mediaurls,
+        createdDate: new Date(),
+        owner: model,
+      });
+      await this.modeltimelineripo.save(newpost);
+
+      //save the notification
+    const notification = new Notifications();
+    notification.account = model.id;
+    notification.subject = 'made a post!';
+    notification.notification_type = NotificationType.model_Posted;
+    notification.message = `Hello ${model.username}, just made a post `;
+    await this.notificationrepository.save(notification);
+
+      const timelineresponse: IModelTimeLineResponse = {
+        id: newpost.id,
+        media: newpost.media,
+        caption: newpost.caption,
+        createdDate: newpost.createdDate,
+        owner: {
+          digital_photo: newpost.owner.digital_photo,
+          username: newpost.owner.username,
+        },
+      };
+      return timelineresponse;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async UpdateAtimeline(
+    dto: ModelTimelineDto,
+    timelineid: number,
+    modelid: string,
+    mediaFiles: Express.Multer.File[],
+  ): Promise<IModelTimeLineResponse> {
+    try {
+      const model = await this.modelripo.findOne({ where: { id: modelid } });
+      if (!model)
+        throw new HttpException(
+          'model with the id not found',
+          HttpStatus.NOT_FOUND,
+        );
+
+      const findtimeline = await this.modeltimelineripo.findOne({
+        where: { id: timelineid },
+      });
+      if (!findtimeline)
+        throw new HttpException(
+          'the post with the id does not exist',
+          HttpStatus.NOT_FOUND,
+        );
+
+      const mediaurls: string[] = [];
+
+      for (const file of mediaFiles) {
+        const mediaurl = await this.fileuploadservice.uploadFile(file);
+        mediaurls.push(
+          `http://localhost:3000/api/v1/customer/uploadfile/puplic/${mediaurl}`,
+        );
+      }
+
+      //create a post
+
+      (findtimeline.caption = dto.caption),
+        (findtimeline.media = mediaurls),
+        (findtimeline.createdDate = new Date()),
+        (findtimeline.owner = model);
+
+      await this.modeltimelineripo.save(findtimeline);
+
+      //save the notification
+    const notification = new Notifications();
+    notification.account = model.id;
+    notification.subject = 'Updated a post!';
+    notification.notification_type = NotificationType.model_Updated_a_post;
+    notification.message = `Hello ${model.username}, just updated a post`;
+    await this.notificationrepository.save(notification);
+
+      const timelineresponse: IModelTimeLineResponse = {
+        id: findtimeline.id,
+        media: findtimeline.media,
+        caption: findtimeline.caption,
+        createdDate: findtimeline.createdDate,
+        owner: {
+          digital_photo: findtimeline.owner.digital_photo,
+          username: findtimeline.owner.username,
+        },
+      };
+      return timelineresponse;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async mytimeLines(modelid: string): Promise<IModelTimeLineResponse[]> {
+    try {
+      const model = await this.modelripo.findOne({ where: { id: modelid } });
+      if (!model)
+        throw new HttpException(
+          'model with the id not found',
+          HttpStatus.NOT_FOUND,
+        );
 
       const modeltimeline = await this.modeltimelineripo
-      .createQueryBuilder('timeline')
-      .leftJoinAndSelect('timeline.owner','owner')
-      .where('owner.id = :modelid',{modelid:model.id})
-      .getMany()
+        .createQueryBuilder('timeline')
+        .leftJoinAndSelect('timeline.owner', 'owner')
+        .where('owner.id = :modelid', { modelid: model.id })
+        .getMany();
 
-      const timelineresponses:IModelTimeLineResponse[] = modeltimeline.map((timeline)=>({
-        id:timeline.id,
-        media:timeline.media,
-        caption :timeline.caption,
-        likes:timeline.likes,
-        dislikes:timeline.dislikes,
-        createdDate :timeline.createdDate,
-        owner:{
-          digital_photo:timeline.owner.digital_photo,
-          username :timeline.owner.username
-        }
-      }))
-      return timelineresponses
-
-      
-      
+      const timelineresponses: IModelTimeLineResponse[] = modeltimeline.map(
+        (timeline) => ({
+          id: timeline.id,
+          media: timeline.media,
+          caption: timeline.caption,
+          likes: timeline.likes,
+          dislikes: timeline.dislikes,
+          createdDate: timeline.createdDate,
+          owner: {
+            digital_photo: timeline.owner.digital_photo,
+            username: timeline.owner.username,
+          },
+        }),
+      );
+      return timelineresponses;
     } catch (error) {
-      throw error
-      
+      throw error;
     }
   }
 
-  async TakedownTimeline(photoid:string,timelineid:number):Promise<{message:string}>{
+  async TakedownTimeline(
+    photoid: string,
+    timelineid: number,
+  ): Promise<{ message: string }> {
     try {
-      
       const model = await this.modelripo.findOne({ where: { id: photoid } });
-      if (!model) throw new HttpException('model with the id not found',HttpStatus.NOT_FOUND)
+      if (!model)
+        throw new HttpException(
+          'model with the id not found',
+          HttpStatus.NOT_FOUND,
+        );
 
-      const findtimeline = await this.modeltimelineripo.findOne({where:{id:timelineid}})
-      if (!findtimeline) throw new HttpException ('the post with the id does not exist',HttpStatus.NOT_FOUND)
+      const findtimeline = await this.modeltimelineripo.findOne({
+        where: { id: timelineid },
+      });
+      if (!findtimeline)
+        throw new HttpException(
+          'the post with the id does not exist',
+          HttpStatus.NOT_FOUND,
+        );
 
-      //remov the post 
-      await this.modeltimelineripo.remove(findtimeline)
-      return {message:'timeline has been removed successfully'}
-  
+      //remov the post
+      await this.modeltimelineripo.remove(findtimeline);
+
+      //save the notification
+    const notification = new Notifications();
+    notification.account = model.id;
+    notification.subject = 'deleted a post!';
+    notification.notification_type = NotificationType.model_deleted_a_post;
+    notification.message = `Hello ${model.username}, just deleted a post `;
+    await this.notificationrepository.save(notification);
+
+      return { message: 'timeline has been removed successfully' };
     } catch (error) {
-      throw error 
-      
+      throw error;
     }
-
   }
 
-
-  
+  async getMyNotifications(model: string): Promise<INotificationResponse[]> {
+    const mynotifications = await this.notificationrepository.find({
+      where: { account: model },
+    });
+    if (!mynotifications || mynotifications.length === 0) {
+      throw new HttpException(
+        'No notifications found',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    const notificationResponse :INotificationResponse[] = mynotifications.map((notifcation)=>({
+      message: notifcation.message,
+      notification_type: notifcation.notification_type,
+      subject:notifcation.subject,
+      date : notifcation.date
+    }))
+      
+    
+    return notificationResponse;
+  }
 }

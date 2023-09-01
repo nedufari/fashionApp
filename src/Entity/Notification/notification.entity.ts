@@ -42,3 +42,13 @@ export interface INotification{
 
     
 }
+
+export interface INotificationResponse{
+    notification_type:NotificationType
+    message:string
+    subject:string
+    date:Date
+   
+
+    
+}
