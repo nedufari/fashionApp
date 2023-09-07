@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param,ParseUUIDPipe,Patch,Post, UploadedFiles, UseInterceptors } from "@nestjs/common"
+import { Body, Controller, Delete, ForbiddenException, Get, Param,ParseUUIDPipe,Patch,Post, Req, UploadedFiles, UseGuards, UseInterceptors } from "@nestjs/common"
 import { ModelService } from "./model.service";
 import { ContractsOfffer } from "../../Entity/contractoffer.entity";
 import { CounterContractsOfffer } from "../../Entity/countercontractOffer.entity";
@@ -9,8 +9,10 @@ import { IModelResponse } from "./model.interface";
 import { FilesInterceptor } from "@nestjs/platform-express";
 import { IModelTimeLineResponse } from "../../Entity/Posts/model.timeline.entity";
 import { INotificationResponse } from "../../Entity/Notification/notification.entity";
+import { JwtGuard } from "../../auth/guards/jwt.guards";
 
 @Controller('model')
+@UseGuards(JwtGuard)
 export class ModelController{
     constructor(private readonly modelservice:ModelService){}
 
@@ -39,8 +41,16 @@ async GetallvendorPosts(): Promise<IVendorPostResponse[]>{
     return await this.modelservice.getAllPosts()
 }
 
+@UseGuards(JwtGuard)
 @Patch('adult/portfolio/:modelid')
-async ModelPortfolio(@Body()dto:ModelPortfolioDto,@Param('modelid')modelid:string):Promise<IModelResponse>{
+async ModelPortfolio(@Body()dto:ModelPortfolioDto,@Param('modelid')modelid:string,@Req() request):Promise<IModelResponse>{
+    const userIdFromToken = await request.user.id; 
+    console.log(userIdFromToken)
+
+    // Check if the user is trying to perform the action on their own account
+    if (userIdFromToken !== modelid) {
+      throw new ForbiddenException("You are not authorized to perform this action on another user's account.");
+    }
     return await this.modelservice.createPortfolio(modelid,dto)
 }
 

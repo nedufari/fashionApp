@@ -9,9 +9,11 @@ import { VendorPostsEntity } from "../../Entity/Posts/vendor.post.entity";
 import { UploadService } from "../../uploads.service";
 import { ModelTimelineEntity } from "../../Entity/Posts/model.timeline.entity";
 import { Notifications } from "../../Entity/Notification/notification.entity";
+import { Replies } from "../../Entity/Activities/reply.entity";
+import { Comments } from "../../Entity/Activities/comment.entity";
 
 @Module({
-    imports:[TypeOrmModule.forFeature([ContractsOfffer,ModelEntity,CounterContractsOfffer,VendorPostsEntity,ModelTimelineEntity,Notifications])],
+    imports:[TypeOrmModule.forFeature([ContractsOfffer,ModelEntity,CounterContractsOfffer,VendorPostsEntity,ModelTimelineEntity,Notifications,Replies,Comments])],
     controllers:[ModelController],
     providers:[ModelService,UploadService]
 })

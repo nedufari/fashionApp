@@ -33,11 +33,18 @@ interface ICommentReplied {
     comment:string
     
 }
-
 export interface ICustomerReplyResponse {
     id: number
     reply: string
     customer: ICustomerInfo
+    comment : ICommentReplied
+   
+}
+
+export interface IModelReplyResponse {
+    id: number
+    reply: string
+    model: Partial<ModelEntity>;
     comment : ICommentReplied
    
 }

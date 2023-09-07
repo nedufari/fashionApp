@@ -8,9 +8,11 @@ import {
 } from '../../contract/contrct.repository';
 import { ModelEntity } from '../../Entity/Users/model.entity';
 import {
+  CommentsRepository,
   ModelEntityRepository,
   ModelTimeLineRepository,
   NotificationsRepository,
+  RepliesRepository,
 } from '../../auth/auth.repository';
 import { CounterContractsOfffer } from '../../Entity/countercontractOffer.entity';
 import { AddLinesDto } from '../vendor/vendor.dto';
@@ -32,6 +34,9 @@ import {
 import { UploadService } from '../../uploads.service';
 import { INotificationResponse, Notifications } from '../../Entity/Notification/notification.entity';
 import { NotificationType } from '../../Enums/notificationTypes.enum';
+import { Comments, IModelCommentResponse } from '../../Entity/Activities/comment.entity';
+import { IModelReplyResponse, Replies } from '../../Entity/Activities/reply.entity';
+import { CustomerMakeCommentDto, CustomerReplyDto } from '../customers/customers.dto';
 
 @Injectable()
 export class ModelService {
@@ -49,6 +54,8 @@ export class ModelService {
     private readonly fileuploadservice: UploadService,
     @InjectRepository(Notifications)
     private notificationrepository: NotificationsRepository,
+    @InjectRepository(Comments)private readonly commentripo: CommentsRepository,
+    @InjectRepository(Replies) private readonly replyripo: RepliesRepository,
   ) {}
 
   async getMyoffers(model: string): Promise<ContractsOfffer[]> {
@@ -420,4 +427,117 @@ export class ModelService {
     
     return notificationResponse;
   }
+
+
+  //make a comment
+  async makeComment(
+    postid: number,
+    modelid: string,
+    commentdto: CustomerMakeCommentDto,
+  ): Promise<IModelCommentResponse> {
+    try {
+      const findpost = await this.vendorpostripo.findOne({
+        where: { id: postid },
+      });
+      if (!findpost)
+        throw new HttpException('the post is not found', HttpStatus.NOT_FOUND);
+
+      const model = await this.modelripo.findOne({
+        where: { id: modelid },
+      });
+      if (!model)
+        throw new HttpException(
+          'the customer  is not found',
+          HttpStatus.NOT_FOUND,
+        );
+
+      const comment = new Comments();
+      (comment.content = commentdto.comment), 
+      (comment.model = model);
+      await this.commentripo.save(comment);
+
+      //save the notification
+      const notification = new Notifications();
+      notification.account = model.id;
+      notification.subject = 'made a comment!';
+      notification.notification_type = NotificationType.model_commented;
+      notification.message = `Hello ${model.username}, just made a comment `;
+      await this.notificationrepository.save(notification);
+
+      const commentResponse: IModelCommentResponse = {
+        id: comment.id,
+        content: comment.content,
+        model: {
+          digital_photo: model.digital_photo,
+          username: model.username,
+        },
+      };
+      
+      return commentResponse;
+    } catch (error) {
+      throw error;
+
+      //this.logger.error(`an error occured: ${error.message}`,error.stack)
+    }
+  }
+
+
+  
+  //reply comments
+  async replycomment(
+    commentid: number,
+    customerid: string,
+    replydto: CustomerReplyDto,
+  ): Promise<IModelReplyResponse> {
+    try {
+      const findcomment = await this.commentripo.findOne({
+        where: { id: commentid },
+      });
+      if (!findcomment)
+        throw new HttpException('the post is not found', HttpStatus.NOT_FOUND);
+
+      const model = await this.modelripo.findOne({
+        where: { id: customerid },
+      });
+      if (!model)
+        throw new HttpException(
+          'the customer  is not found',
+          HttpStatus.NOT_FOUND,
+        );
+
+      const reply = new Replies();
+      (reply.reply = replydto.reply), 
+      (reply.comment = findcomment);
+      (reply.model = model), await this.replyripo.save(reply);
+
+      //save the notification
+      const notification = new Notifications();
+      notification.account = model.id;
+      notification.subject = 'replied a comment!';
+      notification.notification_type =
+        NotificationType.customer_replied_a_comment;
+      notification.message = `Hello ${model.username}, just replied a comment `;
+      await this.notificationrepository.save(notification);
+
+      const ReplyResponse: IModelReplyResponse = {
+        id: reply.id,
+
+        comment: {
+          comment: findcomment.content,
+        },
+        reply: reply.reply,
+        model: {
+          digital_photo: model.digital_photo,
+          username: model.username,
+        },
+      };
+    
+
+      return ReplyResponse;
+    } catch (error) {
+     
+    }
+  }
+
+
 }

@@ -38,7 +38,7 @@ import { Replies } from '../Entity/Activities/reply.entity';
     JwtModule.registerAsync({
         useFactory:()=>({
             secret:process.env.SECRETKEY,
-            signOptions:{expiresIn:"3600s"}
+            signOptions:{expiresIn:process.env.EXPIRESIN}
             
         })
     })

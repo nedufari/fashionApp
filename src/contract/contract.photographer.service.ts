@@ -70,11 +70,11 @@ export class ContractPhotographerService{
      //send contract offer either from the model to the vendor or from the vendor to the model
 async sendcontractoffer(vendorid: string, photoid: string, contractdto: ContractDto):Promise<IContractOfferPhotographerResponse>{
     try {
-      const vendor = await this.vendorrepository.findOne({where:{VendorID:vendorid}})
+      const vendor = await this.vendorrepository.findOne({where:{id:vendorid}})
       if (!vendor) throw new HttpException(`you are not a legitimate vendor on this platform and therefore you cant perform this action`,HttpStatus.NOT_FOUND)
   
       // Check if the model has a contract
-      const photographer = await this.photographerrepository.findOne({ where: { PhotographerID: photoid } });
+      const photographer = await this.photographerrepository.findOne({ where: { id: photoid } });
       if (!photographer) throw new HttpException(`you are not a legitimate photographer on this platform and therefore you cannot perform this task`, HttpStatus.NOT_FOUND);
   
       if (photographer.type_of_contract === TypeOfContract.EXCLUSIVE_CONTRACT && contractdto.type_of_contract === TypeOfContract.EXCLUSIVE_CONTRACT) {
@@ -176,12 +176,12 @@ async sendcontractoffer(vendorid: string, photoid: string, contractdto: Contract
   
   async AcceptContractOfferORDecline(vendorid: string, photoid: string, coi:string, acceptcontractdto: AcceptContractofferDto): Promise<IContractPhotographerResponse>{
     try {
-      const vendor = await this.vendorrepository.findOne({where:{VendorID:vendorid}})
+      const vendor = await this.vendorrepository.findOne({where:{id:vendorid}})
       if (!vendor) throw new HttpException(`you are not a legitimate vendor on this platform and therefore you cant perform this action`,HttpStatus.NOT_FOUND)
       console.log(vendor.brandname)
   
       // Check if the model has a contract
-      const photographer = await this.photographerrepository.findOne({ where: { PhotographerID: photoid } });
+      const photographer = await this.photographerrepository.findOne({ where: { id: photoid } });
       if (!photographer) throw new HttpException(`you are not a legitimate photographer on this platform and therefore you cannot perform this task`, HttpStatus.NOT_FOUND);
   
   
@@ -276,12 +276,12 @@ async sendcontractoffer(vendorid: string, photoid: string, contractdto: Contract
   
   async countercontrctOffer(vendorid:string, modelid:string,coi:string,counterofferdto:CounterOfferDto):Promise<ICounterContractOfferPhotographerResponse>{
     try {
-      const vendor = await this.vendorrepository.findOne({where:{VendorID:vendorid}})
+      const vendor = await this.vendorrepository.findOne({where:{id:vendorid}})
       if (!vendor) throw new HttpException(`you are not a legitimate vendor on this platform and therefore you cant perform this action`,HttpStatus.NOT_FOUND)
       console.log(vendor.brandname)
   
       // Check if the model has a contract
-      const photographer = await this.photographerrepository.findOne({ where: { PhotographerID: modelid } });
+      const photographer = await this.photographerrepository.findOne({ where: { id: modelid } });
       if (!photographer) throw new HttpException(`you are not a legitimate photographer on this platform and therefore you cannot perform this task`, HttpStatus.NOT_FOUND);
   
   
@@ -335,12 +335,12 @@ async sendcontractoffer(vendorid: string, photoid: string, contractdto: Contract
   
   async AcceptCounterContractOfferORDecline(vendorid: string, photoid: string, coi:string, acceptcontractdto: AcceptContractofferDto): Promise<IContractPhotographerResponse>{
     try {
-      const vendor = await this.vendorrepository.findOne({where:{VendorID:vendorid}})
+      const vendor = await this.vendorrepository.findOne({where:{id:vendorid}})
       if (!vendor) throw new HttpException(`you are not a legitimate vendor on this platform and therefore you cant perform this action`,HttpStatus.NOT_FOUND)
       console.log(vendor.brandname)
   
       // Check if the model has a contract
-      const photographer = await this.photographerrepository.findOne({ where: { PhotographerID: photoid } });
+      const photographer = await this.photographerrepository.findOne({ where: { id: photoid } });
       if (!photographer) throw new HttpException(`you are not a legitimate photographer on this platform and therefore you cannot perform this task`, HttpStatus.NOT_FOUND);
   
   
@@ -407,7 +407,7 @@ async sendcontractoffer(vendorid: string, photoid: string, contractdto: Contract
   
         
         //send notifaction to the vendor that the contract extendion was refused 
-        const declinedMessage="i am sorry i can't accept this offer, please lets contine with what we have or you can send in a better offer"
+        const declinedMessage="i am sorry i can't accept this offer, please lets continue with what we have or you can send in a better offer"
         isCoi.status = ContractOfferStatus.DECLINED
         await this.contractsofferrepository.save(isCoi)
   

@@ -62,6 +62,22 @@ export class AuthService {
   }
 
 
+  async generateUsernameSuggestions(originalUsername: string): Promise<string[]> {
+    const suggestions: string[] = [];
+    const alphabet = '0123456789';
+    const nanoid = customAlphabet(alphabet, 3); // Customize the length of the suggestions as needed
+  
+    for (let i = 1; i <= 4; i++) {
+      let suggestion;
+      do {
+        suggestion = `${originalUsername}${nanoid()}`; // Include originalUsername as a prefix
+      } while (suggestions.includes(suggestion)); // Ensure it's unique
+  
+      suggestions.push(suggestion);
+    }
+  
+    return suggestions;
+  }
   ///signup for various users
 
 
@@ -74,12 +90,24 @@ export class AuthService {
       admin.username=userdto.username
       admin.AdminID=this.generateIdentityNumber()
       
-      const emailexsist = this.adminrepository.findOne({where: { email: userdto.email },select: ['id', 'email']});
-      if (!emailexsist)
+      const emailexsist = await this.adminrepository.findOne({where: { email: userdto.email },select: ['id', 'email']});
+   
+      if (emailexsist)
         throw new HttpException(
           `user with email: ${userdto.email} exists, please use another unique email`,
           HttpStatus.CONFLICT,
         );
+
+        // Check if a user with the same username already exists
+    const existingUserByUsername = await this.adminrepository.findOne({ where: { username: userdto.username }, select: ['id', 'username'] });
+    if (existingUserByUsername) {
+      // Generate username suggestions
+      const suggestions = await this.generateUsernameSuggestions(userdto.username);
+      throw new HttpException(
+        `Admin User with username: ${userdto.username} already exists. Please choose another username or consider these suggestions: ${suggestions.join(', ')}`,
+        HttpStatus.CONFLICT,
+      );
+    }
         await this.adminrepository.save(admin);
 
       //2fa authentication 
@@ -249,12 +277,23 @@ export class AuthService {
       customer.username=userdto.username
       customer.CustomerID=this.generateIdentityNumber()
       
-      const emailexsist = this.customerrepository.findOne({where: { email: userdto.email },select: ['id', 'email']});
-      if (!emailexsist)
+      const emailexsist = await this.customerrepository.findOne({where: { email: userdto.email },select: ['id', 'email']});
+      if (emailexsist)
         throw new HttpException(
           `user with email: ${userdto.email} exists, please use another unique email`,
           HttpStatus.CONFLICT,
         );
+
+             // Check if a user with the same username already exists
+    const existingUserByUsername = await this.customerrepository.findOne({ where: { username: userdto.username }, select: ['id', 'username'] });
+    if (existingUserByUsername) {
+      // Generate username suggestions
+      const suggestions = await this.generateUsernameSuggestions(userdto.username);
+      throw new HttpException(
+        `User with username: ${userdto.username} already exists. Please choose another username or consider these suggestions: ${suggestions.join(', ')}`,
+        HttpStatus.CONFLICT,
+      );
+    }
         await this.customerrepository.save(customer);
 
       //2fa authentication 
@@ -468,12 +507,23 @@ export class AuthService {
       vendor.brandname=userdto.brandname
       vendor.VendorID=this.generateIdentityNumber()
       
-      const emailexsist = this.vendorrepository.findOne({where: { email: userdto.email },select: ['id', 'email']});
-      if (!emailexsist)
+      const emailexsist = await this.vendorrepository.findOne({where: { email: userdto.email },select: ['id', 'email']});
+      if (emailexsist)
         throw new HttpException(
           `user with email: ${userdto.email} exists, please use another unique email`,
           HttpStatus.CONFLICT,
         );
+
+             // Check if a user with the same username already exists
+    const existingUserByUsername = await this.vendorrepository.findOne({ where: { brandname: userdto.brandname }, select: ['id', 'brandname'] });
+    if (existingUserByUsername) {
+      // Generate brandname suggestions
+      const suggestions = await this.generateUsernameSuggestions(userdto.brandname);
+      throw new HttpException(
+        `Vendor with Brandname: ${userdto.brandname} already exists. Please choose another brandname or consider these suggestions: ${suggestions.join(', ')}`,
+        HttpStatus.CONFLICT,
+      );
+    }
         await this.vendorrepository.save(vendor);
 
       //2fa authentication 
@@ -511,8 +561,6 @@ export class AuthService {
 
    
   }
-
-
 
   
   async verifyVendorotp(verifyotpdto:VerifyOtpdto):Promise<{isValid:boolean; accessToken:any}>{
@@ -691,12 +739,23 @@ export class AuthService {
       customer.username=userdto.username
       customer.PhotographerID=this.generateIdentityNumber()
       
-      const emailexsist = this.photographerrepository.findOne({where: { email: userdto.email },select: ['id', 'email']});
-      if (!emailexsist)
+      const emailexsist = await this.photographerrepository.findOne({where: { email: userdto.email },select: ['id', 'email']});
+      if (emailexsist)
         throw new HttpException(
           `user with email: ${userdto.email} exists, please use another unique email`,
           HttpStatus.CONFLICT,
         );
+
+             // Check if a user with the same username already exists
+    const existingUserByUsername = await this.photographerrepository.findOne({ where: { username: userdto.username }, select: ['id', 'username'] });
+    if (existingUserByUsername) {
+      // Generate username suggestions
+      const suggestions = await this.generateUsernameSuggestions(userdto.username);
+      throw new HttpException(
+        `Photographer with username: ${userdto.username} already exists. Please choose another username or consider these suggestions: ${suggestions.join(', ')}`,
+        HttpStatus.CONFLICT,
+      );
+    }
         await this.photographerrepository.save(customer);
 
       //2fa authentication 
@@ -908,15 +967,6 @@ export class AuthService {
     if (kiddto.age < 1 || kiddto.age > 15) {
       throw new HttpException(`Kid's age must be between 1 and 15 years old`,HttpStatus.BAD_REQUEST,);}
     const hashedpassword = await this.hashpassword(kiddto.password);
-    const emailexsist = this.modelrepository.findOne({
-      where: { email: kiddto.email },
-      select: ['id', 'email'],
-    });
-    if (!emailexsist)
-      throw new HttpException(
-        `user with email: ${kiddto.email} exists, please use another unique email`,
-        HttpStatus.CONFLICT,
-      );
 
     const kid = new ModelEntity()
     kid.email=kiddto.email
@@ -927,6 +977,32 @@ export class AuthService {
     kid.age=kiddto.age
     kid.kindofmodel=kiddto.kindofmodel
     kid.ModelID=this.generateIdentityNumber()
+
+
+    const emailexsist = await this.modelrepository.findOne({
+      where: { email: kiddto.email },
+      select: ['id', 'email'],
+    });
+    if (emailexsist)
+      throw new HttpException(
+        `user with email: ${kiddto.email} exists, please use another unique email`,
+        HttpStatus.CONFLICT,
+      );
+
+           // Check if a user with the same username already exists
+    const existingUserByUsername = await this.modelrepository.findOne({ where: { username: kiddto.username }, select: ['id', 'username'] });
+    if (existingUserByUsername) {
+      // Generate username suggestions
+      const suggestions = await this.generateUsernameSuggestions(kiddto.username);
+      throw new HttpException(
+        `Kid Model with username: ${kiddto.username} already exists. Please choose another username or consider these suggestions: ${suggestions.join(', ')}`,
+        HttpStatus.CONFLICT,
+      );
+    }
+
+   
+
+
     await this.modelrepository.save(kid)
 
       //2fa authentication 
@@ -1128,15 +1204,7 @@ export class AuthService {
     
     
     const hashedpassword = await this.hashpassword(adultdto.password);
-    const emailexsist = this.modelrepository.findOne({
-      where: { email: adultdto.email },
-      select: ['id', 'email'],
-    });
-    if (!emailexsist)
-      throw new HttpException(
-        `user with email: ${adultdto.email} exists, please use another unique email`,
-        HttpStatus.CONFLICT,
-      );
+   
 
     const adult = new ModelEntity()
     adult.email=adultdto.email
@@ -1144,6 +1212,27 @@ export class AuthService {
     adult.username=adultdto.username
     adult.kindofmodel=adultdto.kindofmodel
     adult.ModelID=this.generateIdentityNumber()
+
+     const emailexsist = await this.modelrepository.findOne({
+      where: { email: adultdto.email },
+      select: ['id', 'email'],
+    });
+    if (emailexsist)
+      throw new HttpException(
+        `user with email: ${adultdto.email} exists, please use another unique email`,
+        HttpStatus.CONFLICT,
+      );
+
+       // Check if a user with the same username already exists
+    const existingUserByUsername = await this.modelrepository.findOne({ where: { username: adultdto.username }, select: ['id', 'username'] });
+    if (existingUserByUsername) {
+      // Generate username suggestions
+      const suggestions = await this.generateUsernameSuggestions(adultdto.username);
+      throw new HttpException(
+        `Adult Model with username: ${adultdto.username} already exists. Please choose another username or consider these suggestions: ${suggestions.join(', ')}`,
+        HttpStatus.CONFLICT,
+      )
+    }
    
     await this.modelrepository.save(adult)
 
@@ -1171,7 +1260,7 @@ export class AuthService {
       notification.message=`Hello ${adult.username}, your kid model account has been created as an ${adult.kindofmodel}. please complete your profile `
       await this.notificationrepository.save(notification)
 
-      return {message:"new Photographer signed up and verification otp has been sent "}
+      return {message:"new Adult model signed up and verification otp has been sent "}
     
   }
 

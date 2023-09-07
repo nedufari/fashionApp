@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpException, HttpStatus, Param, Post,Put } from "@nestjs/common";
+import { Body, Controller, Get, HttpException, HttpStatus, Param, Post,Put, UseGuards } from "@nestjs/common";
 import { ContractModelService } from "./contract.models.service";
 import { AcceptContractofferDto, ContractDto, CounterOfferDto, ExtendContractDto } from "./cotracts.dto";
 import {  IContractModelResponse, IContractPhotographerResponse } from "../Entity/contracts.entity";
@@ -6,8 +6,10 @@ import {  IContractModelResponse, IContractPhotographerResponse } from "../Entit
 import { IContractOfferModelResponse, IContractOfferPhotographerResponse } from "../Entity/contractoffer.entity";
 import { ICounterContractOfferPhotographerResponse, IcounterContractOfferModelResponse } from "../Entity/countercontractOffer.entity";
 import { ContractPhotographerService } from "./contract.photographer.service";
+import { JwtGuard } from "../auth/guards/jwt.guards";
 
 @Controller('contract')
+@UseGuards(JwtGuard)
 export class ContractController{
     constructor(private readonly modelcontractservice:ContractModelService,
         private readonly photographercontractservice:ContractPhotographerService){}

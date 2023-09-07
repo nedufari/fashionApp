@@ -26,7 +26,7 @@ export interface IModelCommentResponse {
     id: number;
     content: string;
     model: Partial<ModelEntity>;
-    replies: Replies[];
+    
 }
 
 export interface IPhotographerCommentResponse {
@@ -40,13 +40,28 @@ export interface IAdminCommentResponse {
     id: number;
     content: string;
     admin: Partial<AdminEntity>;
-    replies: Replies[];
+    
 }
 
 interface ICustomerInfo {
     digital_photo: string;
     username: string;
 }
+
+// interface IModelInfo {
+//     digital_photo: string;
+//     username: string;
+// }
+
+// interface IPhotographerInfo {
+//     digital_photo: string;
+//     username: string;
+// }
+
+// interface IVendorInfo {
+//     digital_photo: string;
+//     username: string;
+// }
 
 export interface ICustomerCommentResponse {
     id: number;
@@ -86,7 +101,7 @@ export class Comments {
     @ManyToOne(() => CustomerEntity, customer => customer.comments)
     customer?: CustomerEntity;
 
-    @ManyToOne(()=>VendorPostsEntity,vendorentity=>vendorentity.comments)
+    @ManyToOne(()=>VendorPostsEntity,vendorentity=>vendorentity.comments,)
     vendor?:VendorPostsEntity
 
     @ManyToOne(() => VendorPostsEntity, post => post.comments)

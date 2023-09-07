@@ -4,6 +4,7 @@ import { ModelEntity } from "../Users/model.entity";
 import { PhotographerEntity } from "../Users/photorapher.entity";
 import { Comments } from "../Activities/comment.entity";
 import { Availability } from "../../Enums/post.enum";
+import { Replies } from "../Activities/reply.entity";
 
 
 export interface IVendoPost{
@@ -21,13 +22,14 @@ export interface IVendoPost{
     dislikedBy:string[]
     creditedPhotographer:string
     comments?:Comments[]
-
 }
 
 interface IVendorInfo {
     display_photo: string;
     brandname: string;
 }
+
+
 
 export interface IVendorPostResponse{
     id:number
@@ -47,19 +49,33 @@ export interface IVendorPostResponse{
 
 }
 
+interface CommentResponse {
+    id: number;
+    content: string;
+    replies?: ReplyResponse[];
+}
+
+interface ReplyResponse {
+    id: number;
+    reply: string;
+    // Add other reply properties you need
+}
+
 export interface IvndorPostResponseWithComments{
+    id:number
     caption:string,
     media:string[],
     availability:Availability,
-    cost:string
+    cost:number
     createdDate:Date
-    owner:vendorEntity
+    owner:IVendorInfo
     creditedModel:string,
     creditedPhotographer:string
     likes?:number,
     dislikes?:number,
-    likedBy?:string,
-    dislikedBy?:string
+    likedBy?:string[],
+    dislikedBy?:string[]
+    comments?:CommentResponse[]
 
 }
 
@@ -112,6 +128,8 @@ export class VendorPostsEntity implements IVendoPost{
     //activities
     @OneToMany(()=>Comments,(comments)=>comments.vendor)
     comments:Comments[]
+
+    
 
 
 

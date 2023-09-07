@@ -49,11 +49,11 @@ export class ContractModelService{
     //send contract offer either from the model to the vendor or from the vendor to the model
 async sendcontractoffer(vendorid: string, modelid: string, contractdto: ContractDto):Promise<IContractOfferModelResponse>{
   try {
-    const vendor = await this.vendorrepository.findOne({where:{VendorID:vendorid}})
+    const vendor = await this.vendorrepository.findOne({where:{id:vendorid}})
     if (!vendor) throw new HttpException(`you are not a legitimate vendor on this platform and therefore you cant perform this action`,HttpStatus.NOT_FOUND)
 
     // Check if the model has a contract
-    const model = await this.modelrepository.findOne({ where: { ModelID: modelid } });
+    const model = await this.modelrepository.findOne({ where: { id: modelid } });
     if (!model) throw new HttpException(`you are not a legitimate model on this platform and therefore you cannot perform this task`, HttpStatus.NOT_FOUND);
 
     if (model.type_of_contract === TypeOfContract.EXCLUSIVE_CONTRACT && contractdto.type_of_contract === TypeOfContract.EXCLUSIVE_CONTRACT) {
@@ -155,12 +155,12 @@ async sendcontractoffer(vendorid: string, modelid: string, contractdto: Contract
 
 async AcceptContractOfferORDecline(vendorid: string, modelid: string, coi:string, acceptcontractdto: AcceptContractofferDto): Promise<IContractModelResponse>{
   try {
-    const vendor = await this.vendorrepository.findOne({where:{VendorID:vendorid}})
+    const vendor = await this.vendorrepository.findOne({where:{id:vendorid}})
     if (!vendor) throw new HttpException(`you are not a legitimate vendor on this platform and therefore you cant perform this action`,HttpStatus.NOT_FOUND)
     console.log(vendor.brandname)
 
     // Check if the model has a contract
-    const model = await this.modelrepository.findOne({ where: { ModelID: modelid } });
+    const model = await this.modelrepository.findOne({ where: { id: modelid } });
     if (!model) throw new HttpException(`you are not a legitimate model on this platform and therefore you cannot perform this task`, HttpStatus.NOT_FOUND);
 
 
@@ -255,12 +255,12 @@ async AcceptContractOfferORDecline(vendorid: string, modelid: string, coi:string
 
 async countercontrctOffer(vendorid:string, modelid:string,coi:string,counterofferdto:CounterOfferDto):Promise<IcounterContractOfferModelResponse>{
   try {
-    const vendor = await this.vendorrepository.findOne({where:{VendorID:vendorid}})
+    const vendor = await this.vendorrepository.findOne({where:{id:vendorid}})
     if (!vendor) throw new HttpException(`you are not a legitimate vendor on this platform and therefore you cant perform this action`,HttpStatus.NOT_FOUND)
     console.log(vendor.brandname)
 
     // Check if the model has a contract
-    const model = await this.modelrepository.findOne({ where: { ModelID: modelid } });
+    const model = await this.modelrepository.findOne({ where: { id: modelid } });
     if (!model) throw new HttpException(`you are not a legitimate model on this platform and therefore you cannot perform this task`, HttpStatus.NOT_FOUND);
 
 
@@ -314,12 +314,12 @@ async countercontrctOffer(vendorid:string, modelid:string,coi:string,counteroffe
 
 async AcceptCounterContractOfferORDecline(vendorid: string, modelid: string, coi:string, acceptcontractdto: AcceptContractofferDto): Promise<IContractModelResponse>{
   try {
-    const vendor = await this.vendorrepository.findOne({where:{VendorID:vendorid}})
+    const vendor = await this.vendorrepository.findOne({where:{id:vendorid}})
     if (!vendor) throw new HttpException(`you are not a legitimate vendor on this platform and therefore you cant perform this action`,HttpStatus.NOT_FOUND)
     console.log(vendor.brandname)
 
     // Check if the model has a contract
-    const model = await this.modelrepository.findOne({ where: { ModelID: modelid } });
+    const model = await this.modelrepository.findOne({ where: { id: modelid } });
     if (!model) throw new HttpException(`you are not a legitimate model on this platform and therefore you cannot perform this task`, HttpStatus.NOT_FOUND);
 
 
