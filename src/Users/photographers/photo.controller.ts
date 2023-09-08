@@ -1,27 +1,43 @@
-import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post, UploadedFiles, UseInterceptors } from "@nestjs/common"
+import { Body, Controller, Delete, ForbiddenException, Get, Param, ParseUUIDPipe, Patch, Post, Req, UploadedFile, UploadedFiles, UseGuards, UseInterceptors } from "@nestjs/common"
 
 import { ContractsOfffer } from "../../Entity/contractoffer.entity";
 import { CounterContractsOfffer } from "../../Entity/countercontractOffer.entity";
 import { PhotographerService } from "./photo.service";
 import { IVendorPostResponse } from "../../Entity/Posts/vendor.post.entity";
-import { FilesInterceptor } from "@nestjs/platform-express";
+import { FileInterceptor, FilesInterceptor } from "@nestjs/platform-express";
 import { IPhotographerTimeLineResponse } from "../../Entity/Posts/photographer.timeline.entity";
 import { ModelTimelineDto } from "../model/model.dto";
 import { PhotographerUpdatePostDto, UpdatePhotographerDataDto } from "./photo.dto";
 import { IPhotographerResponse } from "./photo.interface";
 import { INotificationResponse } from "../../Entity/Notification/notification.entity";
+import { UploadService } from "../../uploads.service";
+import { JwtGuard } from "../../auth/guards/jwt.guards";
 
+@UseGuards(JwtGuard)
 @Controller('photographer')
 export class PhotographerController{
-    constructor(private readonly photoservice:PhotographerService){}
+    constructor(private readonly photoservice:PhotographerService,
+        private readonly fileuploadservice:UploadService){}
 
     @Get('myoffers/:photo')
-    async findmyoffers(@Param('photo')photo:string):Promise<ContractsOfffer[]>{
+    async findmyoffers(@Param('photo')photo:string,@Req()request):Promise<ContractsOfffer[]>{
+        const userIdFromToken = await request.user.id; 
+        console.log(request.user.email)
+    
+        if (userIdFromToken !== photo) {
+        throw new ForbiddenException("You are not authorized to perform this action on another user's account.");
+    }
         return await this.photoservice.getMyoffers(photo)
     }
 
     @Get('mycounteroffers/:photo')
-    async findmyCounteroffers(@Param('photo')photo:string):Promise<CounterContractsOfffer[]>{
+    async findmyCounteroffers(@Param('photo')photo:string,@Req()request):Promise<CounterContractsOfffer[]>{
+        const userIdFromToken = await request.user.id; 
+        console.log(request.user.email)
+    
+        if (userIdFromToken !== photo) {
+        throw new ForbiddenException("You are not authorized to perform this action on another user's account.");
+        }
         return await this.photoservice.getMyCounteroffers(photo)
     }
 
@@ -30,38 +46,92 @@ export class PhotographerController{
     return await this.photoservice.getAllPosts()
 }
 
-@Post('timeline/:modelid/',)
+@Post('timeline/:photolid/',)
 @UseInterceptors(FilesInterceptor("media", 10))
-async CreateTimeline(@Param('modelid') modelid: string, @Body() timelinedto: ModelTimelineDto,@UploadedFiles() mediaFiles: Express.Multer.File[]): Promise<IPhotographerTimeLineResponse> {
-  const post = await this.photoservice.createAtimeline(timelinedto,modelid,mediaFiles);
+async CreateTimeline(@Param('photoid') photoid: string, @Body() timelinedto: ModelTimelineDto,@UploadedFiles() mediaFiles: Express.Multer.File[],@Req()request): Promise<IPhotographerTimeLineResponse> {
+    const userIdFromToken = await request.user.id; 
+    console.log(request.user.email)
+
+    if (userIdFromToken !== photoid) {
+    throw new ForbiddenException("You are not authorized to perform this action on another user's account.");
+    }
+  const post = await this.photoservice.createAtimeline(timelinedto,photoid,mediaFiles);
   return post;
 }
 
-@Patch('update-timeline/:modelid/:timelineid',)
+@Patch('update-timeline/:photoid/:timelineid',)
 @UseInterceptors(FilesInterceptor("media", 10))
-async UpdatePost(@Param('modelid') modelid: string,@Param('timelineid') timelineid: number, @Body() timelinedto: ModelTimelineDto,@UploadedFiles() mediaFiles: Express.Multer.File[]): Promise<IPhotographerTimeLineResponse> {
-  const post = await this.photoservice.UpdateAtimeline(timelinedto,timelineid,modelid,mediaFiles);
+async UpdatePost(@Param('photoid') photoid: string,@Param('timelineid') timelineid: number, @Body() timelinedto: ModelTimelineDto,@UploadedFiles() mediaFiles: Express.Multer.File[],@Req()request): Promise<IPhotographerTimeLineResponse> {
+    const userIdFromToken = await request.user.id; 
+    console.log(request.user.email)
+
+    if (userIdFromToken !== photoid) {
+    throw new ForbiddenException("You are not authorized to perform this action on another user's account.");
+    }
+  const post = await this.photoservice.UpdateAtimeline(timelinedto,timelineid,photoid,mediaFiles);
   return post;
 }
 
-@Get('mytimelines/:modelid')
-async getMytimelines(@Param('modelid',ParseUUIDPipe)modelid:string,):Promise<IPhotographerTimeLineResponse[]>{
-    return await this.photoservice.mytimeLines(modelid)
+@Get('mytimelines/:photoid')
+async getMytimelines(@Param('photoid',ParseUUIDPipe)photoid:string,@Req()request):Promise<IPhotographerTimeLineResponse[]>{
+    const userIdFromToken = await request.user.id; 
+    console.log(request.user.email)
+
+    if (userIdFromToken !== photoid) {
+    throw new ForbiddenException("You are not authorized to perform this action on another user's account.");
+    }
+    return await this.photoservice.mytimeLines(photoid)
 }
 
 @Get('notification/:photographer')
-async findmyNotifications(@Param('photographer')photographer:string):Promise<INotificationResponse[]>{
+async findmyNotifications(@Param('photographer')photographer:string,@Req()request):Promise<INotificationResponse[]>{
+    const userIdFromToken = await request.user.id; 
+    console.log(request.user.email)
+
+    if (userIdFromToken !== photographer) {
+    throw new ForbiddenException("You are not authorized to perform this action on another user's account.");
+    }
     return await this.photoservice.getMyNotifications(photographer)
 }
 
-@Delete('takedown-timeline')
-async takedowntimeline(@Param('photoid')photoid:string,@Param('timelineid')timelineid:number):Promise<{message:string}>{
+@Delete('takedown-timeline/:photoid')
+async takedowntimeline(@Param('photoid')photoid:string,@Param('timelineid')timelineid:number,@Req()request):Promise<{message:string}>{
+    const userIdFromToken = await request.user.id; 
+    console.log(request.user.email)
+
+    if (userIdFromToken !== photoid) {
+    throw new ForbiddenException("You are not authorized to perform this action on another user's account.");
+    }
     return await this.photoservice.TakedownTimeline(photoid,timelineid)
     
 }
 
-@Patch('portfolio/:modelid')
-async ModelPortfolio(@Body()dto:UpdatePhotographerDataDto,@Param('modelid')modelid:string):Promise<IPhotographerResponse>{
-    return await this.photoservice.createPhotographerportfolio(modelid,dto)
+@Patch('portfolio/:photoid')
+async ModelPortfolio(@Body()dto:UpdatePhotographerDataDto,@Param('photoid')photoid:string,@Req()request):Promise<IPhotographerResponse>{
+    const userIdFromToken = await request.user.id; 
+    console.log(request.user.email)
+
+    if (userIdFromToken !== photoid) {
+    throw new ForbiddenException("You are not authorized to perform this action on another user's account.");
+    }
+    return await this.photoservice.createPhotographerportfolio(photoid,dto)
+}
+
+@Patch("/upload/:modelid")
+@UseInterceptors(FileInterceptor('file'))
+async updateProfilePhoto(
+  @Param('modelid') modelid: string,
+  @UploadedFile() file: Express.Multer.File,
+  @Req() request,
+):Promise<{message:string}>{
+    const userIdFromToken = await request.user.id; 
+    console.log(request.user.email)
+    if (userIdFromToken !== modelid) {
+      throw new ForbiddenException("You are not authorized to perform this action on another user's account.");
+    }
+
+  const filename = await this.fileuploadservice.uploadFile(file);
+  const upload = await this.photoservice.updateProfilePics( filename,modelid,);
+  return { message: ` file  uploaded successfully.` }
 }
 }

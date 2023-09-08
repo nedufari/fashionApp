@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { JwtGuard } from './guards/jwt.guards';
+import {  JwtGuard, } from './guards/jwt.guards';
 import { RolesGuard } from './guards/role.guards';
 import { JwtStrategy } from './jwt.strategy';
 import { TypeOrmModule } from '@nestjs/typeorm';

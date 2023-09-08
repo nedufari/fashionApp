@@ -174,7 +174,7 @@ export class AuthService {
 
 
 
-    const accessToken= await this.signToken(customer.id,customer.email)
+    const accessToken= await this.signToken(customer.id,customer.email,customer.role)
 
     return {isValid:true, accessToken}
 
@@ -368,7 +368,7 @@ export class AuthService {
 
 
 
-    const accessToken= await this.signToken(customer.id,customer.email)
+    const accessToken= await this.signToken(customer.id,customer.email,customer.role)
 
     return {isValid:true, accessToken}
     }
@@ -594,7 +594,7 @@ export class AuthService {
 
       await this.customerrepository.save(customer)
 
-    const accessToken= await this.signToken(customer.id,customer.email)
+    const accessToken= await this.signToken(customer.id,customer.email,customer.role)
 
     return {isValid:true, accessToken}
     }
@@ -826,7 +826,7 @@ export class AuthService {
       await this.customerrepository.save(customer)
 
 
-    const accessToken= await this.signToken(customer.id,customer.email)
+    const accessToken= await this.signToken(customer.id,customer.email,customer.role)
 
     return {isValid:true, accessToken}
     }
@@ -1067,7 +1067,7 @@ export class AuthService {
 
       await this.customerrepository.save(customer)
 
-    const accessToken= await this.signToken(customer.id,customer.email)
+    const accessToken= await this.signToken(customer.id,customer.email,customer.role)
 
     return {isValid:true, accessToken}
     }
@@ -1298,7 +1298,7 @@ export class AuthService {
 
 
 
-    const accessToken= await this.signToken(customer.id,customer.email)
+    const accessToken= await this.signToken(customer.id,customer.email,customer.role)
 
     return {isValid:true, accessToken}
     }
@@ -1443,10 +1443,11 @@ export class AuthService {
 
   //login
 
-  async signToken(id: string, email: string) {
+  async signToken(id: string, email: string,role:string) {
     const payload = {
       sub: id,
       email,
+      role
     };
     const secret = this.configservice.get('SECRETKEY');
     const token = await this.jwt.signAsync(payload, {
@@ -1492,7 +1493,7 @@ export class AuthService {
      notification.message=`Hello ${findcustomer.username}, just logged in `
      await this.notificationrepository.save(notification)
      
-      const access_token =await this.signToken(findcustomer.id,findcustomer.email)
+      const access_token =await this.signToken(findcustomer.id,findcustomer.email,findcustomer.role)
       return access_token
   }
 
@@ -1531,7 +1532,7 @@ export class AuthService {
     await this.notificationrepository.save(notification)
 
 
-    return await this.signToken(findvendor.id,findvendor.email)
+    return await this.signToken(findvendor.id,findvendor.email,findvendor.role)
 
   }
 
@@ -1569,7 +1570,7 @@ export class AuthService {
       notification.message=`Hello ${findkid.username}, just logged in `
       await this.notificationrepository.save(notification)
 
-    return await this.signToken(findkid.id,findkid.email)
+    return await this.signToken(findkid.id,findkid.email,findkid.role)
 
   }
 
@@ -1607,7 +1608,7 @@ export class AuthService {
     notification.message=`Hello ${findadult.username}, just logged in `
     await this.notificationrepository.save(notification)
 
-    return await this.signToken(findadult.id,findadult.email)
+    return await this.signToken(findadult.id,findadult.email,findadult.role)
 
   }
 
@@ -1645,7 +1646,7 @@ export class AuthService {
     notification.message=`Hello ${findphotographer.username}, just logged in `
     await this.notificationrepository.save(notification)
 
-    return await this.signToken(findphotographer.id,findphotographer.email)
+    return await this.signToken(findphotographer.id,findphotographer.email,findphotographer.role)
 
   }
 
@@ -1683,11 +1684,27 @@ export class AuthService {
     notification.notification_type=NotificationType.LOGGED_IN
     notification.message=`Hello ${findadmin.username}, just logged in `
     await this.notificationrepository.save(notification)
-    return await this.signToken(findadmin.id,findadmin.email)
+    return await this.signToken(findadmin.id,findadmin.email,findadmin.role)
 
   }
 
   
+  async validateUserById(id: string, role: string) {
+    switch (role) {
+      case 'admin':
+        return await this.adminrepository.findOne({where:{id:id}});
+      case 'vendor':
+        return await this.vendorrepository.findOne({where:{id:id}});
+      case 'customer':
+        return await this.customerrepository.findOne({where:{id:id}});
+      case 'model':
+        return await this.modelrepository.findOne({where:{id:id}});
+      case 'photographer':
+        return await this.photographerrepository.findOne({where:{id:id}});
+      default:
+        return null; // Invalid role
+    }
+  }
 
 
   ///logout routes 

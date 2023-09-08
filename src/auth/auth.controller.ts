@@ -1,10 +1,11 @@
-import { Body, Controller, HttpException, HttpStatus, Param, Patch, Post, Res,UseGuards } from '@nestjs/common';
+import { Body, Controller, ForbiddenException, HttpException, HttpStatus, Param, Patch, Post, Req, Res,UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AdultModelRegistrationDto, RegistrationDto, RequestOtpResendDto, VendorRegistrationDto, kidsModeleRegistrationDto } from './dto/registrationdto';
 import { Logindto, VerifyOtpdto } from './dto/logindto';
 import { Response } from 'express';
-import { JwtGuard } from './guards/jwt.guards';
+// import { JwtGuard } from './guards/jwt.guards';
 import { ChangePasswordDto, FinallyResetPasswordDto, SendPasswordResetLinkDto } from './dto/password.dto';
+import { JwtGuard } from './guards/jwt.guards';
 
 @Controller('auth')
 export class AuthController {
@@ -228,9 +229,15 @@ export class AuthController {
 
 
     /////customer ////
-     
-    @Patch("/customer/changePassword")
-    async changePassword(@Body()changepassword:ChangePasswordDto,@Param('customerid')customerid:string):Promise<{message:string}>{
+     @UseGuards(JwtGuard)
+    @Patch("/customer/changePassword/:customerid")
+    async changePassword(@Body()changepassword:ChangePasswordDto,@Param('customerid')customerid:string,@Req()request):Promise<{message:string}>{
+      const userIdFromToken = await request.user.id; 
+      console.log(request.user.email)
+  
+      if (userIdFromToken !== customerid) {
+      throw new ForbiddenException("You are not authorized to perform this action on another user's account.");
+      }
         return await this.authservice.chnangepassword(changepassword,customerid)
     }
 
@@ -246,10 +253,16 @@ export class AuthController {
 
 
      /////vendor ////
-     
-     @Patch("/vendor/changePassword")
-     async VendorchangePassword(@Body()changepassword:ChangePasswordDto,@Param('customerid')customerid:string):Promise<{message:string}>{
-         return await this.authservice.chnangeVendorpassword(changepassword,customerid)
+     @UseGuards(JwtGuard)
+     @Patch("/vendor/changePassword/:vendorid")
+     async VendorchangePassword(@Body()changepassword:ChangePasswordDto,@Param('vendorid')vendorid:string,@Req()request):Promise<{message:string}>{
+      const userIdFromToken = await request.user.id; 
+      console.log(request.user.email)
+  
+      if (userIdFromToken !== vendorid) {
+      throw new ForbiddenException("You are not authorized to perform this action on another user's account.");
+      }
+         return await this.authservice.chnangeVendorpassword(changepassword,vendorid)
      }
  
      @Post("/vendor/resetlink")
@@ -264,10 +277,16 @@ export class AuthController {
 
 
       /////photographer ////
-     
-    @Patch("/photographer/changePassword")
-    async PhotographerchangePassword(@Body()changepassword:ChangePasswordDto,@Param('customerid')customerid:string):Promise<{message:string}>{
-        return await this.authservice.Photographerchnangepassword(changepassword,customerid)
+      @UseGuards(JwtGuard)
+    @Patch("/photographer/changePassword/:photoid")
+    async PhotographerchangePassword(@Body()changepassword:ChangePasswordDto,@Param('photoid')photoid:string,@Req()request):Promise<{message:string}>{
+      const userIdFromToken = await request.user.id; 
+      console.log(request.user.email)
+  
+      if (userIdFromToken !== photoid) {
+      throw new ForbiddenException("You are not authorized to perform this action on another user's account.");
+      }
+        return await this.authservice.Photographerchnangepassword(changepassword,photoid)
     }
 
     @Post("/photographer/resetlink")
@@ -282,10 +301,16 @@ export class AuthController {
 
 
      /////kidmodel ////
-     
-     @Patch("/kidmodel/changePassword")
-     async KidmodelchangePassword(@Body()changepassword:ChangePasswordDto,@Param('customerid')customerid:string):Promise<{message:string}>{
-         return await this.authservice.KidsModelchnangepassword(changepassword,customerid)
+     @UseGuards(JwtGuard)
+     @Patch("/kidmodel/changePassword/:kidmodelid")
+     async KidmodelchangePassword(@Body()changepassword:ChangePasswordDto,@Param('kidmodelid')kidmodelid:string,@Req()request):Promise<{message:string}>{
+      const userIdFromToken = await request.user.id; 
+      console.log(request.user.email)
+  
+      if (userIdFromToken !== kidmodelid) {
+      throw new ForbiddenException("You are not authorized to perform this action on another user's account.");
+      }
+         return await this.authservice.KidsModelchnangepassword(changepassword,kidmodelid)
      }
  
      @Post("/kidmodel/resetlink")
@@ -299,10 +324,16 @@ export class AuthController {
      }
 
       /// adult model ////
-     
-    @Patch("/customer/changePassword")
-    async AdultModelchangePassword(@Body()changepassword:ChangePasswordDto,@Param('customerid')customerid:string):Promise<{message:string}>{
-        return await this.authservice.AdultModelchnangepassword(changepassword,customerid)
+      @UseGuards(JwtGuard)
+    @Patch("/customer/changePassword/:adultmodelid")
+    async AdultModelchangePassword(@Body()changepassword:ChangePasswordDto,@Param('adultmodelidid')adultmodelid:string,@Req()request):Promise<{message:string}>{
+      const userIdFromToken = await request.user.id; 
+      console.log(request.user.email)
+  
+      if (userIdFromToken !== adultmodelid) {
+      throw new ForbiddenException("You are not authorized to perform this action on another user's account.");
+      }
+        return await this.authservice.AdultModelchnangepassword(changepassword,adultmodelid)
     }
 
     @Post("/customer/resetlink")
@@ -316,10 +347,16 @@ export class AuthController {
     }
 
      ///// admin ////
-     
-     @Patch("/admin/changePassword")
-     async AdminchangePassword(@Body()changepassword:ChangePasswordDto,@Param('customerid')customerid:string):Promise<{message:string}>{
-         return await this.authservice.Adminchnangepassword(changepassword,customerid)
+     @UseGuards(JwtGuard)
+     @Patch("/admin/changePassword/:adminid")
+     async AdminchangePassword(@Body()changepassword:ChangePasswordDto,@Param('adminid')adminid:string,@Req()request):Promise<{message:string}>{
+      const userIdFromToken = await request.user.id; 
+      console.log(request.user.email)
+  
+      if (userIdFromToken !== adminid) {
+      throw new ForbiddenException("You are not authorized to perform this action on another user's account.");
+      }
+         return await this.authservice.Adminchnangepassword(changepassword,adminid)
      }
  
      @Post("/admin/resetlink")
@@ -335,7 +372,7 @@ export class AuthController {
     
 
     //sign out of log out a user 
-    @UseGuards(JwtGuard)
+    // @UseGuards(JwtGuard)
     @Post('/logout')
     async logout(@Res() response: Response): Promise<void> {
       // Clear the access token from the client's storage

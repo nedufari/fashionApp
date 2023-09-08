@@ -213,6 +213,42 @@ export class ModelService {
     return model;
   }
 
+  async updateProfilePics(
+    filename: string,
+    customerid: string,
+  ): Promise<{ message: string }> {
+    try {
+      const customer = await this.modelripo.findOne({
+        where: { id: customerid },
+      });
+      if (!customer) {
+        throw new HttpException(
+          'The customer is not found',
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
+      const fileurl = `http://localhost:3000/api/v1/customer/uploadfile/puplic/${filename}`;
+
+      //update picture
+      customer.digital_photo = fileurl;
+      await this.modelripo.save(customer);
+
+      //save the notification
+      const notification = new Notifications();
+      notification.account = customer.id;
+      notification.subject = 'uploaded a profile picture!';
+      notification.notification_type =
+        NotificationType.customer_Uploaded_a_profilePicture;
+      notification.message = `Hello ${customer.username}, just uploaded a profile picture `;
+      await this.notificationrepository.save(notification);
+
+      return { message: customer.digital_photo };
+    } catch (error) {
+      throw error
+    }
+  }
+
   //create timeline
   async createAtimeline(
     dto: ModelTimelineDto,

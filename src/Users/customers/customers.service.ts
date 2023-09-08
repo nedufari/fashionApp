@@ -455,7 +455,7 @@ export class CustomerService {
   ): Promise<{ message: string }> {
     try {
       const customer = await this.customerripository.findOne({
-        where: { CustomerID: customerid },
+        where: { id: customerid },
       });
       if (!customer) {
         throw new HttpException(

@@ -1,15 +1,18 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { IWallet, IWalletResponse, Wallet } from "../Entity/wallet/wallet.entity";
-import { CustomerEntityRepository, WalletRepository } from "../auth/auth.repository";
+import { CustomerEntityRepository, NotificationsRepository, WalletRepository } from "../auth/auth.repository";
 import { CustomerEntity } from "../Entity/Users/customer.entity";
 import { CreateWalletDto } from "./wallet.dto";
 import * as bcrypt from 'bcrypt';
+import { Notifications } from "../Entity/Notification/notification.entity";
 
 @Injectable()
 export class CustomerWalletService{
     constructor(@InjectRepository(Wallet) private readonly walletripo:WalletRepository,
-    @InjectRepository(CustomerEntity)private readonly customerripository:CustomerEntityRepository,){}
+    @InjectRepository(CustomerEntity)private readonly customerripository:CustomerEntityRepository,
+    @InjectRepository(Notifications)
+    private notificationrepository: NotificationsRepository,){}
 
     async hashpin(pin: string): Promise<string> {
         return await bcrypt.hash(pin, 20);

@@ -314,7 +314,41 @@ export class PhotographerService{
 
   }
 
-  
+  async updateProfilePics(
+    filename: string,
+    customerid: string,
+  ): Promise<{ message: string }> {
+    try {
+      const customer = await this.photoripo.findOne({
+        where: { id: customerid },
+      });
+      if (!customer) {
+        throw new HttpException(
+          'The customer is not found',
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
+      const fileurl = `http://localhost:3000/api/v1/customer/uploadfile/puplic/${filename}`;
+
+      //update picture
+      customer.displayPicture = fileurl;
+      await this.photoripo.save(customer);
+
+      //save the notification
+      const notification = new Notifications();
+      notification.account = customer.id;
+      notification.subject = 'uploaded a profile picture!';
+      notification.notification_type =
+        NotificationType.customer_Uploaded_a_profilePicture;
+      notification.message = `Hello ${customer.username}, just uploaded a profile picture `;
+      await this.notificationrepository.save(notification);
+
+      return { message: customer.displayPicture };
+    } catch (error) {
+      throw error
+    }
+  }
 
 
     }

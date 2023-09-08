@@ -9,7 +9,7 @@ import { ContractPhotographerService } from "./contract.photographer.service";
 import { JwtGuard } from "../auth/guards/jwt.guards";
 
 @Controller('contract')
-@UseGuards(JwtGuard)
+
 export class ContractController{
     constructor(private readonly modelcontractservice:ContractModelService,
         private readonly photographercontractservice:ContractPhotographerService){}

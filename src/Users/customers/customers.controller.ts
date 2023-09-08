@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, Query, UploadedFile, UseInterceptors } from "@nestjs/common";
+import { Body, Controller, ForbiddenException, Get, Param, Patch, Post, Query, Req, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
 import { CustomerService } from "./customers.service";
 import { ICustomerCommentResponse } from "../../Entity/Activities/comment.entity";
 import { CustomerMakeCommentDto, CustomerReplyDto, LikeDto } from "./customers.dto";
@@ -7,34 +7,66 @@ import { IVendorPostResponse } from "../../Entity/Posts/vendor.post.entity";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { UploadService } from "../../uploads.service";
 import { INotificationResponse } from "../../Entity/Notification/notification.entity";
+import { JwtGuard } from "../../auth/guards/jwt.guards";
 
+@UseGuards(JwtGuard)
 @Controller('customer')
 export class CustomerControlller{
     constructor(private readonly customerservice:CustomerService,
       private readonly fileuploadservice:UploadService){}
 
     @Post('comment/:postid/:customerid')
-    async MakePost(@Param('postid')postid:number,@Param('customerid')customerid:string,@Body()dto:CustomerMakeCommentDto):Promise<ICustomerCommentResponse>{
+    async MakePost(@Param('postid')postid:number,@Param('customerid')customerid:string,@Body()dto:CustomerMakeCommentDto,@Req()request):Promise<ICustomerCommentResponse>{
+      const userIdFromToken = await request.user.id; 
+      console.log(request.user.email)
+  
+      if (userIdFromToken !== customerid) {
+      throw new ForbiddenException("You are not authorized to perform this action on another user's account.");
+      }
         return await this.customerservice.makeComment(postid,customerid,dto)
     }
 
     @Post('reply/:commentid/:customerid')
-    async ReplyComment(@Param('commentid')commentid:number,@Param('customerid')customerid:string,@Body()dto:CustomerReplyDto):Promise<ICustomerReplyResponse>{
+    async ReplyComment(@Param('commentid')commentid:number,@Param('customerid')customerid:string,@Body()dto:CustomerReplyDto,@Req()request):Promise<ICustomerReplyResponse>{
+      const userIdFromToken = await request.user.id; 
+      console.log(request.user.email)
+  
+      if (userIdFromToken !== customerid) {
+      throw new ForbiddenException("You are not authorized to perform this action on another user's account.");
+      }
         return await this.customerservice.replycomment(commentid,customerid,dto)
     }
 
     @Post('like/:postid/:customerid')
-    async likeaPost(@Param('postid')postid:number,@Param('customerid')customerid:string,@Body()dto:LikeDto):Promise<{message:string}>{
+    async likeaPost(@Param('postid')postid:number,@Param('customerid')customerid:string,@Body()dto:LikeDto,@Req()request):Promise<{message:string}>{
+      const userIdFromToken = await request.user.id; 
+      console.log(request.user.email)
+  
+      if (userIdFromToken !== customerid) {
+      throw new ForbiddenException("You are not authorized to perform this action on another user's account.");
+      }
         return await this.customerservice.likeAPost(postid,customerid,dto)
     }
 
     @Get('notification/:customer')
-    async findmyNotifications(@Param('customer')customer:string):Promise<INotificationResponse[]>{
+    async findmyNotifications(@Param('customer')customer:string,@Req()request):Promise<INotificationResponse[]>{
+      const userIdFromToken = await request.user.id; 
+      console.log(request.user.email)
+  
+      if (userIdFromToken !== customer) {
+      throw new ForbiddenException("You are not authorized to perform this action on another user's account.");
+      }
         return await this.customerservice.getMyNotifications(customer)
     }
 
     @Post('dislike/:postid/:customerid')
-    async dislikeaPost(@Param('postid')postid:number,@Param('customerid')customerid:string,@Body()dto:LikeDto):Promise<{message:string}>{
+    async dislikeaPost(@Param('postid')postid:number,@Param('customerid')customerid:string,@Body()dto:LikeDto,@Req()request):Promise<{message:string}>{
+      const userIdFromToken = await request.user.id; 
+      console.log(request.user.email)
+  
+      if (userIdFromToken !== customerid) {
+      throw new ForbiddenException("You are not authorized to perform this action on another user's account.");
+      }
         return await this.customerservice.DislikeAPost(postid,customerid,dto)
     }
 
@@ -67,10 +99,17 @@ async searchVendorNiche(@Query('keyword') keyword: string,) {
 
 @Patch("/upload/:customerid")
 @UseInterceptors(FileInterceptor('file'))
-async updatePostPhoto(
+async updateProfilePhoto(
   @Param('customerid') customerid: string,
   @UploadedFile() file: Express.Multer.File,
+  @Req()request
 ):Promise<{message:string}>{
+  const userIdFromToken = await request.user.id; 
+      console.log(request.user.email)
+  
+      if (userIdFromToken !== customerid) {
+      throw new ForbiddenException("You are not authorized to perform this action on another user's account.");
+      }
   const filename = await this.fileuploadservice.uploadFile(file);
   const upload = await this.customerservice.updateProfilePics( filename,customerid,);
   return { message: ` file  uploaded successfully.` }
