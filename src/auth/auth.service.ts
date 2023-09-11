@@ -224,8 +224,8 @@ export class AuthService {
     await this.mailerservice.SendPasswordResetLinkMail(dto.email,resetlink)
 
     //save the reset link and the expiration time to the database 
-    isEmailReistered.password_reset_link=resetlink
-    isEmailReistered.reset_link_exptime=expirationTime
+    isEmailReistered.password_reset_link = resetlink
+    isEmailReistered.reset_link_exptime = expirationTime
     await this.adminrepository.save(isEmailReistered)
 
     const notification = new Notifications()
@@ -690,7 +690,7 @@ export class AuthService {
     const notification = new Notifications()
     notification.account= isEmailReistered.id,
     notification.subject="password Reset link!"
-    notification.notification_type=NotificationType.OTP_VERIFICATION
+    notification.notification_type=NotificationType.PASSWORD_RESET_REQUEST
     notification.message=`Hello ${isEmailReistered.username}, password resent link sent `
     await this.notificationrepository.save(notification)
 
@@ -715,8 +715,8 @@ export class AuthService {
 
     const notification = new Notifications()
     notification.account= verifyuser.id,
-    notification.subject="New Customer!"
-    notification.notification_type=NotificationType.OTP_VERIFICATION
+    notification.subject="Password Reset!"
+    notification.notification_type=NotificationType.RESET_PASSWORD
     notification.message=`Hello ${verifyuser.username}, password reset link verified and the password has been recently reseted `
     await this.notificationrepository.save(notification)
 
@@ -1461,7 +1461,7 @@ export class AuthService {
   //respective logins for various users 
   async loginCustomer(logindto: Logindto) {
     const findcustomer =await this.customerrepository.findOne({where: { email: logindto.email },})
-      if (!findcustomer) throw new HttpException(`invalid email address`,HttpStatus.UNAUTHORIZED)
+      if (!findcustomer) throw new HttpException(`invalid credentials`,HttpStatus.UNAUTHORIZED)
       const comaprepass=await this.comaprePassword(logindto.password,findcustomer.password)
       if (!comaprepass) {
         findcustomer.login_count+=1;
@@ -1470,7 +1470,7 @@ export class AuthService {
           findcustomer.is_locked=true
           findcustomer.is_locked_until= new Date(Date.now()+24*60*60*1000) //lock for 24 hours 
           await this.customerrepository.save(findcustomer)
-          throw new HttpException(`invalid password`,HttpStatus.UNAUTHORIZED)
+          throw new HttpException(`invalid credential`,HttpStatus.UNAUTHORIZED)
         }
 
         //  If the customer hasn't reached the maximum login attempts, calculate the number of attempts left
@@ -1509,7 +1509,7 @@ export class AuthService {
         findvendor.is_locked=true
         findvendor.is_locked_until= new Date(Date.now()+24*60*60*1000) //lock for 24 hours 
         await this.customerrepository.save(findvendor)
-        throw new HttpException(`invalid password`,HttpStatus.UNAUTHORIZED)
+        throw new HttpException(`invalid credential`,HttpStatus.UNAUTHORIZED)
       }
 
       //  If the vendor hasn't reached the maximum login attempts, calculate the number of attempts left
@@ -1547,7 +1547,7 @@ export class AuthService {
         findkid.is_locked=true
         findkid.is_locked_until= new Date(Date.now()+24*60*60*1000) //lock for 24 hours 
         await this.customerrepository.save(findkid)
-        throw new HttpException(`invalid password`,HttpStatus.UNAUTHORIZED)
+        throw new HttpException(`invalid credential`,HttpStatus.UNAUTHORIZED)
       }
 
       //  If the customer hasn't reached the maximum login attempts, calculate the number of attempts left
@@ -1585,7 +1585,7 @@ export class AuthService {
         findadult.is_locked=true
         findadult.is_locked_until= new Date(Date.now()+24*60*60*1000) //lock for 24 hours 
         await this.customerrepository.save(findadult)
-        throw new HttpException(`invalid password`,HttpStatus.UNAUTHORIZED)
+        throw new HttpException(`invalid credential`,HttpStatus.UNAUTHORIZED)
       }
 
       //  If the customer hasn't reached the maximum login attempts, calculate the number of attempts left
@@ -1662,7 +1662,7 @@ export class AuthService {
         findadmin.is_locked=true
         findadmin.is_locked_until= new Date(Date.now()+24*60*60*1000) //lock for 24 hours 
         await this.customerrepository.save(findadmin)
-        throw new HttpException(`invalid password`,HttpStatus.UNAUTHORIZED)
+        throw new HttpException(`invalid credential`,HttpStatus.UNAUTHORIZED)
       }
 
       //  If the customer hasn't reached the maximum login attempts, calculate the number of attempts left

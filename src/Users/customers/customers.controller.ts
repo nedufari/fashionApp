@@ -3,7 +3,7 @@ import { CustomerService } from "./customers.service";
 import { ICustomerCommentResponse } from "../../Entity/Activities/comment.entity";
 import { CustomerMakeCommentDto, CustomerReplyDto, LikeDto } from "./customers.dto";
 import { ICustomerReplyResponse } from "../../Entity/Activities/reply.entity";
-import { IVendorPostResponse } from "../../Entity/Posts/vendor.post.entity";
+import { IVendorPostResponse, IvndorPostResponseWithComments } from "../../Entity/Posts/vendor.post.entity";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { UploadService } from "../../uploads.service";
 import { INotificationResponse } from "../../Entity/Notification/notification.entity";
@@ -71,7 +71,7 @@ export class CustomerControlller{
     }
 
     @Get('vendorposts')
-    async GetallvendorPosts(): Promise<IVendorPostResponse[]>{
+    async GetallvendorPosts(): Promise<IvndorPostResponseWithComments[]>{
         return await this.customerservice.getAllPosts()
     }
 

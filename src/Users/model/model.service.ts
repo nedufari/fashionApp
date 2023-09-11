@@ -23,6 +23,7 @@ import {
 } from './model.dto';
 import {
   IVendorPostResponse,
+  IvndorPostResponseWithComments,
   VendorPostsEntity,
 } from '../../Entity/Posts/vendor.post.entity';
 import { IModelResponse } from './model.interface';
@@ -105,13 +106,14 @@ export class ModelService {
     return model;
   }
 
-  async getAllPosts(): Promise<IVendorPostResponse[]> {
+  async getAllPosts(): Promise<IvndorPostResponseWithComments[]> {
     try {
       const allPosts = await this.vendorpostripo.find({
         relations: ['owner'], // Load the 'owner' relationship for each post
       });
 
-      const postResponses: IVendorPostResponse[] = allPosts.map((post) => ({
+     
+      const postResponses: IvndorPostResponseWithComments[] = allPosts.map((post) => ({
         id: post.id,
         creditedModel: post.creditedModel,
         creditedPhotographer: post.creditedPhotographer,
@@ -120,10 +122,28 @@ export class ModelService {
         cost: post.cost,
         availability: post.availability,
         createdDate: post.createdDate,
+        likes: post.likes,
+        likedBy: post.likedBy,
         owner: {
           display_photo: post.owner.id,
           brandname: post.owner.brandname,
         },
+
+        products: post.products.map((product) => ({
+          image: product.images,
+          price: product.price,
+        })),
+
+        comments: post.comments.map((comment) => ({
+          id: comment.id,
+          content: comment.content,
+          replies: comment.replies.map((reply) => ({
+            id: reply.id,
+            reply: reply.reply,
+          })),
+        })),
+
+        
       }));
 
       return postResponses;

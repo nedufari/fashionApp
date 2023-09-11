@@ -3,7 +3,7 @@ import { ModelService } from "./model.service";
 import { ContractsOfffer } from "../../Entity/contractoffer.entity";
 import { CounterContractsOfffer } from "../../Entity/countercontractOffer.entity";
 import { AddLinesDto } from "../vendor/vendor.dto";
-import { IVendorPostResponse } from "../../Entity/Posts/vendor.post.entity";
+import { IVendorPostResponse, IvndorPostResponseWithComments } from "../../Entity/Posts/vendor.post.entity";
 import { AddInterestsDto, ModelPortfolioDto, ModelTimelineDto } from "./model.dto";
 import { IModelResponse } from "./model.interface";
 import { FileInterceptor, FilesInterceptor } from "@nestjs/platform-express";
@@ -64,7 +64,7 @@ export class ModelController{
   }
 
 @Get('vendorposts')
-async GetallvendorPosts(): Promise<IVendorPostResponse[]>{
+async GetallvendorPosts(): Promise<IvndorPostResponseWithComments[]>{
     return await this.modelservice.getAllPosts()
 }
 

@@ -62,6 +62,31 @@ export class VendorMakePostDto{
 
 }
 
+//create Product 
+
+export class VendorProductDto{
+   
+
+    @IsNumber()
+    @IsNotEmpty()
+    price:number
+
+}
+
+export class VendorMakePostandProductDto{
+    postdto:VendorMakePostDto
+    productdto:VendorProductDto
+}
+
+export class VendorUpdateProductDto{
+   
+
+    @IsNumber()
+    @IsOptional()
+    price:number
+
+}
+
 // update post
 export class VendorUpdatePostDto{
     @IsString()

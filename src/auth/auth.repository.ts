@@ -13,6 +13,9 @@ import { Replies } from "../Entity/Activities/reply.entity";
 import { Wallet } from "../Entity/wallet/wallet.entity";
 import { ModelTimelineEntity } from "../Entity/Posts/model.timeline.entity";
 import { PhotographerTimelineEntity } from "../Entity/Posts/photographer.timeline.entity";
+import { CustomerCartEntity } from "../Entity/Cart/customer.cart.entity";
+import { CustomerCartItemEntity } from "../Entity/Cart/customer.cartitem.entity";
+import { VendorProducts } from "../Entity/VendorProducts/vendor.products.entity";
 
 
 @EntityRepository(CustomerEntity)
@@ -79,6 +82,21 @@ export class RepliesRepository extends Repository <Replies>{
 
 @EntityRepository(Wallet)
 export class WalletRepository extends Repository <Wallet>{
+
+}
+
+@EntityRepository(CustomerCartEntity)
+export class CustomerCartRepository extends Repository <CustomerCartEntity>{
+
+}
+
+@EntityRepository(CustomerCartItemEntity)
+export class CustomerCartItemRepository extends Repository <CustomerCartItemEntity>{
+
+}
+
+@EntityRepository(VendorProducts)
+export class VendorProductRepository extends Repository <VendorProducts>{
 
 }
 

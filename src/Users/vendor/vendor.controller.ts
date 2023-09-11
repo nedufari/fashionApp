@@ -1,7 +1,7 @@
-import { Body, Controller, Delete, ForbiddenException, Get, Param, ParseUUIDPipe, Patch, Post, Query, Req, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, ForbiddenException, Get, Param, ParseUUIDPipe, Patch, Post, Query, Req, UploadedFile, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { VendorService } from './vendor.service';
-import {  AddLinesDto, UpdateVendorDataDto, VendorMakePostDto, VendorUpdatePostDto } from './vendor.dto';
-import { IVendorPostResponse } from '../../Entity/Posts/vendor.post.entity';
+import {  AddLinesDto, UpdateVendorDataDto, VendorMakePostDto, VendorMakePostandProductDto, VendorProductDto, VendorUpdatePostDto } from './vendor.dto';
+import { IVendorPostResponse, IvndorPostResponseWithComments } from '../../Entity/Posts/vendor.post.entity';
 import { ContractsOfffer } from '../../Entity/contractoffer.entity';
 import { CounterContractsOfffer } from '../../Entity/countercontractOffer.entity';
 import { IVendorResponse } from './vendor.interface';
@@ -16,27 +16,28 @@ export class VendorController {
 
   @Post('makepost/:vendorid/',)
   @UseInterceptors(FilesInterceptor("media", 10))
-  async MakePost(@Param('vendorid') vendorid: string, @Body() postdto: VendorMakePostDto,@UploadedFiles() mediaFiles: Express.Multer.File[],@Req()request): Promise<IVendorPostResponse> {
+  async MakePost(@Param('vendorid') vendorid: string, @Body() dto: VendorMakePostDto,@UploadedFiles() mediaFiles: Express.Multer.File[],@Req()request): Promise<IVendorPostResponse> {
     const userIdFromToken = await request.user.id; 
         console.log(request.user.email)
     
         if (userIdFromToken !== vendorid) {
         throw new ForbiddenException("You are not authorized to perform this action on another user's account.");
         }
-    const post = await this.vendorservice.makepost(postdto,vendorid,mediaFiles);
+    const post = await this.vendorservice.makepost(dto,vendorid,mediaFiles);
     return post;
   }
 
-  @Patch('updatepost/:vendorid/:postid',)
+  @Patch('updatepost/:vendorid/:postid/:productid',)
   @UseInterceptors(FilesInterceptor("media", 10))
-  async UpdatePost(@Param('vendorid') vendorid: string,@Param('postid') postid: number, @Body() postdto: VendorUpdatePostDto,@UploadedFiles() mediaFiles: Express.Multer.File[],@Req()request): Promise<IVendorPostResponse> {
+  @UseInterceptors(FilesInterceptor("file", 3))
+  async UpdatePost(@Param('vendorid') vendorid: string,@Param('postid') postid: number,@Param('productid') producttid: number, @Body() postdto: VendorUpdatePostDto,@Body() productdto: VendorProductDto,@UploadedFiles() mediaFiles: Express.Multer.File[],@UploadedFile() productile: Express.Multer.File,@Req()request): Promise<IVendorPostResponse> {
     const userIdFromToken = await request.user.id; 
     console.log(request.user.email)
 
     if (userIdFromToken !== vendorid) {
     throw new ForbiddenException("You are not authorized to perform this action on another user's account.");
     }
-    const post = await this.vendorservice.Updateepost(postdto,vendorid,postid,mediaFiles);
+    const post = await this.vendorservice.Updateepost(postdto,productdto,vendorid,postid,producttid,mediaFiles,productile);
     return post;
   }
 
@@ -75,7 +76,7 @@ export class VendorController {
   }
 
   @Get('myposts/:vendorid')
-  async findmyPosts(@Param('vendorid', ParseUUIDPipe) vendorId: string,@Req()request):Promise<IVendorPostResponse[]>{
+  async findmyPosts(@Param('vendorid', ParseUUIDPipe) vendorId: string,@Req()request):Promise<IvndorPostResponseWithComments[]>{
     const userIdFromToken = await request.user.id; 
     console.log(request.user.email)
 
@@ -108,7 +109,7 @@ export class VendorController {
   }
 
   @Get('vendorposts')
-  async GetallvendorPosts(): Promise<IVendorPostResponse[]>{
+  async GetallvendorPosts(): Promise<IvndorPostResponseWithComments[]>{
     return await this.vendorservice.getAllPosts()
 }
 

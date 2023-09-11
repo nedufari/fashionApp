@@ -6,7 +6,7 @@ import { ModelEntity } from "../../Entity/Users/model.entity";
 import { ModelEntityRepository, NotificationsRepository, PhotographerEntityRepository, PhotographerTimeLineRepository } from "../../auth/auth.repository";
 import { CounterContractsOfffer } from "../../Entity/countercontractOffer.entity";
 import { PhotographerEntity } from "../../Entity/Users/photorapher.entity";
-import { IVendorPostResponse, VendorPostsEntity } from "../../Entity/Posts/vendor.post.entity";
+import { IVendorPostResponse, IvndorPostResponseWithComments, VendorPostsEntity } from "../../Entity/Posts/vendor.post.entity";
 import { ModelTimelineDto } from "../model/model.dto";
 import { UploadService } from "../../uploads.service";
 import { IPhotographerTimeLineResponse, PhotographerTimelineEntity } from "../../Entity/Posts/photographer.timeline.entity";
@@ -44,13 +44,13 @@ export class PhotographerService{
         return offersForModel;
       }
 
-      async getAllPosts(): Promise<IVendorPostResponse[]> {
+      async getAllPosts(): Promise<IvndorPostResponseWithComments[]> {
         try {
           const allPosts = await this.vendorpostripo.find({
             relations: ['owner'], // Load the 'owner' relationship for each post
           });
       
-          const postResponses: IVendorPostResponse[] = allPosts.map(post => ({
+          const postResponses: IvndorPostResponseWithComments[] = allPosts.map((post) => ({
             id: post.id,
             creditedModel: post.creditedModel,
             creditedPhotographer: post.creditedPhotographer,
@@ -59,11 +59,30 @@ export class PhotographerService{
             cost: post.cost,
             availability: post.availability,
             createdDate: post.createdDate,
+            likes: post.likes,
+            likedBy: post.likedBy,
             owner: {
               display_photo: post.owner.id,
               brandname: post.owner.brandname,
             },
+    
+            products: post.products.map((product) => ({
+              image: product.images,
+              price: product.price,
+            })),
+    
+            comments: post.comments.map((comment) => ({
+              id: comment.id,
+              content: comment.content,
+              replies: comment.replies.map((reply) => ({
+                id: reply.id,
+                reply: reply.reply,
+              })),
+            })),
+    
+            
           }));
+    
       
           return postResponses;
         } catch (error) {

@@ -3,6 +3,7 @@ import { Roles } from "../../Enums/roles.enum"
 import { ICustomer } from "../../Users/customers/customers.interface"
 import { Comments } from "../Activities/comment.entity"
 import { Replies } from "../Activities/reply.entity"
+import { CustomerCartEntity } from "../Cart/customer.cart.entity"
 
 @Entity()
 export class CustomerEntity implements ICustomer{
@@ -89,4 +90,7 @@ export class CustomerEntity implements ICustomer{
 
     @OneToMany(()=>Replies,reply=>reply.customer)
     replies:Replies[]
+
+    @OneToMany(()=>CustomerCartEntity,(cart)=>cart.customer)
+    carts:CustomerCartEntity[]
 }

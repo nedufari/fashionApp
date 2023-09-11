@@ -7,6 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   IVendorPostResponse,
+  IvndorPostResponseWithComments,
   VendorPostsEntity,
 } from '../../Entity/Posts/vendor.post.entity';
 import {
@@ -16,6 +17,7 @@ import {
   PhotographerEntityRepository,
   VendorEntityRepository,
   VendorMakePostRepository,
+  VendorProductRepository,
 } from '../../auth/auth.repository';
 import { vendorEntity } from '../../Entity/Users/vendor.entity';
 import { PhotographerEntity } from '../../Entity/Users/photorapher.entity';
@@ -25,7 +27,10 @@ import {
   AddLinesDto,
   UpdateVendorDataDto,
   VendorMakePostDto,
+  VendorMakePostandProductDto,
+  VendorProductDto,
   VendorUpdatePostDto,
+  VendorUpdateProductDto,
 } from './vendor.dto';
 import { Contracts } from '../../Entity/contracts.entity';
 import {ContractOfferRepository,ContractRepository,CounterContractOfferRepository,VendorPostRepository,} from '../../contract/contrct.repository';
@@ -42,6 +47,7 @@ import { IPhotographer } from '../photographers/photo.interface';
 import { KindOfModel } from '../../Enums/modelType.enum';
 import { UploadService } from '../../uploads.service';
 import { NotificationType } from '../../Enums/notificationTypes.enum';
+import { VendorProducts } from '../../Entity/VendorProducts/vendor.products.entity';
 
 @Injectable()
 export class VendorService {
@@ -62,6 +68,8 @@ export class VendorService {
     private readonly offerripo: ContractOfferRepository,
     @InjectRepository(CounterContractsOfffer)
     private readonly counterripo: CounterContractOfferRepository,
+    @InjectRepository(VendorProducts)
+    private vendorProductrepository: VendorProductRepository,
     private readonly fileuploadservice:UploadService
   ) {}
 
@@ -133,10 +141,12 @@ export class VendorService {
   async makepost(
     postdto: VendorMakePostDto,
     vendorid: string,
-    mediaFiles:Express.Multer.File[]
+    mediaFiles:Express.Multer.File[],
   ): Promise<IVendorPostResponse> {
     try {
       const vendor = await this.verifyVendor(vendorid);
+
+     
 
       const cvnmodel = postdto.cvnmodel;
       const cvnphotographer = postdto.cvnphotographer;
@@ -145,6 +155,9 @@ export class VendorService {
       const contractPhotographer = await this.verifyContract(cvnphotographer);
 
       const mediaurls :string[] = []
+
+      
+
      
 
       for (const file of mediaFiles){
@@ -165,12 +178,20 @@ export class VendorService {
 
       await this.vendorpostrepository.save(newpost);
 
+      //add Products
+      const newProduct = new VendorProducts()
+      newProduct.images = mediaurls
+      newProduct.price = postdto.cost
+      newProduct.post = newpost
+      await this.vendorProductrepository.save(newProduct)
+
+
       //save the notification
     const notification = new Notifications();
     notification.account = vendor.id;
-    notification.subject = 'made a post!';
+    notification.subject = 'made a post amd product created!';
     notification.notification_type = NotificationType.vendor_Posted;
-    notification.message = `Hello ${vendor.brandname}, just made a post `;
+    notification.message = `Hello ${vendor.brandname}, just made a post and created a product too for sale ${newProduct.id} `;
     await this.notificationrepository.save(notification);
 
       const customerResponses: IVendorPostResponse = {
@@ -186,6 +207,11 @@ export class VendorService {
           display_photo: newpost.owner.id,
           brandname: newpost.owner.brandname,
         },
+        products:{
+          image : newProduct.images,
+          price: newProduct.price
+        }
+        
       };
 
       return customerResponses;
@@ -197,9 +223,12 @@ export class VendorService {
   //update post
   async Updateepost(
     postdto: VendorUpdatePostDto,
+    productdto:VendorUpdateProductDto,
     vendorid: string,
     postid:number,
-    mediaFiles:Express.Multer.File[]
+    productid:number,
+    mediaFiles:Express.Multer.File[],
+    productfile :Express.Multer.File
   ): Promise<IVendorPostResponse> {
     try {
       const vendor = await this.verifyVendor(vendorid);
@@ -212,7 +241,12 @@ export class VendorService {
 
       const findpost = await this.vendorpostrepository.findOne({where:{id:postid}})
       if (!findpost) throw new HttpException ('the post with the id does not exist',HttpStatus.NOT_FOUND)
+
+      const findProduct = await this.vendorProductrepository.findOne({where:{id:productid}})
+      if (!findProduct) throw new HttpException ('the product with the id does not exist',HttpStatus.NOT_FOUND)
+
       const mediaurls :string[] = []
+      const fileurl = `http://localhost:3000/api/v1/customer/uploadfile/puplic/${productfile}`;
      
 
       for (const file of mediaFiles){
@@ -231,6 +265,15 @@ export class VendorService {
       findpost.createdDate = new Date();
       findpost.owner = vendor;
       await this.vendorpostrepository.save(findpost);
+
+      //update the product if need be 
+      findProduct.images = mediaurls,
+      findProduct.price = productdto.price
+      await this.vendorProductrepository.save(findProduct)
+
+
+
+
 
          //save the notification
     const notification = new Notifications();
@@ -253,6 +296,10 @@ export class VendorService {
           display_photo: findpost.owner.id,
           brandname: findpost.owner.brandname,
         },
+        products:{
+          image : findProduct.images,
+          price: findProduct.price
+        }
       };
 
       return customerResponses;
@@ -261,7 +308,7 @@ export class VendorService {
     }
   }
 
-  async getVendorPosts(vendorId: string): Promise<IVendorPostResponse[]> {
+  async getVendorPosts(vendorId: string): Promise<IvndorPostResponseWithComments[]> {
     try {
       const vendor = await this.vendorrepository.findOne({
         where: { id: vendorId },
@@ -276,7 +323,7 @@ export class VendorService {
         .where('owner.id = :vendorId', { vendorId: vendor.id })
         .getMany();
 
-      const postResponses: IVendorPostResponse[] = vendorPosts.map((post) => ({
+      const postResponses: IvndorPostResponseWithComments[] = vendorPosts.map((post) => ({
         id: post.id,
         creditedModel: post.creditedModel,
         creditedPhotographer: post.creditedPhotographer,
@@ -291,6 +338,10 @@ export class VendorService {
           display_photo: post.owner.id,
           brandname: post.owner.brandname,
         },
+        products: post.products.map((product) => ({
+          image: product.images,
+          price: product.price,
+        })),
       }));
 
       return postResponses;
@@ -482,13 +533,13 @@ export class VendorService {
     return vendor;
   }
 
-  async getAllPosts(): Promise<IVendorPostResponse[]> {
+  async getAllPosts(): Promise<IvndorPostResponseWithComments[]> {
     try {
       const allPosts = await this.vendorpostrepository.find({
-        relations: ['owner'], // Load the 'owner' relationship for each post
+        relations: ['owner','comments','comments.replies','products'], // Load the 'owner' relationship for each post
       });
 
-      const postResponses: IVendorPostResponse[] = allPosts.map((post) => ({
+      const postResponses: IvndorPostResponseWithComments[] = allPosts.map((post) => ({
         id: post.id,
         creditedModel: post.creditedModel,
         creditedPhotographer: post.creditedPhotographer,
@@ -497,10 +548,28 @@ export class VendorService {
         cost: post.cost,
         availability: post.availability,
         createdDate: post.createdDate,
+        likes: post.likes,
+        likedBy: post.likedBy,
         owner: {
           display_photo: post.owner.id,
           brandname: post.owner.brandname,
         },
+
+        products: post.products.map((product) => ({
+          image: product.images,
+          price: product.price,
+        })),
+
+        comments: post.comments.map((comment) => ({
+          id: comment.id,
+          content: comment.content,
+          replies: comment.replies.map((reply) => ({
+            id: reply.id,
+            reply: reply.reply,
+          })),
+        })),
+
+        
       }));
 
       return postResponses;

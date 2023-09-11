@@ -1,8 +1,10 @@
 import { ICommentResponses } from "../../Entity/Activities/comment.entity"
 import { IRepliesResponses } from "../../Entity/Activities/reply.entity"
+import { VendorPostsEntity } from "../../Entity/Posts/vendor.post.entity"
 import { KindOfModel } from "../../Enums/modelType.enum"
 import { Niche4Vendors } from "../../Enums/niche.enum"
 import { PaymentPlan } from "../../Enums/paymentOption.enum"
+import { VendorPostRepository } from "../../contract/contrct.repository"
 
 export interface IVendor{
     id:string,
@@ -37,6 +39,7 @@ export interface IVendor{
     password_reset_link:string
     reset_link_exptime:Date
     VendorID:string
+    myposts:VendorPostsEntity[]
 
 }
 

@@ -3,7 +3,7 @@ import { Body, Controller, Delete, ForbiddenException, Get, Param, ParseUUIDPipe
 import { ContractsOfffer } from "../../Entity/contractoffer.entity";
 import { CounterContractsOfffer } from "../../Entity/countercontractOffer.entity";
 import { PhotographerService } from "./photo.service";
-import { IVendorPostResponse } from "../../Entity/Posts/vendor.post.entity";
+import { IVendorPostResponse, IvndorPostResponseWithComments } from "../../Entity/Posts/vendor.post.entity";
 import { FileInterceptor, FilesInterceptor } from "@nestjs/platform-express";
 import { IPhotographerTimeLineResponse } from "../../Entity/Posts/photographer.timeline.entity";
 import { ModelTimelineDto } from "../model/model.dto";
@@ -42,7 +42,7 @@ export class PhotographerController{
     }
 
     @Get('vendorposts')
-    async GetallvendorPosts(): Promise<IVendorPostResponse[]>{
+    async GetallvendorPosts(): Promise<IvndorPostResponseWithComments[]>{
     return await this.photoservice.getAllPosts()
 }
 

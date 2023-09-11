@@ -17,9 +17,10 @@ import { VendorController } from "./vendor.controller";
 import { ContractsOfffer } from "../../Entity/contractoffer.entity";
 import { CounterContractsOfffer } from "../../Entity/countercontractOffer.entity";
 import { UploadService } from "../../uploads.service";
+import { VendorProducts } from "../../Entity/VendorProducts/vendor.products.entity";
 
 @Module({
-    imports:[TypeOrmModule.forFeature([CustomerEntity,AdminEntity,vendorEntity,PhotographerEntity,ModelEntity,Contracts,ContractsOfffer,Notifications,UserOtp,Comments,Replies,Likes,VendorPostsEntity,ContractsOfffer,CounterContractsOfffer,])],
+    imports:[TypeOrmModule.forFeature([CustomerEntity,AdminEntity,vendorEntity,PhotographerEntity,ModelEntity,Contracts,ContractsOfffer,Notifications,UserOtp,Comments,Replies,Likes,VendorPostsEntity,ContractsOfffer,CounterContractsOfffer,VendorProducts])],
     controllers:[VendorController],
     providers:[VendorService,UploadService]
 })

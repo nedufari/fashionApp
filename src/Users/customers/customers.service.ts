@@ -9,10 +9,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CustomerEntity } from '../../Entity/Users/customer.entity';
 import {
   CommentsRepository,
+  CustomerCartItemRepository,
+  CustomerCartRepository,
   CustomerEntityRepository,
   NotificationsRepository,
   RepliesRepository,
   VendorEntityRepository,
+  VendorProductRepository,
 } from '../../auth/auth.repository';
 import {
   CustomerMakeCommentDto,
@@ -28,6 +31,7 @@ import {
   IVendorPostResponse,
   IvndorPostResponseWithComments,
   VendorPostsEntity,
+  IProductinfo,
 } from '../../Entity/Posts/vendor.post.entity';
 import { VendorPostRepository } from '../../contract/contrct.repository';
 import {
@@ -44,6 +48,10 @@ import {
   Notifications,
 } from '../../Entity/Notification/notification.entity';
 import { NotificationType } from '../../Enums/notificationTypes.enum';
+import { CustomerCartEntity, ICustomerCart } from '../../Entity/Cart/customer.cart.entity';
+import { CustomerCartItemEntity, ICustomerCartItem } from '../../Entity/Cart/customer.cartitem.entity';
+import { VendorProducts } from '../../Entity/VendorProducts/vendor.products.entity';
+import { add } from 'winston';
 
 @Injectable()
 export class CustomerService {
@@ -61,6 +69,12 @@ export class CustomerService {
     private notificationrepository: NotificationsRepository,
     @InjectRepository(vendorEntity)
     private vendorrepository: VendorEntityRepository,
+    @InjectRepository(CustomerCartEntity)
+    private cartrepository: CustomerCartRepository,
+    @InjectRepository(CustomerCartItemEntity)
+    private cartitemrepository: CustomerCartItemRepository,
+    @InjectRepository(VendorProducts)
+    private vendorProductrepository: VendorProductRepository,
   ) {}
 
   //send order request on a particular post
@@ -341,7 +355,7 @@ export class CustomerService {
   async getAllPosts(): Promise<IvndorPostResponseWithComments[]> {
     try {
       const allPosts = await this.vendorpostripo.find({
-        relations: ['owner','comments','comments.replies'], // Load the 'owner' relationship for each post
+        relations: ['owner','comments','comments.replies','products'], // Load the 'owner' relationship for each post
       });
 
       const postResponses: IvndorPostResponseWithComments[] = allPosts.map((post) => ({
@@ -359,6 +373,12 @@ export class CustomerService {
           display_photo: post.owner.id,
           brandname: post.owner.brandname,
         },
+
+        products: post.products.map((product) => ({
+          image: product.images,
+          price: product.price,
+        })),
+
         comments: post.comments.map((comment) => ({
           id: comment.id,
           content: comment.content,
@@ -371,11 +391,11 @@ export class CustomerService {
         
       }));
 
-      this.logger.log(`all the post just gor retrived by a customer`);
+      
 
       return postResponses;
     } catch (error) {
-      this.logger.error(`an error occured ${error.message} `, error.stack);
+      throw error 
     }
   }
 
@@ -482,6 +502,85 @@ export class CustomerService {
       return { message: customer.digital_photo };
     } catch (error) {
       this.logger.error(`An error occurred: ${error.message}`, error.stack);
+    }
+  }
+
+
+  //customer create a cart
+  async CreateCart(customerid:string):Promise<ICustomerCart>{
+
+    try {
+      const customer = await this.customerripository.findOne({ where: { id: customerid }});
+      if (!customer) {
+        throw new HttpException('The customer is not found',HttpStatus.NOT_FOUND );
+      }
+
+        //check whether user has a cart before creating a new one 
+        const hasCart = await this.cartrepository
+        .createQueryBuilder('cart')
+        .leftJoinAndSelect('cart.customer', 'customer')
+        .where('customer.id = :customerid', { customerid: customer.id })
+        .getOne();
+
+        if (!hasCart){
+          const newCart = new CustomerCartEntity()
+          newCart.created_at = new Date()
+          newCart.customer = customer
+          await this.cartrepository.save(newCart)
+        }
+        return hasCart
+      
+
+      
+    } catch (error) {
+      throw error 
+      
+    }
+  }
+
+  //customer add items to cart
+
+  async AddItemsToCart(customerid:string,productid:number,quantity:number):Promise<ICustomerCartItem>{
+    try {
+
+
+      const customer = await this.customerripository.findOne({ where: { id: customerid }});
+      if (!customer) {
+        throw new HttpException('The customer is not found',HttpStatus.NOT_FOUND );
+      }
+
+      //check for cart 
+      const cart = await this.CreateCart(customerid)
+
+     
+      //find product 
+      const product = await this.vendorProductrepository.findOne({where:{id:productid}})
+      if (!product) throw new HttpException('The product is not found',HttpStatus.NOT_FOUND );
+
+       //check for eisting product
+       const isProductinCart = await this.cartitemrepository.findOne({where:{productID:productid}})
+       if (isProductinCart) {
+        isProductinCart.quantity += quantity
+        await this.cartitemrepository.save(isProductinCart)
+
+       }
+       else {
+         //add product to cart 
+      const addProd = new CustomerCartItemEntity()
+      addProd.productID = productid
+      addProd.quantity += quantity
+      addProd.cart = cart
+      addProd.created_at = new Date()
+      await  this.cartitemrepository.save(addProd)
+
+       }
+       return isProductinCart 
+     
+
+      
+    } catch (error) {
+      throw error 
+      
     }
   }
 }

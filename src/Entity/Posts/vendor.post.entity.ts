@@ -1,10 +1,11 @@
-import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { vendorEntity } from "../Users/vendor.entity";
 import { ModelEntity } from "../Users/model.entity";
 import { PhotographerEntity } from "../Users/photorapher.entity";
 import { Comments } from "../Activities/comment.entity";
 import { Availability } from "../../Enums/post.enum";
 import { Replies } from "../Activities/reply.entity";
+import { VendorProducts } from "../VendorProducts/vendor.products.entity";
 
 
 export interface IVendoPost{
@@ -22,12 +23,20 @@ export interface IVendoPost{
     dislikedBy:string[]
     creditedPhotographer:string
     comments?:Comments[]
+    products: VendorProducts[]
+
 }
 
 interface IVendorInfo {
     display_photo: string;
     brandname: string;
 }
+
+export interface IProductinfo{
+    image:string[]
+    price:number
+}
+
 
 
 
@@ -41,12 +50,15 @@ export interface IVendorPostResponse{
     owner:IVendorInfo
     creditedModel:string,
     creditedPhotographer:string
-    likes?:number,
-    dislikes?:number,
-    likedBy?:string[],
-    dislikedBy?:string[]
+    products: IProductinfo
     
 
+}
+
+interface ReplyResponse {
+    id: number;
+    reply: string;
+    // Add other reply properties you need
 }
 
 interface CommentResponse {
@@ -55,11 +67,7 @@ interface CommentResponse {
     replies?: ReplyResponse[];
 }
 
-interface ReplyResponse {
-    id: number;
-    reply: string;
-    // Add other reply properties you need
-}
+
 
 export interface IvndorPostResponseWithComments{
     id:number
@@ -76,6 +84,7 @@ export interface IvndorPostResponseWithComments{
     likedBy?:string[],
     dislikedBy?:string[]
     comments?:CommentResponse[]
+    products: IProductinfo[]
 
 }
 
@@ -128,6 +137,9 @@ export class VendorPostsEntity implements IVendoPost{
     //activities
     @OneToMany(()=>Comments,(comments)=>comments.vendor)
     comments:Comments[]
+
+    @OneToMany(()=>VendorProducts,(product)=>product.post)
+    products: VendorProducts[]
 
     
 

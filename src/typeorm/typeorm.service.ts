@@ -18,6 +18,9 @@ import { CounterContractsOfffer } from "../Entity/countercontractOffer.entity";
 import { Wallet } from "../Entity/wallet/wallet.entity";
 import { ModelTimelineEntity } from "../Entity/Posts/model.timeline.entity";
 import { PhotographerTimelineEntity } from "../Entity/Posts/photographer.timeline.entity";
+import { CustomerCartEntity } from "../Entity/Cart/customer.cart.entity";
+import { CustomerCartItemEntity } from "../Entity/Cart/customer.cartitem.entity";
+import { VendorProducts } from "../Entity/VendorProducts/vendor.products.entity";
 
 @Injectable()
 export class TypeOrmService implements TypeOrmOptionsFactory{
@@ -34,7 +37,7 @@ export class TypeOrmService implements TypeOrmOptionsFactory{
             database:this.configservice.get('DATABASE_NAME'),
             synchronize:true,
             logging:false,
-            entities:[ AdminEntity,ModelEntity,PhotographerEntity,vendorEntity,CustomerEntity,Comments,Likes,Replies,UserOtp,Notifications,Contracts,VendorPostsEntity,ContractsOfffer,CounterContractsOfffer,Wallet,ModelTimelineEntity,PhotographerTimelineEntity],
+            entities:[ AdminEntity,ModelEntity,PhotographerEntity,vendorEntity,CustomerEntity,Comments,Likes,Replies,UserOtp,Notifications,Contracts,VendorPostsEntity,ContractsOfffer,CounterContractsOfffer,Wallet,ModelTimelineEntity,PhotographerTimelineEntity,CustomerCartEntity,CustomerCartItemEntity,VendorProducts],
             migrations:[],
             subscribers:[],
 
