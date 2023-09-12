@@ -24,9 +24,9 @@ export class ModelController{
         const userIdFromToken = await request.user.id; 
         console.log(request.user.email)
     
-        if (userIdFromToken !== model) {
-        throw new ForbiddenException("You are not authorized to perform this action on another user's account.");
-    }
+    //     if (userIdFromToken !== model) {
+    //     throw new ForbiddenException("You are not authorized to perform this action on another user's account.");
+    // }
         return await this.modelservice.getMyoffers(model)
     }
 

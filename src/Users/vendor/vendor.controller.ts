@@ -47,9 +47,9 @@ export class VendorController {
     const userIdFromToken = await request.user.id; 
     console.log(request.user.email)
 
-    if (userIdFromToken !== vendor) {
-    throw new ForbiddenException("You are not authorized to perform this action on another user's account.");
-    }
+    // if (userIdFromToken !== vendor) {
+    // throw new ForbiddenException("You are not authorized to perform this action on another user's account.");
+    // }
       return await this.vendorservice.getMyoffers(vendor)
   }
 

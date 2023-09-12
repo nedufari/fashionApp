@@ -14,7 +14,7 @@ export class VendorProducts implements IVendorProduct{
     @PrimaryGeneratedColumn()
     id:number
 
-    @Column()
+    @Column({nullable:true})
     price:number
 
     @Column({type:'jsonb',nullable:true,})

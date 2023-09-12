@@ -304,6 +304,11 @@ async sendcontractoffer(vendorid: string, photoid: string, contractdto: Contract
       counteroffer.status = ContractOfferStatus.PENDING
       counteroffer.contract_counteroffer_id = this.CVN()
       await this.countercontractsofferrepository.save(counteroffer)
+
+      //update the offertable 
+      isCoi.isCountered = true
+      isCoi.status = ContractOfferStatus.COUNTERED
+      await this.contractsofferrepository.save(isCoi)
   
       const counterresponse: ICounterContractOfferPhotographerResponse= {
         vendor: counteroffer.vendor,
@@ -370,7 +375,7 @@ async sendcontractoffer(vendorid: string, photoid: string, contractdto: Contract
          //update the offertable
          isCoi.isCountered= false
          isCoi.status = ContractOfferStatus.ACCEPTED
-         await this.contractsofferrepository.save(isCoi)
+         await this.countercontractsofferrepository.save(isCoi)
    
          //update the model table and save 
    

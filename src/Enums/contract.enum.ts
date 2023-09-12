@@ -13,7 +13,8 @@ export enum TypeOfContract{
 export enum ContractOfferStatus{
     PENDING = "pending",
     ACCEPTED = "accepted",
-    DECLINED = "declined"
+    DECLINED = "declined",
+    COUNTERED = "countered"
 }
 
 export enum ContractOfferResponse{
