@@ -8,6 +8,7 @@ import { ICounterContractOfferPhotographerResponse, IcounterContractOfferModelRe
 import { ContractPhotographerService } from "./contract.photographer.service";
 import { JwtGuard } from "../auth/guards/jwt.guards";
 
+@UseGuards(JwtGuard)
 @Controller('contract')
 
 export class ContractController{

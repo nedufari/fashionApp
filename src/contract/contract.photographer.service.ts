@@ -13,6 +13,8 @@ import { ContractDuration, ContractOfferResponse, ContractOfferStatus, TypeOfCon
 import { add } from 'date-fns';
 import { ContractsOfffer, IContractOfferPhotographerResponse } from "../Entity/contractoffer.entity";
 import { CounterContractsOfffer, ICounterContractOfferPhotographerResponse } from "../Entity/countercontractOffer.entity";
+import { QrcodeService } from "../qrcode/qrcode.service";
+import { MailService } from "../mailer.service";
 
 @Injectable()
 export class ContractPhotographerService{
@@ -21,7 +23,9 @@ export class ContractPhotographerService{
     @InjectRepository(CounterContractsOfffer)private countercontractsofferrepository:CounterContractOfferRepository,
     @InjectRepository(vendorEntity)private vendorrepository:VendorEntityRepository,
     @InjectRepository(PhotographerEntity)private photographerrepository:PhotographerEntityRepository,
-    @InjectRepository(Notifications)private notificationrepository:NotificationsRepository){}
+    @InjectRepository(Notifications)private notificationrepository:NotificationsRepository,
+    private readonly qrcodeservice:QrcodeService,
+    private readonly mailerservice:MailService){}
 
     private CVN():string{ 
         const nanoid=customAlphabet('abcdefghijklmnopqrstuvwxyz0123456789',10)
@@ -218,6 +222,15 @@ async sendcontractoffer(vendorid: string, photoid: string, contractdto: Contract
          photographer.type_of_contract = isCoi.type_of_contract; // Update the contractType in the Model table
          photographer.is_onContract = true; // Update the is_on_contract field as needed
          await this.photographerrepository.save(photographer);
+
+         //generate qrcode for the contract 
+      //  const qrCodeDataUrl =await this.qrcodeservice.generateContractQrCode(contract)
+
+       //send mail to photographer 
+       await this.mailerservice.SendMailtoPhotographerVendor(vendor.email,contract.contract_duration,contract.contract_worth,contract.contract_validity_number,isPhotographer.photographer,isVendor.vendor,contract.expiration_date)
+
+       //send mail to vendor 
+       await this.mailerservice.SendMailtoVendorPhotographer(vendor.email,contract.contract_duration,contract.contract_worth,contract.contract_validity_number,isPhotographer.photographer,isVendor.vendor,contract.expiration_date)
   
           //save the notification 
           const notification = new Notifications()
@@ -256,8 +269,8 @@ async sendcontractoffer(vendorid: string, photoid: string, contractdto: Contract
   
         const notification = new Notifications()
         notification.account= photographer.id || vendor.id
-        notification.subject="New Contract Extention offer declined!"
-        notification.notification_type=NotificationType.CONTRACT_EXTENSION_ACCEPTED
+        notification.subject="New Contract offer declined!"
+        notification.notification_type=NotificationType.CONTRACT_OFFER_DECLINED
         notification.message=`Hello a contract  offer  between  ${vendor.brandname} and ${photographer.username} for an extended duration of  has been declined`
         await this.notificationrepository.save(notification)
   
@@ -324,7 +337,7 @@ async sendcontractoffer(vendorid: string, photoid: string, contractdto: Contract
       const notification = new Notifications()
             notification.account= counteroffer.contract_counteroffer_id
             notification.subject="New Contract counter offer sent!"
-            notification.notification_type=NotificationType.CONTRACT_EXTENSION_COUNTER_OFFER_SENT
+            notification.notification_type=NotificationType.CONTRACT_COUNTER_OFFER_SENT
             notification.message=`Hello a contract offer between  ${vendor.brandname} and ${photographer.username} has been been countered by the model with an offer of ${counteroffer.contract_duration} with a worth of ${counteroffer.contract_worth}`
             await this.notificationrepository.save(notification)
   
@@ -382,12 +395,19 @@ async sendcontractoffer(vendorid: string, photoid: string, contractdto: Contract
          photographer.type_of_contract = isCoi.type_of_contract; // Update the contractType in the Model table
          photographer.is_onContract = true; // Update the is_on_contract field as needed
          await this.photographerrepository.save(photographer);
+
+          //send mail to photographer 
+       await this.mailerservice.SendMailtoPhotographerVendor(vendor.email,contract.contract_duration,contract.contract_worth,contract.contract_validity_number,isPhotographer.photographer,isVendor.vendor,contract.expiration_date)
+
+       //send mail to vendor 
+       await this.mailerservice.SendMailtoVendorPhotographer(vendor.email,contract.contract_duration,contract.contract_worth,contract.contract_validity_number,isPhotographer.photographer,isVendor.vendor,contract.expiration_date)
+  
   
           //save the notification 
           const notification = new Notifications()
           notification.account= contract.contract_validity_number
-          notification.subject="New Contract Signed!"
-          notification.notification_type=NotificationType.CONTRACT_SIGNED
+          notification.subject="New Contract Signed and counter offer Accepted!"
+          notification.notification_type=NotificationType.CONTRACT_COUNTER_OFFER_ACCEPTED
           notification.message=`Hello a contract has been signed between  ${vendor.brandname} and ${photographer.username} for a duration of ${contract.contract_duration} worth ${contract.contract_worth} which starts ${contract.commence_date} and expires on ${contract.expiration_date}, Thnaks`
           await this.notificationrepository.save(notification)
     
@@ -420,8 +440,8 @@ async sendcontractoffer(vendorid: string, photoid: string, contractdto: Contract
   
         const notification = new Notifications()
         notification.account= photographer.id || vendor.id
-        notification.subject="New Contract Extention offer declined!"
-        notification.notification_type=NotificationType.CONTRACT_EXTENSION_ACCEPTED
+        notification.subject="New Counter Contract  offer declined!"
+        notification.notification_type=NotificationType.CONTRACT_COUNTER_OFFER_DECLINED
         notification.message=`Hello a contract  offer  between  ${vendor.brandname} and ${photographer.username} for an extended duration of  has been declined`
         await this.notificationrepository.save(notification)
   

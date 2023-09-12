@@ -33,15 +33,3 @@ export const sendVerificationEail=({id,email})=>{
     const uniqueString= uuidv4()+id
 
 }
-
-
-
-
-
-
-
-
-
-
-
-

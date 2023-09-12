@@ -1,14 +1,12 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Contracts, IContract, IContractModelResponse, IContractPhotographerResponse } from "../Entity/contracts.entity";
+import { Contracts, IContractModelResponse,  } from "../Entity/contracts.entity";
 import { ContractOfferRepository, ContractRepository, CounterContractOfferRepository } from "./contrct.repository";
 import { vendorEntity } from "../Entity/Users/vendor.entity";
 import { ModelEntityRepository, NotificationsRepository, PhotographerEntityRepository, VendorEntityRepository } from "../auth/auth.repository";
 import { PhotographerEntity } from "../Entity/Users/photorapher.entity";
 import { ModelEntity } from "../Entity/Users/model.entity";
 import { AcceptContractTermoinationRequestDto, AcceptContractofferDto, ContractDto, CounterOfferDto, ExtendContractDto, TerminateDto } from "./cotracts.dto";
-import { IVendor } from "../Users/vendor/vendor.interface";
-import { IModel } from "../Users/model/model.interface";
 import { ContractDuration, ContractOfferResponse, ContractOfferStatus, TypeOfContract } from "../Enums/contract.enum";
 import { customAlphabet, nanoid } from "nanoid";
 import { Notifications } from "../Entity/Notification/notification.entity";
@@ -16,6 +14,8 @@ import { NotificationType } from "../Enums/notificationTypes.enum";
 import { add } from 'date-fns';
 import { CounterContractsOfffer, IcounterContractOfferModelResponse } from "../Entity/countercontractOffer.entity";
 import { ContractsOfffer, IContractOfferModelResponse } from "../Entity/contractoffer.entity";
+import { QrcodeService } from "../qrcode/qrcode.service";
+import { MailService } from "../mailer.service";
 
 
 @Injectable()
@@ -26,7 +26,9 @@ export class ContractModelService{
     @InjectRepository(vendorEntity)private vendorrepository:VendorEntityRepository,
     @InjectRepository(PhotographerEntity)private photographerrepository:PhotographerEntityRepository,
     @InjectRepository(ModelEntity)private modelrepository:ModelEntityRepository,
-    @InjectRepository(Notifications)private notificationrepository:NotificationsRepository){}
+    @InjectRepository(Notifications)private notificationrepository:NotificationsRepository,
+    private readonly qrcodeservice:QrcodeService,
+    private readonly mailerservice:MailService){}
 
 
     //contract validity number 
@@ -198,6 +200,17 @@ async AcceptContractOfferORDecline(vendorid: string, modelid: string, coi:string
        model.is_onContract = true; // Update the is_on_contract field as needed
        await this.modelrepository.save(model);
 
+       //generate qrcode for the contract 
+       await this.qrcodeservice.generateContractQrCode(contract)
+
+       //send mail to photographer 
+       await this.mailerservice.SendMailtoModelVendor(vendor.email,contract.contract_duration,contract.contract_worth,contract.contract_validity_number,isModel.model,isVendor.vendor,contract.expiration_date)
+
+       //send mail to vendor 
+       await this.mailerservice.SendMailtoVendorModel(vendor.email,contract.contract_duration,contract.contract_worth,contract.contract_validity_number,isModel.model,isVendor.vendor,contract.expiration_date)
+  
+       
+
         //save the notification 
         const notification = new Notifications()
         notification.account= contract.contract_validity_number
@@ -236,7 +249,7 @@ async AcceptContractOfferORDecline(vendorid: string, modelid: string, coi:string
       const notification = new Notifications()
       notification.account= model.id || vendor.id
       notification.subject="New Contract Extention offer declined!"
-      notification.notification_type=NotificationType.CONTRACT_EXTENSION_ACCEPTED
+      notification.notification_type=NotificationType.CONTRACT_OFFER_DECLINED
       notification.message=`Hello a contract  offer  between  ${vendor.brandname} and ${model.username} for an extended duration of  has been declined`
       await this.notificationrepository.save(notification)
 
@@ -305,8 +318,8 @@ async countercontrctOffer(vendorid:string, modelid:string,coi:string,counteroffe
     const notification = new Notifications()
           notification.account= counteroffer.contract_counteroffer_id
           notification.subject="New Contract counter offer sent!"
-          notification.notification_type=NotificationType.CONTRACT_EXTENSION_COUNTER_OFFER_SENT
-          notification.message=`Hello a contract offer between  ${vendor.brandname} and ${model.username} has been been countered by the model with an offer of ${counteroffer.contract_duration} with a worth of ${counteroffer.contract_worth}`
+          notification.notification_type=NotificationType.CONTRACT_COUNTER_OFFER_SENT
+          notification.message=`Hello a contract offer between  ${vendor.brandname} and ${model.username} has been countered by the model with an offer of ${counteroffer.contract_duration} with a worth of ${counteroffer.contract_worth}`
           await this.notificationrepository.save(notification)
 
     
@@ -364,11 +377,21 @@ async AcceptCounterContractOfferORDecline(vendorid: string, modelid: string, coi
        model.is_onContract = true; // Update the is_on_contract field as needed
        await this.modelrepository.save(model);
 
+         //send mail to photographer 
+         await this.mailerservice.SendMailtoModelVendor(vendor.email,contract.contract_duration,contract.contract_worth,contract.contract_validity_number,isModel.model,isVendor.vendor,contract.expiration_date)
+
+         //send mail to vendor 
+         await this.mailerservice.SendMailtoVendorModel(vendor.email,contract.contract_duration,contract.contract_worth,contract.contract_validity_number,isModel.model,isVendor.vendor,contract.expiration_date)
+    
+         
+
+       
+
         //save the notification 
         const notification = new Notifications()
         notification.account= contract.contract_validity_number
-        notification.subject="New Contract Signed!"
-        notification.notification_type=NotificationType.CONTRACT_SIGNED
+        notification.subject="New Contract Signed and counter offer accepted!"
+        notification.notification_type=NotificationType.CONTRACT_COUNTER_OFFER_ACCEPTED
         notification.message=`Hello a contract has been signed between  ${vendor.brandname} and ${model.username} for a duration of ${contract.contract_duration} worth ${contract.contract_worth} which starts ${contract.commence_date} and expires on ${contract.expiration_date}, Thnaks`
         await this.notificationrepository.save(notification)
   
@@ -401,9 +424,9 @@ async AcceptCounterContractOfferORDecline(vendorid: string, modelid: string, coi
 
       const notification = new Notifications()
       notification.account= model.id || vendor.id
-      notification.subject="New Contract Extention offer declined!"
-      notification.notification_type=NotificationType.CONTRACT_EXTENSION_ACCEPTED
-      notification.message=`Hello a contract  offer  between  ${vendor.brandname} and ${model.username} for an extended duration of  has been declined`
+      notification.subject="New Contract counter offer declined!"
+      notification.notification_type=NotificationType.CONTRACT_COUNTER_OFFER_DECLINED
+      notification.message=`Hello a contract  offer  between  ${vendor.brandname} and ${model.username}  has been declined`
       await this.notificationrepository.save(notification)
 
       throw new HttpException(declinedMessage,HttpStatus.OK)
