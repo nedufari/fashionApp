@@ -57,6 +57,12 @@ export  class CustomerCareAdminService {
         return emailadress
     }
 
+    private async getAllAdminEmail():Promise<string[]>{
+        const vendor = await this.adminripo.find()
+        const emailadress= vendor.map((vendors)=>vendors.email)
+        return emailadress
+    }
+
 
 
     //get total number of all the respective users 
@@ -78,6 +84,11 @@ export  class CustomerCareAdminService {
     async Totalcustomer():Promise<number>{
         const totalvendor =await this.customerrepository.count()
         return totalvendor
+    }
+
+    async totalnumberOfAllUsers():Promise<number>{
+        const totalusers = (await this.TotalPhotographer() + await this.TotalVendor() + await this.Totalcustomer() + await this.Totalmodel())
+        return totalusers 
     }
 
 
@@ -106,19 +117,142 @@ export  class CustomerCareAdminService {
                 
             } catch (error) {
                 throw error 
-
                 
             }
         }
 
         return {message:'mail has been sent to all users '}
-
-        
             
         } catch (error) {
             throw error 
             
         }
     }
+
+
+
+    async sendEmailArticlesToCustomers(adminid:string,dto:SendEmailToUsersDto):Promise<{message:string}>{
+        try {
+
+        const admin = await this.adminripo.findOne({ where: { id: adminid } });
+        if (!admin)throw new HttpException(`super admin with ${adminid} not found`,HttpStatus.NOT_FOUND);
+
+        const customerEmails = await this.getAllCustomerEmail()
+       
+
+        const allEmails = [...customerEmails]
+
+        for (const email of allEmails){
+            try {
+                //send mails 
+                await this.mailservice.SendRandomMail(dto.content,email,dto.subject)
+                
+            } catch (error) {
+                throw error 
+                
+            }
+        }
+
+        return {message:'mail has been sent to all customers '}
+    
+        } catch (error) {
+            throw error 
+            
+        }
+    }
+
+    async sendEmailArticlesToVendors(adminid:string,dto:SendEmailToUsersDto):Promise<{message:string}>{
+        try {
+
+        const admin = await this.adminripo.findOne({ where: { id: adminid } });
+        if (!admin)throw new HttpException(`super admin with ${adminid} not found`,HttpStatus.NOT_FOUND);
+
+        const vendorEmails = await this.getAllVendorEmail()
+       
+
+        const allEmails = [...vendorEmails]
+
+        for (const email of allEmails){
+            try {
+                //send mails 
+                await this.mailservice.SendRandomMail(dto.content,email,dto.subject)
+                
+            } catch (error) {
+                throw error 
+                
+            }
+        }
+
+        return {message:'mail has been sent to all vendors '}
+    
+        } catch (error) {
+            throw error 
+            
+        }
+    }
+
+
+    async sendEmailArticlesToModels(adminid:string,dto:SendEmailToUsersDto):Promise<{message:string}>{
+        try {
+
+        const admin = await this.adminripo.findOne({ where: { id: adminid } });
+        if (!admin)throw new HttpException(`super admin with ${adminid} not found`,HttpStatus.NOT_FOUND);
+
+        const modelEmails = await this.getAllModelEmail()
+       
+
+        const allEmails = [...modelEmails]
+
+        for (const email of allEmails){
+            try {
+                //send mails 
+                await this.mailservice.SendRandomMail(dto.content,email,dto.subject)
+                
+            } catch (error) {
+                throw error 
+                
+            }
+        }
+
+        return {message:'mail has been sent to all models '}
+    
+        } catch (error) {
+            throw error 
+            
+        }
+    }
+
+    async sendEmailArticlesToPhotographers(adminid:string,dto:SendEmailToUsersDto):Promise<{message:string}>{
+        try {
+
+        const admin = await this.adminripo.findOne({ where: { id: adminid } });
+        if (!admin)throw new HttpException(`super admin with ${adminid} not found`,HttpStatus.NOT_FOUND);
+
+        const photographerEmails = await this.getAllPhotographerEmail()
+       
+
+        const allEmails = [...photographerEmails]
+
+        for (const email of allEmails){
+            try {
+                //send mails 
+                await this.mailservice.SendRandomMail(dto.content,email,dto.subject)
+                
+            } catch (error) {
+                throw error 
+                
+            }
+        }
+
+        return {message:'mail has been sent to all models '}
+    
+        } catch (error) {
+            throw error 
+            
+        }
+    }
+
+
+
 }
 
