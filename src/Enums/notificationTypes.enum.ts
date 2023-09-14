@@ -2,6 +2,12 @@ export enum NotificationType{
     MESSAGE_FEEDBACK='message_feedback',
     LOGGED_IN="logged_in",
     SIGNED_UP="signed_up",
+
+    ADMIN_CREATED="admin_created",
+    ADMIN_DELETED="admin_deleted",
+    ADMIN_CLEARANCE_UPGRADED="admin_clearance_upgraded",
+    ADMIN_PASSWORD_CHANGED="admin_password_changed",
+
     CONTRACT_SIGNED="contract_signed",
     CONTRACT_COUNTER_OFFER_SENT="contract_counter_offer_sent",
     CONTRACT_COUNTER_OFFER_DECLINED="contract_counter_offer_declined",

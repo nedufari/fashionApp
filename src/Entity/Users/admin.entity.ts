@@ -1,5 +1,5 @@
 import { Column, Entity, PrimaryGeneratedColumn,Generated, OneToMany, CreateDateColumn } from "typeorm"
-import { Roles } from "../../Enums/roles.enum"
+import { AdminTypes, ClearanceLevels, Roles } from "../../Enums/roles.enum"
 import { IAdmin } from "../../Users/admin/admin.interface"
 import { Comments } from "../Activities/comment.entity"
 import { Replies } from "../Activities/reply.entity"
@@ -32,6 +32,12 @@ export class AdminEntity implements IAdmin{
 
     @Column({type:"enum", enum:Roles, default:Roles.ADMIN})
     role:Roles
+
+    @Column({type:"enum", enum:AdminTypes,nullable:true})
+    AdminType:AdminTypes
+
+    @Column({type:"enum", enum:ClearanceLevels,nullable:true})
+    ClearanceLevel:ClearanceLevels
 
     @CreateDateColumn()
     created_at:Date

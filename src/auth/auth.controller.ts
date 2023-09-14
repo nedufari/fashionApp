@@ -1,7 +1,7 @@
 import { Body, Controller, ForbiddenException, HttpException, HttpStatus, Param, Patch, Post, Req, Res,UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { AdultModelRegistrationDto, RegistrationDto, RequestOtpResendDto, VendorRegistrationDto, kidsModeleRegistrationDto } from './dto/registrationdto';
-import { Logindto, VerifyOtpdto } from './dto/logindto';
+import { AdminRegistrationDto, AdultModelRegistrationDto, RegistrationDto, RequestOtpResendDto, VendorRegistrationDto, kidsModeleRegistrationDto } from './dto/registrationdto';
+import { AdminLogindto, Logindto, VerifyOtpdto } from './dto/logindto';
 import { Response } from 'express';
 // import { JwtGuard } from './guards/jwt.guards';
 import { ChangePasswordDto, FinallyResetPasswordDto, SendPasswordResetLinkDto } from './dto/password.dto';
@@ -12,12 +12,10 @@ export class AuthController {
     constructor(private authservice:AuthService){}
 
     @Post('signup/customer')
-    async customersignup(@Body()dto:RegistrationDto):Promise<{message:"welcome to ned fashion "}>{
+    async customersignup(@Body()dto:RegistrationDto):Promise<{message:string}>{
         try {
-            await this.authservice.CustomerSignup(dto)
-            return {message:"welcome to ned fashion "}
-        
-            
+           return await this.authservice.CustomerSignup(dto)
+             
         } catch (error) {
             throw error
             
@@ -133,12 +131,11 @@ export class AuthController {
     }
 
     @Post('signup/photographer')
-    async Photographersignup(@Body()dto:RegistrationDto):Promise<{message:"welcome to ned fashion "}>{
+    async Photographersignup(@Body()dto:RegistrationDto):Promise<{message:string}>{
         try {
-            await this.authservice.PhotographerSignup(dto)
-            return {message:"welcome to ned fashion "}
-        
+          return  await this.authservice.PhotographerSignup(dto)
             
+        
         } catch (error) {
             throw error
             
@@ -148,11 +145,10 @@ export class AuthController {
 
 
     @Post('signup/kidmodel')
-    async kidmodelsignup(@Body()dto:kidsModeleRegistrationDto):Promise<{message:"welcome to ned fashion "}>{
+    async kidmodelsignup(@Body()dto:kidsModeleRegistrationDto):Promise<{message:string}>{
         try {
-            await this.authservice.kidsmodelsignup(dto)
-            return {message:"welcome to ned fashion "}
-        
+           return await this.authservice.kidsmodelsignup(dto)
+            
             
         } catch (error) {
             throw error
@@ -162,10 +158,10 @@ export class AuthController {
     }
 
     @Post('signup/adultmodel')
-    async AdultModelsignup(@Body()dto:AdultModelRegistrationDto):Promise<{message:"welcome to ned fashion "}>{
+    async AdultModelsignup(@Body()dto:AdultModelRegistrationDto):Promise<{message:string}>{
         try {
-            await this.authservice.Adultmodelsignup(dto)
-            return {message:"welcome to ned fashion "}
+           return await this.authservice.Adultmodelsignup(dto)
+            
         
             
         } catch (error) {
@@ -176,11 +172,9 @@ export class AuthController {
     }
 
     @Post('signup/admin')
-    async Adminsignup(@Body()dto:RegistrationDto):Promise<{message:"welcome to ned fashion "}>{
+    async Adminsignup(@Body()dto:AdminRegistrationDto):Promise<{message:string}>{
         try {
-            await this.authservice.AdminSignup(dto)
-            return {message:"welcome to ned fashion "}
-        
+            return await this.authservice.AdminSignup(dto)
             
         } catch (error) {
             throw error
@@ -223,7 +217,7 @@ export class AuthController {
 
     
     @Post("login/admin")
-    async loginAdmin(@Body()logindto:Logindto){
+    async loginAdmin(@Body()logindto:AdminLogindto){
         return await this.authservice.loginAdmmin(logindto)
     }
 

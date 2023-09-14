@@ -3,12 +3,40 @@
 // like 
 
 
-import { IsBoolean, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength } from "class-validator";
+import { IsBoolean, IsEmail, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength } from "class-validator";
+import { AdminTypes, ClearanceLevels } from "../../Enums/roles.enum";
 
 
 
+//create admin dto 
+export class CreateAdminDto{
+    @IsEnum(AdminTypes)
+    @IsNotEmpty()
+    admintype:AdminTypes
 
+    @IsEnum(ClearanceLevels)
+    @IsNotEmpty()
+    clearanceLevel:ClearanceLevels
 
+    @IsEmail()
+    @IsNotEmpty()
+    email:string
+}
+
+export class UpgradeClearanceLevelDto{
+    @IsEnum(ClearanceLevels)
+    @IsOptional()
+    clearanceLevel:ClearanceLevels
+
+}
+
+export class ChangeAdmintypeDto{
+    @IsEnum(AdminTypes)
+    @IsOptional()
+    admintype:AdminTypes
+    
+
+}
     
 
 
@@ -60,4 +88,14 @@ export class UpdateAdminDataDto{
 export class VerifyAccountDto{
     @IsBoolean({message:"the account must be verified else once the user logs out the user wont be allowed to log in back "})
     isVerified:boolean
+}
+
+export class SendEmailToUsersDto{
+    @IsString()
+    subject:string | any
+
+    @IsString()
+    content:string | any 
+
+
 }

@@ -2,9 +2,9 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import {AdultModelRegistrationDto, RegistrationDto,RequestOtpResendDto,VendorRegistrationDto,kidsModeleRegistrationDto,} from './dto/registrationdto';
+import {AdminRegistrationDto, AdultModelRegistrationDto, RegistrationDto,RequestOtpResendDto,VendorRegistrationDto,kidsModeleRegistrationDto,} from './dto/registrationdto';
 import { ConfigService } from '@nestjs/config';
-import { Logindto, VerifyOtpdto } from './dto/logindto';
+import { AdminLogindto, Logindto, VerifyOtpdto } from './dto/logindto';
 import { AdminEntityRepository, CustomerEntityRepository, ModelEntityRepository, NotificationsRepository, OtpRepository, PhotographerEntityRepository, VendorEntityRepository } from './auth.repository';
 import { IAdminResponse } from '../Users/admin/admin.interface';
 import { ICustomerResponse } from '../Users/customers/customers.interface';
@@ -20,6 +20,7 @@ import { ModelEntity } from '../Entity/Users/model.entity';
 import { PhotographerEntity } from '../Entity/Users/photorapher.entity';
 import { customAlphabet, nanoid } from 'nanoid';
 import { ChangePasswordDto, FinallyResetPasswordDto, SendPasswordResetLinkDto } from './dto/password.dto';
+import { AdminTypes, ClearanceLevels } from '../Enums/roles.enum';
 
 
 @Injectable()
@@ -81,13 +82,15 @@ export class AuthService {
   ///signup for various users
 
 
-  async AdminSignup(userdto: RegistrationDto,): Promise<{message:string}> {
+  async AdminSignup(userdto: AdminRegistrationDto,): Promise<{message:string}> {
     try {
       const hashedpassword = await this.hashpassword(userdto.password);
       const admin = new AdminEntity()
       admin.email=userdto.email
       admin.password=hashedpassword
       admin.username=userdto.username
+      admin.AdminType = AdminTypes.SUPER_ADMIN
+      admin.ClearanceLevel = ClearanceLevels.SUPER
       admin.AdminID=this.generateIdentityNumber()
       
       const emailexsist = await this.adminrepository.findOne({where: { email: userdto.email },select: ['id', 'email']});
@@ -135,7 +138,7 @@ export class AuthService {
       notification.message=`Hello ${admin.username}, your customer has been created. please complete your profile `
       await this.notificationrepository.save(notification)
 
-      return {message:"new coustomer signed up and verification otp has been sent "}
+      return {message:`new coustomer signed up and verification otp has been sent, please copy this adminID ${admin.AdminID}, it would be used to sign you in when you are logged out. it is important you share it with no one and never loose it `}
     
     } catch (error) {
       throw error
@@ -1651,8 +1654,8 @@ export class AuthService {
   }
 
   
-  async loginAdmmin(logindto:Logindto){
-    const findadmin= await this.adminrepository.findOne({where:{email:logindto.email}})
+  async loginAdmmin(logindto:AdminLogindto){
+    const findadmin= await this.adminrepository.findOne({where:{AdminID:logindto.adminID}})
     if (!findadmin) throw new HttpException(`invalid credential`,HttpStatus.NOT_FOUND)
     const comparepass=await this.comaprePassword(logindto.password,findadmin.password)
     if (!comparepass) {
@@ -1684,6 +1687,8 @@ export class AuthService {
     notification.notification_type=NotificationType.LOGGED_IN
     notification.message=`Hello ${findadmin.username}, just logged in `
     await this.notificationrepository.save(notification)
+
+    
     return await this.signToken(findadmin.id,findadmin.email,findadmin.role)
 
   }

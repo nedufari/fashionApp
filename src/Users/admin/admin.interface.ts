@@ -1,5 +1,6 @@
 import { Comments, ICommentResponses } from "../../Entity/Activities/comment.entity"
 import { IRepliesResponses, Replies } from "../../Entity/Activities/reply.entity"
+import { AdminTypes, ClearanceLevels } from "../../Enums/roles.enum"
 
 export  interface IAdmin{
     id:string
@@ -15,7 +16,10 @@ export  interface IAdmin{
     is_logged_out:boolean
     last_login:Date
     login_count:number
+    created_at:Date
     AdminID:string
+    ClearanceLevel:ClearanceLevels
+    AdminType:AdminTypes
     is_locked:boolean
     is_locked_until:Date
     password_reset_link:string
@@ -39,3 +43,30 @@ export  interface IAdminResponseComment{
     comments: ICommentResponses[]
     replies:IRepliesResponses[]
 }
+
+export interface ICreateOtherAdmin {
+    id:string
+    AdminID:string
+    email:string
+    ClearanceLevel:ClearanceLevels
+    AdminType:AdminTypes
+    password:string
+    created_at:Date
+}
+
+export interface IUpgradeAdminClearanceLevel {
+    ClearanceLevel:ClearanceLevels
+   
+}
+
+export interface IChangeAdminType{
+    AdminType:AdminTypes
+   
+}
+
+export interface IAdminChangePassword{
+    password:string
+}
+
+
+

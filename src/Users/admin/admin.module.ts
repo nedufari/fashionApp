@@ -16,10 +16,15 @@ import { Likes } from "../../Entity/Activities/likes.entity";
 import { ContractsOfffer } from "../../Entity/contractoffer.entity";
 import { CounterContractsOfffer } from "../../Entity/countercontractOffer.entity";
 import { Wallet } from "../../Entity/wallet/wallet.entity";
+import { SuperAdminService } from "./superAdmin.service";
+import { SuperAdmincontroller } from "./superAdmin.controller";
+import { CustomerCareAdminService } from "./customerCare.admin.service";
+import { CustomerCareAdminController } from "./customerCare.controller";
+import { MailService } from "../../mailer.service";
 
 @Module({
     imports:[TypeOrmModule.forFeature([CustomerEntity,AdminEntity,vendorEntity,PhotographerEntity,ModelEntity,Contracts,Notifications,UserOtp,Comments,Replies,Likes,ContractsOfffer,CounterContractsOfffer,Wallet])],
-    providers:[AdminService],
-    controllers:[AdminController]
+    providers:[AdminService,SuperAdminService,CustomerCareAdminService,MailService],
+    controllers:[AdminController,SuperAdmincontroller,CustomerCareAdminController]
 })
 export class AdminModule{}

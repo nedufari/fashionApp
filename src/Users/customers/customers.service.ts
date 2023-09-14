@@ -126,9 +126,8 @@ export class CustomerService {
           username: customer.username,
         },
       };
-      this.logger.log(
-        `comment made on post ${postid} by customer ${customerid}`,
-      );
+      
+      
       return commentResponse;
     } catch (error) {
       throw error;
@@ -184,13 +183,11 @@ export class CustomerService {
           username: customer.username,
         },
       };
-      this.logger.log(
-        `this reply ${reply.reply} was given to this comment ${findcomment.content}`,
-      );
+     
 
       return ReplyResponse;
     } catch (error) {
-      this.logger.error(`An error occurred: ${error.message}`, error.stack);
+      throw error
     }
   }
 
@@ -250,14 +247,12 @@ export class CustomerService {
         notification.message = `Hello ${customer.username}, just liked a post `;
         await this.notificationrepository.save(notification);
 
-        this.logger.log(
-          `this post ${findpost.caption} just got a like from ${customer.username} and the total number of like for the post is ${findpost.likes}`,
-        );
+        
 
         return { message: 'You have liked this post' };
       }
     } catch (error) {
-      this.logger.error(`an error occured ${error.message} `, error.stack);
+      throw error
     }
   }
 
@@ -339,14 +334,12 @@ export class CustomerService {
         notification.message = `Hello ${customer.username}, just disliked a post `;
         await this.notificationrepository.save(notification);
 
-        this.logger.log(
-          `this post ${findpost.caption} just got a dislike from ${customer.username} and the total number of like for the post is ${findpost.likes}`,
-        );
+       
 
         return { message: 'You have disliked this post' };
       }
     } catch (error) {
-      this.logger.error(`an error occured ${error.message} `, error.stack);
+      throw error 
     }
   }
 
@@ -387,11 +380,7 @@ export class CustomerService {
             reply: reply.reply,
           })),
         })),
-
-        
       }));
-
-      
 
       return postResponses;
     } catch (error) {
@@ -468,6 +457,8 @@ export class CustomerService {
       this.logger.error(`An error occurred: ${error.message}`, error.stack);
     }
   }
+
+  
 
   async updateProfilePics(
     filename: string,
@@ -577,7 +568,8 @@ export class CustomerService {
        return isProductinCart 
      
 
-      
+      //adding vat and other calculations and deductions 
+      //
     } catch (error) {
       throw error 
       

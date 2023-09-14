@@ -40,16 +40,6 @@ export class AdminService{
         // if (!admin) throw new HttpException(`admin with ${id} not found`,HttpStatus.NOT_FOUND)
         const customers= await this.customerrepository.find()
 
-        const customerResponses: ICustomerResponse[] = customers.map((customer) => ({
-            digital_photo: customer.digital_photo,
-            username: customer.username,
-            gender: customer.gender,
-            fullname: customer.fullname,
-            CustomerID: customer.CustomerID,
-            comments: customer.comments,
-            replies: customer.replies,
-          }));
-
           return customers 
             
         } catch (error) {
@@ -69,17 +59,7 @@ export class AdminService{
             const customer= await this.customerrepository.findOne({where:{CustomerID:customerid}})
             if (!customer) throw new HttpException(`customer with ${customerid} not found`,HttpStatus.NOT_FOUND)
     
-            const customerResponses: ICustomerResponse={
-                digital_photo: customer.digital_photo,
-                username: customer.username,
-                gender: customer.gender,
-                fullname: customer.fullname,
-                CustomerID: customer.CustomerID,
-                comments: customer.comments,
-                replies: customer.replies,
-            };
-    
-              return customerResponses 
+              return customer
                 
             } catch (error) {
                 
@@ -96,26 +76,6 @@ export class AdminService{
         // const admin = this.adminrepository.findOne({where:{id:id}})
         // if (!admin) throw new HttpException(`admin with ${id} not found`,HttpStatus.NOT_FOUND)
         const vendors= await this.vendorrepository.find()
-
-        const vendorResponses: IVendorResponse[] = vendors.map((vendor) => ({
-            display_photo: vendor.display_photo,
-            gender: vendor.gender,
-            VendorID: vendor.VendorID,
-            phone1:vendor.phone1,
-            phone2:vendor.phone2,
-            niche: vendor.niche,
-            bio:vendor.bio,
-            facebook:vendor.facebook,
-            twitter:vendor.twitter,
-            thread:vendor.thread,
-            instagram:vendor.instagram,
-            tiktok:vendor.tiktok,
-            snapchat:vendor.snapchat,
-            brandname:vendor.brandname,
-            address:vendor.address
-            
-          }));
-
           return vendors
             
         } catch (error) {
@@ -135,25 +95,9 @@ export class AdminService{
             const vendor= await this.vendorrepository.findOne({where:{VendorID:vendorid}})
             if (!vendor) throw new HttpException(`customer with ${vendorid} not found`,HttpStatus.NOT_FOUND)
     
-            const vendorResponses: IVendorResponse={
-                display_photo: vendor.display_photo,
-                gender: vendor.gender,
-                VendorID: vendor.VendorID,
-                phone1:vendor.phone1,
-                phone2:vendor.phone2,
-                niche: vendor.niche,
-                bio:vendor.bio,
-                facebook:vendor.facebook,
-                twitter:vendor.twitter,
-                thread:vendor.thread,
-                instagram:vendor.instagram,
-                tiktok:vendor.tiktok,
-                snapchat:vendor.snapchat,
-                brandname:vendor.brandname,
-                address:vendor.address
-            };
+            
     
-              return vendorResponses 
+              return vendor
                 
             } catch (error) {
                 
@@ -298,6 +242,8 @@ export class AdminService{
             if (!findmodel)throw new HttpException(`model with the id ${modelid} does not exist`,HttpStatus.NOT_FOUND)
 
             await this.modelrepository.remove(findmodel)
+
+
             const notification = new Notifications()
             notification.account= modelid
             notification.subject="Record deleted!"
@@ -323,12 +269,15 @@ export class AdminService{
             if (!findvendor)throw new HttpException(`vendor with the id ${vendorid} does not exist`,HttpStatus.NOT_FOUND)
 
             await this.vendorrepository.remove(findvendor)
+
+
             const notification = new Notifications()
             notification.account= vendorid
             notification.subject="Record deleted!"
             notification.notification_type=NotificationType.account_deleted
             notification.message=`the entire account of ${vendorid} has been deleted by the admin`
             await this.notificationrepository.save(notification)
+            
             return {message:`${findvendor.brandname} has been deleted as a vendor on walkways successfully`}
             
         } catch (error) {
@@ -346,6 +295,8 @@ export class AdminService{
             if (!findphotographer)throw new HttpException(`photographer with the id ${photoid} does not exist`,HttpStatus.NOT_FOUND)
 
             await this.photorepository.remove(findphotographer)
+
+
             const notification = new Notifications()
             notification.account= photoid
             notification.subject="Record deleted!"
@@ -401,6 +352,8 @@ export class AdminService{
                 findmodel.is_verified= true 
                 await this.modelrepository.save(findmodel)
             }
+
+
             const notification = new Notifications()
             notification.account= modelid
             notification.subject="Account Verified!"
@@ -430,6 +383,8 @@ export class AdminService{
                 findphotographer.is_verified= true 
                 await this.photorepository.save(findphotographer)
             }
+
+
             const notification = new Notifications()
             notification.account= photolid
             notification.subject="Account Verified!"
@@ -459,12 +414,15 @@ export class AdminService{
                 findcustomer.is_verified= true 
                 await this.customerrepository.save(findcustomer)
             }
+
             const notification = new Notifications()
             notification.account= customerid
             notification.subject="Account Verified!"
             notification.notification_type=NotificationType.account_verified
             notification.message=`the account of ${findcustomer.username} has been verified by the admin`
             await this.notificationrepository.save(notification)
+
+
             return {message:`${findcustomer.username} has been verified as a customer in walkway`}
             
         } catch (error) {
@@ -487,12 +445,15 @@ export class AdminService{
                 findvendor.is_verified= true 
                 await this.vendorrepository.save(findvendor)
             }
+
             const notification = new Notifications()
             notification.account= vendorid
             notification.subject="Account Verified!"
             notification.notification_type=NotificationType.account_verified
             notification.message=`the account of ${findvendor.brandname} has been verified by the admin`
             await this.notificationrepository.save(notification)
+
+
             return {message:`${findvendor.username} has been verified as a model in walkway`}
             
 
