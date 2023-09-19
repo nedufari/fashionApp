@@ -13,9 +13,10 @@ import { UploadService } from "../../uploads.service";
 import { Notifications } from "../../Entity/Notification/notification.entity";
 import { Replies } from "../../Entity/Activities/reply.entity";
 import { Comments } from "../../Entity/Activities/comment.entity";
+import { ComplaintsEntity } from "../../Entity/Activities/complaints.entity";
 
 @Module({
-    imports:[TypeOrmModule.forFeature([ContractsOfffer,ModelEntity,CounterContractsOfffer,PhotographerEntity,VendorPostsEntity,PhotographerTimelineEntity,Notifications,Replies,Comments])],
+    imports:[TypeOrmModule.forFeature([ContractsOfffer,ModelEntity,CounterContractsOfffer,PhotographerEntity,VendorPostsEntity,PhotographerTimelineEntity,Notifications,Replies,Comments,ComplaintsEntity])],
     controllers:[PhotographerController],
     providers:[PhotographerService,UploadService]
 })

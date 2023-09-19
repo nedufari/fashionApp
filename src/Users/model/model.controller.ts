@@ -11,6 +11,7 @@ import { IModelTimeLineResponse } from "../../Entity/Posts/model.timeline.entity
 import { INotificationResponse } from "../../Entity/Notification/notification.entity";
 import { JwtGuard } from "../../auth/guards/jwt.guards";
 import { UploadService } from "../../uploads.service";
+import { LayComplaintDto } from "../../sharedDto/complaints.dto";
 
 @UseGuards(JwtGuard)
 @Controller('model')
@@ -147,6 +148,26 @@ async takedowntimeline(@Param('modelid')modelid:string,@Param('timelineid')timel
 }
     return await this.modelservice.TakedownTimeline(modelid,timelineid)
     
+}
+
+@Post('complaint/:modelid')
+@UseInterceptors(FileInterceptor('file'))
+async createComplaint(@Param('modelid') modelid: string,@Body() complaintDto: LayComplaintDto,@UploadedFile() file: Express.Multer.File,@Req()request) :Promise<{issueID:string, message:string}>{
+  try {
+    const userIdFromToken = await request.user.id; 
+    console.log(request.user.email)
+
+    if (userIdFromToken !== modelid) {
+    throw new ForbiddenException("You are not authorized to perform this action on another user's account.");
+    }
+    // Call the service to handle the complaint
+    const filename = await this.fileuploadservice.uploadFile(file);
+    const response = await this.modelservice.handleComplaint(modelid, complaintDto,filename);
+    return response;
+  } catch (error) {
+   
+    throw error;
+  }
 }
 
 }

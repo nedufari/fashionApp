@@ -3,7 +3,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { ContractsOfffer } from "../../Entity/contractoffer.entity";
 import { ContractOfferRepository, CounterContractOfferRepository, VendorPostRepository } from "../../contract/contrct.repository";
 import { ModelEntity } from "../../Entity/Users/model.entity";
-import { ModelEntityRepository, NotificationsRepository, PhotographerEntityRepository, PhotographerTimeLineRepository } from "../../auth/auth.repository";
+import { ComplaintRepository, ModelEntityRepository, NotificationsRepository, PhotographerEntityRepository, PhotographerTimeLineRepository } from "../../auth/auth.repository";
 import { CounterContractsOfffer } from "../../Entity/countercontractOffer.entity";
 import { PhotographerEntity } from "../../Entity/Users/photorapher.entity";
 import { IVendorPostResponse, IvndorPostResponseWithComments, VendorPostsEntity } from "../../Entity/Posts/vendor.post.entity";
@@ -15,6 +15,9 @@ import { IPhotographerResponse } from "./photo.interface";
 import { PolicyGuards } from "rckg-shared-library";
 import { INotificationResponse, Notifications } from "../../Entity/Notification/notification.entity";
 import { NotificationType } from "../../Enums/notificationTypes.enum";
+import { ComplaintsEntity } from "../../Entity/Activities/complaints.entity";
+import { ComplaintResolutionLevel } from "../../Enums/complaint.enum";
+import { LayComplaintDto } from "../../sharedDto/complaints.dto";
 
 @Injectable()
 export class PhotographerService{
@@ -25,7 +28,9 @@ export class PhotographerService{
     private readonly fileuploadservice:UploadService,
     @InjectRepository(Notifications)private notificationrepository:NotificationsRepository,
     @InjectRepository(PhotographerTimelineEntity)
-    private readonly phototimelineripo: PhotographerTimeLineRepository,){}
+    private readonly phototimelineripo: PhotographerTimeLineRepository,
+    @InjectRepository(ComplaintsEntity)
+    private complaintsrepository: ComplaintRepository,){}
 
     async getMyoffers(photo: string): Promise<ContractsOfffer[]> {
         const offersForModel = await this.offerripo.find({ where: { photographer: photo } });
@@ -367,6 +372,48 @@ export class PhotographerService{
     } catch (error) {
       throw error
     }
+  }
+
+  async handleComplaint(customerid: string,dto: LayComplaintDto,filename: string,): Promise<{issueID:string, message:string}> {
+
+    try {
+      const customer = await this.photoripo.findOne({
+        where: { id: customerid },
+      });
+      if (!customer) {
+        throw new HttpException(
+          'The customer is not found',
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
+        const fileurl = `http://localhost:3000/api/v1/customer/uploadfile/puplic/${filename}`;
+
+
+        const newcomplaint = new ComplaintsEntity()
+        newcomplaint.issue = dto.issue
+        newcomplaint.issue_type = dto.complaint_type
+        newcomplaint.pictorial_proof = fileurl
+        newcomplaint.walletID = dto.walletID
+        newcomplaint.tracking_number = dto.tracking_number
+        newcomplaint.cvn = dto.cvn
+        newcomplaint.reciept_number =dto.reciept_number
+        newcomplaint.complainerID = customer.id
+        newcomplaint.complainerRole= customer.role
+        newcomplaint.resolution_level = ComplaintResolutionLevel.PROCESSING
+        newcomplaint.reported_at = new Date()
+        await this.complaintsrepository.save(newcomplaint)
+
+        const responseIssueID = `${newcomplaint.issueID}`
+       const responseMessage = `Your complaint has been Fowarded to the Walkway Review Team. This ID displayed above is the issueID, copy and save. You can use it to track the resolution level of your complaint few days from today. Thank you for chosing Walkway.`
+      
+       return {issueID:responseIssueID, message:responseMessage}
+
+    } catch (error) {
+        throw error 
+        
+    }
+
   }
 
 

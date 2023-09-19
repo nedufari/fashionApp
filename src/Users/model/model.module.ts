@@ -11,9 +11,10 @@ import { ModelTimelineEntity } from "../../Entity/Posts/model.timeline.entity";
 import { Notifications } from "../../Entity/Notification/notification.entity";
 import { Replies } from "../../Entity/Activities/reply.entity";
 import { Comments } from "../../Entity/Activities/comment.entity";
+import { ComplaintsEntity } from "../../Entity/Activities/complaints.entity";
 
 @Module({
-    imports:[TypeOrmModule.forFeature([ContractsOfffer,ModelEntity,CounterContractsOfffer,VendorPostsEntity,ModelTimelineEntity,Notifications,Replies,Comments])],
+    imports:[TypeOrmModule.forFeature([ContractsOfffer,ModelEntity,CounterContractsOfffer,VendorPostsEntity,ModelTimelineEntity,Notifications,Replies,Comments,ComplaintsEntity])],
     controllers:[ModelController],
     providers:[ModelService,UploadService]
 })

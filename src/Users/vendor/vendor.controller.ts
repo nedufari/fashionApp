@@ -5,14 +5,17 @@ import { IVendorPostResponse, IvndorPostResponseWithComments } from '../../Entit
 import { ContractsOfffer } from '../../Entity/contractoffer.entity';
 import { CounterContractsOfffer } from '../../Entity/countercontractOffer.entity';
 import { IVendorResponse } from './vendor.interface';
-import { FilesInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { INotificationResponse } from '../../Entity/Notification/notification.entity';
 import { JwtGuard } from '../../auth/guards/jwt.guards';
+import { UploadService } from '../../uploads.service';
+import { LayComplaintDto } from '../../sharedDto/complaints.dto';
 
 @UseGuards(JwtGuard)
 @Controller('vendor')
 export class VendorController {
-  constructor(private readonly vendorservice: VendorService) {}
+  constructor(private readonly vendorservice: VendorService,
+    private readonly fileuploadservice:UploadService) {}
 
   @Post('makepost/:vendorid/',)
   @UseInterceptors(FilesInterceptor("media", 10))
@@ -144,6 +147,26 @@ async searchPhotographers(@Query('keyword') keyword: string,) {
   } catch (error) {
     throw error
     
+  }
+}
+
+@Post('complaint/:customerid')
+@UseInterceptors(FileInterceptor('file'))
+async createComplaint(@Param('customerid') customerid: string,@Body() complaintDto: LayComplaintDto,@UploadedFile() file: Express.Multer.File,@Req()request) :Promise<{issueID:string, message:string}>{
+  try {
+    const userIdFromToken = await request.user.id; 
+    console.log(request.user.email)
+
+    if (userIdFromToken !== customerid) {
+    throw new ForbiddenException("You are not authorized to perform this action on another user's account.");
+    }
+    // Call the service to handle the complaint
+    const filename = await this.fileuploadservice.uploadFile(file);
+    const response = await this.vendorservice.handleComplaint(customerid, complaintDto,filename);
+    return response;
+  } catch (error) {
+   
+    throw error;
   }
 }
 
