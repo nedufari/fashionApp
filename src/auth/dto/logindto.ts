@@ -10,9 +10,7 @@ export class Logindto{
     @IsNotEmpty()
     password:string
 
-    @IsEnum(AdminTypes)
-    @IsNotEmpty({message:'please selct the admin type'})
-    adminType:AdminTypes
+   
 }
 
 export class AdminLogindto{

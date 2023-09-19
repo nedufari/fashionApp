@@ -21,9 +21,10 @@ import { SuperAdmincontroller } from "./superAdmin.controller";
 import { CustomerCareAdminService } from "./customerCare.admin.service";
 import { CustomerCareAdminController } from "./customerCare.controller";
 import { MailService } from "../../mailer.service";
+import { ComplaintsEntity } from "../../Entity/Activities/complaints.entity";
 
 @Module({
-    imports:[TypeOrmModule.forFeature([CustomerEntity,AdminEntity,vendorEntity,PhotographerEntity,ModelEntity,Contracts,Notifications,UserOtp,Comments,Replies,Likes,ContractsOfffer,CounterContractsOfffer,Wallet])],
+    imports:[TypeOrmModule.forFeature([CustomerEntity,AdminEntity,vendorEntity,PhotographerEntity,ModelEntity,Contracts,Notifications,UserOtp,Comments,Replies,Likes,ContractsOfffer,CounterContractsOfffer,Wallet,ComplaintsEntity])],
     providers:[AdminService,SuperAdminService,CustomerCareAdminService,MailService],
     controllers:[AdminController,SuperAdmincontroller,CustomerCareAdminController]
 })

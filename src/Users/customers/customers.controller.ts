@@ -8,12 +8,15 @@ import { FileInterceptor } from "@nestjs/platform-express";
 import { UploadService } from "../../uploads.service";
 import { INotificationResponse } from "../../Entity/Notification/notification.entity";
 import { JwtGuard } from "../../auth/guards/jwt.guards";
+// import { CustomerComplaintService } from "./customer.complain.service";
+import { ComplaintDto, LayComplaintDto } from "../../sharedDto/complaints.dto";
 
 @UseGuards(JwtGuard)
 @Controller('customer')
 export class CustomerControlller{
     constructor(private readonly customerservice:CustomerService,
-      private readonly fileuploadservice:UploadService){}
+      private readonly fileuploadservice:UploadService,
+      ){}
 
     @Post('comment/:postid/:customerid')
     async MakePost(@Param('postid')postid:number,@Param('customerid')customerid:string,@Body()dto:CustomerMakeCommentDto,@Req()request):Promise<ICustomerCommentResponse>{
@@ -115,5 +118,25 @@ async updateProfilePhoto(
   return { message: ` file  uploaded successfully.` }
 }
 
+
+@Post('complaint/:customerid')
+@UseInterceptors(FileInterceptor('file'))
+async createComplaint(@Param('customerid') customerid: string,@Body() complaintDto: LayComplaintDto,@UploadedFile() file: Express.Multer.File,@Req()request) :Promise<{issueID:string, message:string}>{
+  try {
+    const userIdFromToken = await request.user.id; 
+    console.log(request.user.email)
+
+    if (userIdFromToken !== customerid) {
+    throw new ForbiddenException("You are not authorized to perform this action on another user's account.");
+    }
+    // Call the service to handle the complaint
+    const filename = await this.fileuploadservice.uploadFile(file);
+    const response = await this.customerservice.handleComplaint(customerid, complaintDto,filename);
+    return response;
+  } catch (error) {
+   
+    throw error;
+  }
+}
 
 }

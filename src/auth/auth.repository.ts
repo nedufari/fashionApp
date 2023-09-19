@@ -16,6 +16,7 @@ import { PhotographerTimelineEntity } from "../Entity/Posts/photographer.timelin
 import { CustomerCartEntity } from "../Entity/Cart/customer.cart.entity";
 import { CustomerCartItemEntity } from "../Entity/Cart/customer.cartitem.entity";
 import { VendorProducts } from "../Entity/VendorProducts/vendor.products.entity";
+import { ComplaintsEntity } from "../Entity/Activities/complaints.entity";
 
 
 @EntityRepository(CustomerEntity)
@@ -97,6 +98,11 @@ export class CustomerCartItemRepository extends Repository <CustomerCartItemEnti
 
 @EntityRepository(VendorProducts)
 export class VendorProductRepository extends Repository <VendorProducts>{
+
+}
+
+@EntityRepository(ComplaintsEntity)
+export class ComplaintRepository extends Repository <ComplaintsEntity>{
 
 }
 

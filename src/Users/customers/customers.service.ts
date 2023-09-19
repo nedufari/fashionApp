@@ -9,6 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CustomerEntity } from '../../Entity/Users/customer.entity';
 import {
   CommentsRepository,
+  ComplaintRepository,
   CustomerCartItemRepository,
   CustomerCartRepository,
   CustomerEntityRepository,
@@ -52,6 +53,9 @@ import { CustomerCartEntity, ICustomerCart } from '../../Entity/Cart/customer.ca
 import { CustomerCartItemEntity, ICustomerCartItem } from '../../Entity/Cart/customer.cartitem.entity';
 import { VendorProducts } from '../../Entity/VendorProducts/vendor.products.entity';
 import { add } from 'winston';
+import { ComplaintsEntity, IComplaint, IContractComplaintResponse, IOrderComplaintResponse, IOtherComplaintResponse, IWalletComplaintResponse } from '../../Entity/Activities/complaints.entity';
+import { ComplaintDto, LayComplaintDto } from '../../sharedDto/complaints.dto';
+import { ComplaintResolutionLevel, complaintsType } from '../../Enums/complaint.enum';
 
 @Injectable()
 export class CustomerService {
@@ -75,6 +79,8 @@ export class CustomerService {
     private cartitemrepository: CustomerCartItemRepository,
     @InjectRepository(VendorProducts)
     private vendorProductrepository: VendorProductRepository,
+    @InjectRepository(ComplaintsEntity)
+    private complaintsrepository: ComplaintRepository,
   ) {}
 
   //send order request on a particular post
@@ -575,4 +581,48 @@ export class CustomerService {
       
     }
   }
+
+   async handleComplaint(customerid: string,dto: LayComplaintDto,filename: string,): Promise<{issueID:string, message:string}> {
+
+    try {
+      const customer = await this.customerripository.findOne({
+        where: { id: customerid },
+      });
+      if (!customer) {
+        throw new HttpException(
+          'The customer is not found',
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
+        const fileurl = `http://localhost:3000/api/v1/customer/uploadfile/puplic/${filename}`;
+
+
+        const newcomplaint = new ComplaintsEntity()
+        newcomplaint.issue = dto.issue
+        newcomplaint.issue_type = dto.complaint_type
+        newcomplaint.pictorial_proof = fileurl
+        newcomplaint.walletID = dto.walletID
+        newcomplaint.tracking_number = dto.tracking_number
+        newcomplaint.cvn = dto.cvn
+        newcomplaint.reciept_number =dto.reciept_number
+        newcomplaint.complainerID = customer.id
+        newcomplaint.complainerRole= customer.role
+        newcomplaint.resolution_level = ComplaintResolutionLevel.PROCESSING
+        newcomplaint.reported_at = new Date()
+        await this.complaintsrepository.save(newcomplaint)
+
+        const responseIssueID = `${newcomplaint.issueID}`
+       const responseMessage = `Your complaint has been Fowarded to the Walkway Review Team. This ID displayed above is the issueID, copy and save. You can use it to track the resolution level of your complaint few days from today. Thank you for chosing Walkway.`
+      
+       return {issueID:responseIssueID, message:responseMessage}
+
+    } catch (error) {
+        throw error 
+        
+    }
+
+  }
+
 }
+

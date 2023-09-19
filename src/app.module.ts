@@ -16,6 +16,7 @@ import { CustomerModule } from './Users/customers/customers.module';
 import { WalletModule } from './Wallet/wallet.module';
 import { UploadService } from './uploads.service';
 import { QrcodeModule } from './qrcode/qrcode.module';
+import { PaymentModule } from './payment/payment.module';
 
 
 @Module({
@@ -44,7 +45,8 @@ import { QrcodeModule } from './qrcode/qrcode.module';
         },
       }
     }),
-    QrcodeModule
+    QrcodeModule,
+    PaymentModule
   
   ],
   providers:[MailService,UploadService],

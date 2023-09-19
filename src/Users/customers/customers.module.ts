@@ -12,10 +12,12 @@ import { Notifications } from "../../Entity/Notification/notification.entity";
 import { CustomerCartEntity } from "../../Entity/Cart/customer.cart.entity";
 import { CustomerCartItemEntity } from "../../Entity/Cart/customer.cartitem.entity";
 import { VendorProducts } from "../../Entity/VendorProducts/vendor.products.entity";
+import { ComplaintsEntity } from "../../Entity/Activities/complaints.entity";
+// import { CustomerComplaintService } from "./customer.complain.service";
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Comments,CustomerEntity,VendorPostsEntity,Replies,vendorEntity,Notifications,CustomerCartEntity,CustomerCartItemEntity,VendorProducts,CustomerCartEntity,CustomerCartItemEntity])],
-    providers:[CustomerService,UploadService],
+    imports: [TypeOrmModule.forFeature([Comments,CustomerEntity,VendorPostsEntity,Replies,vendorEntity,Notifications,CustomerCartEntity,CustomerCartItemEntity,VendorProducts,CustomerCartEntity,CustomerCartItemEntity,ComplaintsEntity])],
+    providers:[CustomerService,UploadService,],
     controllers:[CustomerControlller]
 })
 

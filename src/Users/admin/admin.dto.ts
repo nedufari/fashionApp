@@ -5,6 +5,7 @@
 
 import { IsBoolean, IsEmail, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength } from "class-validator";
 import { AdminTypes, ClearanceLevels } from "../../Enums/roles.enum";
+import { ComplaintResolutionLevel } from "../../Enums/complaint.enum";
 
 
 
@@ -98,4 +99,15 @@ export class SendEmailToUsersDto{
     content:string | any 
 
 
+}
+
+export class ResolveComplaintDto{
+    @IsEnum(ComplaintResolutionLevel)
+    isResolved:ComplaintResolutionLevel
+
+    @IsString()
+    response:string
+
+    @IsString()
+    title:string
 }

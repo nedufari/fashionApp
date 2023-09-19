@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { MailService } from "../../mailer.service";
 import { InjectRepository } from "@nestjs/typeorm";
 import { AdminEntity } from "../../Entity/Users/admin.entity";
-import { AdminEntityRepository, CustomerEntityRepository, ModelEntityRepository, NotificationsRepository, OtpRepository, PhotographerEntityRepository, VendorEntityRepository, WalletRepository } from "../../auth/auth.repository";
+import { AdminEntityRepository, ComplaintRepository, CustomerEntityRepository, ModelEntityRepository, NotificationsRepository, OtpRepository, PhotographerEntityRepository, VendorEntityRepository, WalletRepository } from "../../auth/auth.repository";
 import { vendorEntity } from "../../Entity/Users/vendor.entity";
 import { PhotographerEntity } from "../../Entity/Users/photorapher.entity";
 import { ModelEntity } from "../../Entity/Users/model.entity";
@@ -14,7 +14,9 @@ import { Notifications } from "../../Entity/Notification/notification.entity";
 import { Wallet } from "../../Entity/wallet/wallet.entity";
 import { KindOfModel } from "../../Enums/modelType.enum";
 import { CustomerEntity } from "../../Entity/Users/customer.entity";
-import { SendEmailToUsersDto } from "./admin.dto";
+import { ResolveComplaintDto, SendEmailToUsersDto } from "./admin.dto";
+import { ComplaintsEntity, IComplaint } from "../../Entity/Activities/complaints.entity";
+import { Roles } from "../../Enums/roles.enum";
 
 @Injectable()
 export  class CustomerCareAdminService {
@@ -28,6 +30,7 @@ export  class CustomerCareAdminService {
     @InjectRepository(ContractsOfffer)private contractoffersrepository:ContractOfferRepository,
     @InjectRepository(Notifications)private notificationrepository:NotificationsRepository,
     @InjectRepository(CustomerEntity)private customerrepository:CustomerEntityRepository,
+    @InjectRepository(ComplaintsEntity)private complaintsrepository: ComplaintRepository,
     @InjectRepository(Wallet) private readonly walletripo:WalletRepository){}
 
 
@@ -252,6 +255,68 @@ export  class CustomerCareAdminService {
         }
     }
 
+
+    //complaints 
+
+    async fetchComplaints ():Promise<IComplaint[]>{
+        const fetchall = await this.complaintsrepository.find()
+        return fetchall
+    }
+
+    async fetchComplaintsTotal ():Promise<number>{
+        const fetchall = await this.complaintsrepository.count()
+        return fetchall
+    }
+
+    async fetchOneComplaints (issueId:string):Promise<IComplaint>{
+        const fetchall = await this.complaintsrepository.findOne({where:{issueID:issueId}})
+        if (!fetchall) throw new HttpException(`complaints with issueID : ${issueId} is not found`,HttpStatus.NOT_FOUND)
+        return fetchall
+    }
+
+    async resolveComplaint (issueId:string, dto:ResolveComplaintDto):Promise<{message:string}>{
+        const fetchall = await this.complaintsrepository.findOne({where:{issueID:issueId}})
+        if (!fetchall) throw new HttpException(`complaints with issueID : ${issueId} is not found`,HttpStatus.NOT_FOUND)
+
+        //resolve complaint 
+        fetchall.resolution_level = dto.isResolved
+        await this.complaintsrepository.save(fetchall)
+
+        //foward mail 
+
+        if (fetchall.complainerRole === Roles.CUSTOMER){
+            const customer = await this.customerrepository.findOne({where:{id:fetchall.complainerID}})
+            await this.mailservice.SendCompliaitResolutionMail(dto.response,customer.email,dto.title, issueId)
+        }
+
+        else if (fetchall.complainerRole === Roles.MODEL){
+            const customer = await this.modelrepository.findOne({where:{id:fetchall.complainerID}})
+            await this.mailservice.SendCompliaitResolutionMail(dto.response,customer.email,dto.title,issueId)
+        }
+
+        else if (fetchall.complainerRole === Roles.PHOTOGRAPHER){
+            const customer = await this.photorepository.findOne({where:{id:fetchall.complainerID}})
+            await this.mailservice.SendCompliaitResolutionMail(dto.response,customer.email,dto.title,issueId)  
+        }
+
+        else if (fetchall.complainerRole === Roles.VENDOR){
+            const customer = await this.customerrepository.findOne({where:{id:fetchall.complainerID}})
+            await this.mailservice.SendCompliaitResolutionMail(dto.response,customer.email,dto.title,issueId)
+        }
+
+
+        return {message: 'mail sent and the issue resolved '}
+
+
+
+    }
+
+
+
+    // fetch suggestions 
+    // verify reviews
+    // report anomalies to the super admin 
+   
 
 
 }

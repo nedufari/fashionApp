@@ -721,6 +721,104 @@ export class MailService{
     <h1>Dear Esteemed Customer</h1>
         <h1>${title}</h1>
         <p> ${body}
+        
+          <p>
+        <a href="#" class="cta-button">Visit Walkway</a> </p>
+        
+        <p 
+      Best regards,
+      Walkway Team
+    </p>
+
+    </div>
+</body>
+</html>
+
+      ` 
+      await this.mailservice.sendMail({to:email,subject,html:content})
+
+    }
+
+
+    async SendCompliaitResolutionMail(body:string,email:string,title:string,issue:string):Promise<void>{
+      const subject = title
+      const content = `
+      <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Walkway Announcement</title>
+    <style>
+        /* Reset some default styles for email clients */
+        body, p {
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Set a background color and text color */
+        body {
+            background-color: #f4f4f4;
+            color: #333;
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Add some spacing to the top and bottom of the email */
+        .container {
+            margin: 20px auto;
+            padding: 20px;
+            max-width: 600px;
+            background: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        /* Style the heading and subheading */
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        /* Style the paragraph text */
+        p {
+            font-size: 16px;
+        }
+
+        /* Style the button */
+        .cta-button {
+            display: inline-block;
+            background-color: #007BFF;
+            color: #fff;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        /* Style the button on hover */
+        .cta-button:hover {
+            background-color: #aa6c39;
+        }
+
+        .signature {
+          text-align: right;
+          font-size: 18px;
+          font-weight: bold;
+          margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+
+    <h1>Dear Esteemed Customer</h1>
+        <h1>${title}</h1>
+        <p> complaint with issue  ${issue} resolved </p>
+        <p> ${body}
+        
           <p>
         <a href="#" class="cta-button">Visit Walkway</a> </p>
         
