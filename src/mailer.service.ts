@@ -728,6 +728,7 @@ export class MailService{
         <p 
       Best regards,
       Walkway Team
+
     </p>
 
     </div>
@@ -740,7 +741,7 @@ export class MailService{
     }
 
 
-    async SendCompliaitResolutionMail(body:string,email:string,title:string,issue:string):Promise<void>{
+    async SendCompliaitResolutionMail(body:string,email:string,title:string,issue:string,issueid:string,username:string):Promise<void>{
       const subject = title
       const content = `
       <!DOCTYPE html>
@@ -790,7 +791,7 @@ export class MailService{
         /* Style the button */
         .cta-button {
             display: inline-block;
-            background-color: #007BFF;
+            background-color: #aa6c39;
             color: #fff;
             text-decoration: none;
             padding: 10px 20px;
@@ -800,7 +801,7 @@ export class MailService{
 
         /* Style the button on hover */
         .cta-button:hover {
-            background-color: #aa6c39;
+            background-color: #007BFF; ;
         }
 
         .signature {
@@ -814,9 +815,18 @@ export class MailService{
 <body>
     <div class="container">
 
-    <h1>Dear Esteemed Customer</h1>
-        <h1>${title}</h1>
-        <p> complaint with issue  ${issue} resolved </p>
+    <h1>${title}</h1>
+
+    <h1>Dear ${username}</h1>
+
+    <h2> This Complaint below: </h2>
+        
+        <p class="cta-button"> ${issue}  </p> <br> 
+
+        <h2>  issueID:  <Strong > ${issueid}  </Strong> <br> </h2>
+
+
+  
         <p> ${body}
         
           <p>

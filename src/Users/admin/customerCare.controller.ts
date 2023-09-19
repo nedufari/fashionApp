@@ -1,11 +1,42 @@
-import { Body, Controller, Get, Param, Post } from "@nestjs/common";
+import { Body, Controller, ForbiddenException, Get, Param, Post, Req, UseGuards } from "@nestjs/common";
 import { CustomerCareAdminService } from "./customerCare.admin.service";
 import { ResolveComplaintDto, SendEmailToUsersDto } from "./admin.dto";
 import { IComplaint } from "../../Entity/Activities/complaints.entity";
+import { JwtGuard } from "../../auth/guards/jwt.guards";
+import { RolesGuard } from "../../auth/guards/role.guards";
+import { Role } from "../../auth/decorator/roles.decorators";
+import { AdminTypes } from "../../Enums/roles.enum";
+import { IAdminResponse } from "./admin.interface";
+import { InjectRepository } from "@nestjs/typeorm";
+import { AdminEntity } from "../../Entity/Users/admin.entity";
+import { AdminEntityRepository } from "../../auth/auth.repository";
 
+@UseGuards(JwtGuard,RolesGuard)
+@Role(AdminTypes.SUPER_ADMIN, AdminTypes.CUSTOMER_CARE)
 @Controller('customercare')
 export class CustomerCareAdminController{
-    constructor(private readonly customercaseservice:CustomerCareAdminService){}
+    constructor(private readonly customercaseservice:CustomerCareAdminService,){}
+
+
+
+    
+
+
+
+
+    @Get('profile/:adminid')
+    async getmyProfile(@Param("adminid")adminid:string,@Req()request):Promise<IAdminResponse>{
+        const userIdFromToken = await request.user.id; 
+        console.log(request.user.id)
+
+        if (userIdFromToken !== adminid) {
+        throw new ForbiddenException("You are not authorized to perform this action on another user's account.");
+    }
+        return await this.customercaseservice.getProile(adminid)
+    }
+
+    
+
 
 // fetching the total of all customers 
 
@@ -56,7 +87,7 @@ export class CustomerCareAdminController{
         return await this.customercaseservice.sendEmailArticlesToModels(id,dto)
     }
 
-    @Post('send-mail-to-all/:id')
+    @Post('send-mail-to-photographers/:id')
     async SendMailToAllPhotographers(@Param('id')id:string, @Body()dto:SendEmailToUsersDto):Promise<{message:string}>{
         return await this.customercaseservice.sendEmailArticlesToPhotographers(id,dto)
     }
@@ -79,9 +110,16 @@ export class CustomerCareAdminController{
         return await this.customercaseservice.fetchOneComplaints(issueid)
     }
 
-    @Post("resolve-compliant/:issueid")
-    async ResolveComplaint (@Param('issueid')issueid:string,@Body()dto:ResolveComplaintDto):Promise<{message:string}>{
-        return await this.customercaseservice.resolveComplaint(issueid,dto)
+    @Post("resolve-compliant/:admindid/:issueid")
+    async ResolveComplaint (@Param("adminid")adminid:string,@Param('issueid')issueid:string,@Body()dto:ResolveComplaintDto,@Req()request):Promise<{message:string}>{
+
+        const userIdFromToken = await request.user.id; 
+        console.log(request.user.id)
+
+        if (userIdFromToken !== adminid) {
+        throw new ForbiddenException("You are not authorized to perform this action on another user's account.");
+    }
+        return await this.customercaseservice.resolveComplaint(adminid,issueid,dto)
     }
 
 

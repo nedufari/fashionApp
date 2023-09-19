@@ -238,7 +238,7 @@ export class AdminService{
             // const admin = this.adminrepository.findOne({where:{id:id}})
             // if (!admin) throw new HttpException(`admin with ${id} not found`,HttpStatus.NOT_FOUND)
 
-            const findmodel =  await this.modelrepository.findOne({where:{ModelID:modelid}})
+            const findmodel =  await this.modelrepository.findOne({where:{id:modelid}})
             if (!findmodel)throw new HttpException(`model with the id ${modelid} does not exist`,HttpStatus.NOT_FOUND)
 
             await this.modelrepository.remove(findmodel)
@@ -265,7 +265,7 @@ export class AdminService{
             // const admin = this.adminrepository.findOne({where:{id:id}})
             // if (!admin) throw new HttpException(`admin with ${id} not found`,HttpStatus.NOT_FOUND)
 
-            const findvendor =  await this.vendorrepository.findOne({where:{VendorID:vendorid}})
+            const findvendor =  await this.vendorrepository.findOne({where:{id:vendorid}})
             if (!findvendor)throw new HttpException(`vendor with the id ${vendorid} does not exist`,HttpStatus.NOT_FOUND)
 
             await this.vendorrepository.remove(findvendor)
@@ -291,7 +291,7 @@ export class AdminService{
             // const admin = this.adminrepository.findOne({where:{id:id}})
             // if (!admin) throw new HttpException(`admin with ${id} not found`,HttpStatus.NOT_FOUND)
 
-            const findphotographer =  await this.photorepository.findOne({where:{PhotographerID:photoid}})
+            const findphotographer =  await this.photorepository.findOne({where:{id:photoid}})
             if (!findphotographer)throw new HttpException(`photographer with the id ${photoid} does not exist`,HttpStatus.NOT_FOUND)
 
             await this.photorepository.remove(findphotographer)
@@ -316,7 +316,7 @@ export class AdminService{
             // const admin = this.adminrepository.findOne({where:{id:id}})
             // if (!admin) throw new HttpException(`admin with ${id} not found`,HttpStatus.NOT_FOUND)
 
-            const findcustomer =  await this.customerrepository.findOne({where:{CustomerID:customerid}})
+            const findcustomer =  await this.customerrepository.findOne({where:{id:customerid}})
             if (!findcustomer)throw new HttpException(`customer with the id ${customerid} does not exist`,HttpStatus.NOT_FOUND)
 
             await this.customerrepository.remove(findcustomer)

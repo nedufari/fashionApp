@@ -17,6 +17,8 @@ import { CustomerEntity } from "../../Entity/Users/customer.entity";
 import { ResolveComplaintDto, SendEmailToUsersDto } from "./admin.dto";
 import { ComplaintsEntity, IComplaint } from "../../Entity/Activities/complaints.entity";
 import { Roles } from "../../Enums/roles.enum";
+import { NotificationType } from "../../Enums/notificationTypes.enum";
+import { IAdminResponse } from "./admin.interface";
 
 @Injectable()
 export  class CustomerCareAdminService {
@@ -32,6 +34,14 @@ export  class CustomerCareAdminService {
     @InjectRepository(CustomerEntity)private customerrepository:CustomerEntityRepository,
     @InjectRepository(ComplaintsEntity)private complaintsrepository: ComplaintRepository,
     @InjectRepository(Wallet) private readonly walletripo:WalletRepository){}
+
+
+    
+//personal profile data 
+async getProile(id:string):Promise<IAdminResponse>{
+    const profile = await this.adminripo.findOne({where:{id:id}})
+    return profile
+}
 
 
     //get all user email address
@@ -274,7 +284,11 @@ export  class CustomerCareAdminService {
         return fetchall
     }
 
-    async resolveComplaint (issueId:string, dto:ResolveComplaintDto):Promise<{message:string}>{
+    async resolveComplaint (adminid:string,issueId:string, dto:ResolveComplaintDto):Promise<{message:string}>{
+
+        const admin = await this.adminripo.findOne({ where: { id: adminid } });
+        if (!admin)throw new HttpException(`super admin with ${adminid} not found`,HttpStatus.NOT_FOUND);
+
         const fetchall = await this.complaintsrepository.findOne({where:{issueID:issueId}})
         if (!fetchall) throw new HttpException(`complaints with issueID : ${issueId} is not found`,HttpStatus.NOT_FOUND)
 
@@ -286,23 +300,30 @@ export  class CustomerCareAdminService {
 
         if (fetchall.complainerRole === Roles.CUSTOMER){
             const customer = await this.customerrepository.findOne({where:{id:fetchall.complainerID}})
-            await this.mailservice.SendCompliaitResolutionMail(dto.response,customer.email,dto.title, issueId)
+            await this.mailservice.SendCompliaitResolutionMail(dto.response,customer.email,dto.title,fetchall.issue, issueId, customer.username)
         }
 
         else if (fetchall.complainerRole === Roles.MODEL){
             const customer = await this.modelrepository.findOne({where:{id:fetchall.complainerID}})
-            await this.mailservice.SendCompliaitResolutionMail(dto.response,customer.email,dto.title,issueId)
+            await this.mailservice.SendCompliaitResolutionMail(dto.response,customer.email,dto.title,fetchall.issue,issueId,customer.username)
         }
 
         else if (fetchall.complainerRole === Roles.PHOTOGRAPHER){
             const customer = await this.photorepository.findOne({where:{id:fetchall.complainerID}})
-            await this.mailservice.SendCompliaitResolutionMail(dto.response,customer.email,dto.title,issueId)  
+            await this.mailservice.SendCompliaitResolutionMail(dto.response,customer.email,dto.title,fetchall.issue,issueId,customer.username)  
         }
 
         else if (fetchall.complainerRole === Roles.VENDOR){
-            const customer = await this.customerrepository.findOne({where:{id:fetchall.complainerID}})
-            await this.mailservice.SendCompliaitResolutionMail(dto.response,customer.email,dto.title,issueId)
+            const customer = await this.vendorrepository.findOne({where:{id:fetchall.complainerID}})
+            await this.mailservice.SendCompliaitResolutionMail(dto.response,customer.email,dto.title,fetchall.issue,issueId,customer.brandname)
         }
+
+        const notification = new Notifications();
+        notification.account = admin.id;
+        notification.subject = 'Admin clearance level upgraded !';
+        notification.notification_type = NotificationType.COMPLAINT_RESOLVED;
+        notification.message = `the admin with id ${adminid} has resolved the complaint filed and have fowraed a resoltion mail to the user  `;
+        await this.notificationrepository.save(notification);
 
 
         return {message: 'mail sent and the issue resolved '}
@@ -313,9 +334,7 @@ export  class CustomerCareAdminService {
 
 
 
-    // fetch suggestions 
-    // verify reviews
-    // report anomalies to the super admin 
+   
    
 
 

@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { ForbiddenException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
@@ -485,7 +485,7 @@ export class AuthService {
     const notification = new Notifications()
     notification.account= verifyuser.id,
     notification.subject="New Customer!"
-    notification.notification_type=NotificationType.OTP_VERIFICATION
+    notification.notification_type=NotificationType.RESET_PASSWORD
     notification.message=`Hello ${verifyuser.username}, password reset link verified and the password has been recently reseted `
     await this.notificationrepository.save(notification)
 
@@ -1469,6 +1469,7 @@ export class AuthService {
       if (!comaprepass) {
         findcustomer.login_count+=1;
 
+     
         if (findcustomer.login_count>=5){
           findcustomer.is_locked=true
           findcustomer.is_locked_until= new Date(Date.now()+24*60*60*1000) //lock for 24 hours 
@@ -1484,9 +1485,17 @@ export class AuthService {
     
       }
 
+      if (!findcustomer.is_verified) {
+        // If the account is not verified, throw an exception
+        throw new ForbiddenException(
+          `Your account has not been verified. Please verify your account by requesting an OTP.`
+        );
+      }
+
        //If the password matches, reset the login_count and unlock the account if needed
       findcustomer.login_count = 0;
-      findcustomer.is_locked = false;
+      findcustomer.is_logged_in =true
+      await this.customerrepository.save(findcustomer)
 
        //save the notification 
      const notification = new Notifications()
@@ -1517,15 +1526,29 @@ export class AuthService {
 
       //  If the vendor hasn't reached the maximum login attempts, calculate the number of attempts left
     const attemptsleft= 5 - findvendor.login_count
-    await this.customerrepository.save(findvendor)
+    await this.vendorrepository.save(findvendor)
 
     throw new HttpException(`invalid credentials ${attemptsleft} attempts left before your account is locked.`,HttpStatus.UNAUTHORIZED)
   
     }
 
+    if (!findvendor.is_verified) {
+      // If the account is not verified, throw an exception
+      throw new ForbiddenException(
+        `Your account has not been verified. Please verify your account by requesting an OTP.`
+      );
+    }
+
      //If the password matches, reset the login_count and unlock the account if needed
     findvendor.login_count = 0;
-    findvendor.is_locked = false;
+    findvendor.is_logged_in = true
+
+    await this.vendorrepository.save(findvendor)
+
+
+
+
+
     //save the notification 
     const notification = new Notifications()
     notification.account= findvendor.id
@@ -1561,9 +1584,18 @@ export class AuthService {
   
     }
 
+    if (!findkid.is_verified) {
+      // If the account is not verified, throw an exception
+      throw new ForbiddenException(
+        `Your account has not been verified. Please verify your account by requesting an OTP.`
+      );
+    }
+
      //If the password matches, reset the login_count and unlock the account if needed
     findkid.login_count = 0;
     findkid.is_locked = false;
+    findkid.is_logged_in = true
+    await this.modelrepository.save(findkid)
 
       //save the notification 
       const notification = new Notifications()
@@ -1599,9 +1631,18 @@ export class AuthService {
   
     }
 
+    if (!findadult.is_verified) {
+      // If the account is not verified, throw an exception
+      throw new ForbiddenException(
+        `Your account has not been verified. Please verify your account by requesting an OTP.`
+      );
+    }
+
      //If the password matches, reset the login_count and unlock the account if needed
     findadult.login_count = 0;
     findadult.is_locked = false;
+    findadult.is_logged_in = true
+    await this.modelrepository.save(findadult)
 
     //save the notification 
     const notification = new Notifications()
@@ -1637,9 +1678,17 @@ export class AuthService {
   
     }
 
+    if (!findphotographer.is_verified) {
+      // If the account is not verified, throw an exception
+      throw new ForbiddenException(
+        `Your account has not been verified. Please verify your account by requesting an OTP.`
+      );
+    }
+
      //If the password matches, reset the login_count and unlock the account if needed
     findphotographer.login_count = 0;
-    findphotographer.is_locked = false;
+    findphotographer.is_logged_in = true;
+    await this.photographerrepository.save(findphotographer)
 
     //save the notification 
     const notification = new Notifications()
@@ -1676,9 +1725,17 @@ export class AuthService {
   
     }
 
+    if (!findadmin.is_verified) {
+      // If the account is not verified, throw an exception
+      throw new ForbiddenException(
+        `Your account has not been verified. Please verify your account by requesting an OTP.`
+      );
+    }
+
      //If the password matches, reset the login_count and unlock the account if needed
     findadmin.login_count = 0;
-    findadmin.is_locked = false;
+    findadmin.is_logged_in = true;
+    await this.adminrepository.save(findadmin)
 
     //save the notification 
     const notification = new Notifications()

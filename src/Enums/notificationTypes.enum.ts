@@ -8,6 +8,12 @@ export enum NotificationType{
     ADMIN_CLEARANCE_UPGRADED="admin_clearance_upgraded",
     ADMIN_PASSWORD_CHANGED="admin_password_changed",
 
+    COMPLAINT_RESOLVED = "complaint_resolved",
+    COMPLAINT_FILED = "complaint_filed",
+    
+
+
+
     CONTRACT_SIGNED="contract_signed",
     CONTRACT_COUNTER_OFFER_SENT="contract_counter_offer_sent",
     CONTRACT_COUNTER_OFFER_DECLINED="contract_counter_offer_declined",

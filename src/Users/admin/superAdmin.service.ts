@@ -50,6 +50,7 @@ export class SuperAdminService {
       newAdmin.created_at = new Date();
       newAdmin.AdminType = createadmindto.admintype;
       newAdmin.ClearanceLevel = createadmindto.clearanceLevel
+      newAdmin.is_verified = true
       newAdmin.email = createadmindto.email
 
 
