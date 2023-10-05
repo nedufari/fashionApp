@@ -19,6 +19,7 @@ import { ModelEntity } from '../Entity/Users/model.entity';
 import { MailService } from '../mailer.service';
 import { Comments } from '../Entity/Activities/comment.entity';
 import { Replies } from '../Entity/Activities/reply.entity';
+import { Wallet } from '../Entity/wallet/wallet.entity';
 
 @Module({
   providers: [JwtGuard, RolesGuard, JwtStrategy, AuthService,MailService],
@@ -32,8 +33,8 @@ import { Replies } from '../Entity/Activities/reply.entity';
       Notifications,
       UserOtp,
       ModelEntity,
-      Comments,
-      Replies,    
+      Wallet
+        
     ]),
     JwtModule.registerAsync({
         useFactory:()=>({

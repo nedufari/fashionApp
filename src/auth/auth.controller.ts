@@ -25,10 +25,10 @@ export class AuthController {
 
 
     @Post('customer/verify-otp')
-    async verifyOtp(@Body() verifyOtpDto:VerifyOtpdto): Promise<{ isValid: boolean; accessToken: any }> {
+    async verifyOtp(@Body() verifyOtpDto:VerifyOtpdto): Promise<{ isValid: boolean; accessToken: any,walletPIN:string }> {
       try {
         const result = await this.authservice.verifyotp(verifyOtpDto);
-        return { isValid: result.isValid, accessToken: result.accessToken};
+        return { isValid: result.isValid, accessToken: result.accessToken, walletPIN:result.walletPIN};
       } catch (error) {
         throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
       }
@@ -319,7 +319,7 @@ export class AuthController {
 
       /// adult model ////
       @UseGuards(JwtGuard)
-    @Patch("/customer/changePassword/:adultmodelid")
+    @Patch("/adultmodel/changePassword/:adultmodelid")
     async AdultModelchangePassword(@Body()changepassword:ChangePasswordDto,@Param('adultmodelidid')adultmodelid:string,@Req()request):Promise<{message:string}>{
       const userIdFromToken = await request.user.id; 
       console.log(request.user.email)
@@ -330,12 +330,12 @@ export class AuthController {
         return await this.authservice.AdultModelchnangepassword(changepassword,adultmodelid)
     }
 
-    @Post("/customer/resetlink")
+    @Post("/adultmodel/resetlink")
     async AdultModelPasswordResetLink(@Body()email:SendPasswordResetLinkDto):Promise<{message:string}>{
         return await this.authservice.AdultModelsendPasswordResetLink(email)
     }
 
-    @Patch("customer/resetPassword")
+    @Patch("adultmodel/resetPassword")
     async AdultResetPasswordFinally(@Body()dto:FinallyResetPasswordDto):Promise<{message:string}>{
         return await this.authservice.finallyAdultModelResetPassword(dto)
     }

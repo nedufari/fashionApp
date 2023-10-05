@@ -97,7 +97,7 @@ export class AdminController{
              }
            }
      
-           @Get('/models/:modelid')
+           @Get('/onemodel/:modelid')
            async AdminGetOneModel(@Param('modelid')modelid:string):Promise<IModel>{
              try {
                  const photgrapher= await this.adminservice.AdminGetOneModel(modelid)

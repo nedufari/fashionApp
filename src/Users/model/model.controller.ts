@@ -70,7 +70,7 @@ async GetallvendorPosts(): Promise<IvndorPostResponseWithComments[]>{
 }
 
 
-@Patch('adult/portfolio/:modelid')
+@Patch('create/portfolio/:modelid')
 async ModelPortfolio(@Body()dto:ModelPortfolioDto,@Param('modelid')modelid:string,@Req() request):Promise<IModelResponse>{
     const userIdFromToken = await request.user.id; 
     console.log(request.user.email)

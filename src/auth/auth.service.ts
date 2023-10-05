@@ -5,7 +5,7 @@ import * as bcrypt from 'bcrypt';
 import {AdminRegistrationDto, AdultModelRegistrationDto, RegistrationDto,RequestOtpResendDto,VendorRegistrationDto,kidsModeleRegistrationDto,} from './dto/registrationdto';
 import { ConfigService } from '@nestjs/config';
 import { AdminLogindto, Logindto, VerifyOtpdto } from './dto/logindto';
-import { AdminEntityRepository, CustomerEntityRepository, ModelEntityRepository, NotificationsRepository, OtpRepository, PhotographerEntityRepository, VendorEntityRepository } from './auth.repository';
+import { AdminEntityRepository, CustomerEntityRepository, ModelEntityRepository, NotificationsRepository, OtpRepository, PhotographerEntityRepository, VendorEntityRepository, WalletRepository } from './auth.repository';
 import { IAdminResponse } from '../Users/admin/admin.interface';
 import { ICustomerResponse } from '../Users/customers/customers.interface';
 import { generate2FACode4digits, generate2FACode6digits } from '../helpers';
@@ -21,6 +21,7 @@ import { PhotographerEntity } from '../Entity/Users/photorapher.entity';
 import { customAlphabet, nanoid } from 'nanoid';
 import { ChangePasswordDto, FinallyResetPasswordDto, SendPasswordResetLinkDto } from './dto/password.dto';
 import { AdminTypes, ClearanceLevels } from '../Enums/roles.enum';
+import { Wallet } from '../Entity/wallet/wallet.entity';
 
 
 @Injectable()
@@ -41,12 +42,19 @@ export class AuthService {
     private otprepository: OtpRepository,
     @InjectRepository(Notifications)
     private notificationrepository: NotificationsRepository,
+    @InjectRepository(Wallet) private readonly walletripo:WalletRepository,
     private configservice: ConfigService,
     private mailerservice:MailService
   ) {}
 
   async hashpassword(password: string): Promise<string> {
     return await bcrypt.hash(password, 12);
+  }
+
+
+  //wallet transaction pin 
+  async hashpin(pin: string): Promise<string> {
+    return await bcrypt.hash(pin, 20);
   }
 
   async comaprePassword(userpassword,dbpassword): Promise<boolean> {
@@ -58,7 +66,12 @@ export class AuthService {
   }
 
   private generatePasswordResetLink():string{
-    const nanoid = customAlphabet('1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ',40)
+    const nanoid = customAlphabet('1234567890',6)
+    return nanoid()
+  }
+
+  private generateWalletTransactionPin():string{
+    const nanoid = customAlphabet('1234567890',4)
     return nanoid()
   }
 
@@ -167,6 +180,8 @@ export class AuthService {
       customer.is_verified=true
       customer.is_active=true
     }
+
+    
 
      const notification = new Notifications()
       notification.account= customer.id,
@@ -336,7 +351,7 @@ export class AuthService {
    
   }
 
-  async verifyotp(verifyotpdto:VerifyOtpdto):Promise<{isValid:boolean; accessToken:any}>{
+  async verifyotp(verifyotpdto:VerifyOtpdto):Promise<{isValid:boolean; accessToken:any, walletPIN:string}>{
     const findemail= await this.otprepository.findOne({where:{email:verifyotpdto.email}})
     if (!findemail) throw new HttpException('the user does not match the owner of the otp',HttpStatus.NOT_FOUND)
     //find the otp privided if it matches with the otp stored 
@@ -355,6 +370,16 @@ export class AuthService {
       customer.is_active=true
       customer.is_verified=true
 
+      //create wallet for the customer 
+      const walletpin = this.generateWalletTransactionPin()
+      const hashpin = await this.hashpin(walletpin)
+      
+      
+      const wallet =new Wallet()
+      wallet.owner = customer
+      wallet.cratedDate = new Date()
+      wallet.PIN = hashpin
+      await this.walletripo.save(wallet)
     
 
      const notification = new Notifications()
@@ -373,7 +398,7 @@ export class AuthService {
 
     const accessToken= await this.signToken(customer.id,customer.email,customer.role)
 
-    return {isValid:true, accessToken}
+    return {isValid:true, accessToken, walletPIN:walletpin}
     }
 
 
