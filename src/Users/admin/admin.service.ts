@@ -206,23 +206,24 @@ export class AdminService{
         
     }
 
-    async AdminGetAllWallets():Promise<IWalletResponse[]>{
+    async AdminGetAllWallets():Promise<IWallet[]>{
         try {
                 //verify admin 
             // const admin = this.adminrepository.findOne({where:{id:id}})
             // if (!admin) throw new HttpException(`admin with ${id} not found`,HttpStatus.NOT_FOUND)
-            const wallets= await this.walletripo.find({relations:['owner'], select: ['walletid', 'balance', 'cratedDate'],})
-           
-            return wallets.map(wallet => ({
-                walletid: wallet.walletid,
-                balance: wallet.balance,
-                cratedDate: wallet.cratedDate,
-                owner: {
-                    digital_photo:wallet.owner.digital_photo,
-                    username:wallet.owner.username
+            //const wallets= await this.walletripo.find({relations:['owner'], select: ['walletid', 'balance', 'cratedDate'],})
+            const wallets= await this.walletripo.find()
+           return wallets
+            // return wallets.map(wallet => ({
+            //     walletid: wallet.walletid,
+            //     balance: wallet.balance,
+            //     cratedDate: wallet.cratedDate,
+            //     owner: {
                     
-                },
-            }))
+            //         username:wallet.owner.username
+                    
+            //     },
+            // }))
         } catch (error) {
             throw error
             

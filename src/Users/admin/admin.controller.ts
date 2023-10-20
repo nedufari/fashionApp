@@ -129,7 +129,7 @@ export class AdminController{
            }
 
            @Get('/wallets')
-           async AdminGetAllWallets():Promise<IWalletResponse[]>{
+           async AdminGetAllWallets():Promise<IWallet[]>{
              try {
                  const wallets= await this.adminservice.AdminGetAllWallets()
                  return wallets

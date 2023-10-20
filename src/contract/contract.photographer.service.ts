@@ -13,7 +13,6 @@ import { ContractDuration, ContractOfferResponse, ContractOfferStatus, TypeOfCon
 import { add } from 'date-fns';
 import { ContractsOfffer, IContractOfferPhotographerResponse } from "../Entity/contractoffer.entity";
 import { CounterContractsOfffer, ICounterContractOfferPhotographerResponse } from "../Entity/countercontractOffer.entity";
-import { QrcodeService } from "../qrcode/qrcode.service";
 import { MailService } from "../mailer.service";
 
 @Injectable()
@@ -24,7 +23,7 @@ export class ContractPhotographerService{
     @InjectRepository(vendorEntity)private vendorrepository:VendorEntityRepository,
     @InjectRepository(PhotographerEntity)private photographerrepository:PhotographerEntityRepository,
     @InjectRepository(Notifications)private notificationrepository:NotificationsRepository,
-    private readonly qrcodeservice:QrcodeService,
+    
     private readonly mailerservice:MailService){}
 
     private CVN():string{ 

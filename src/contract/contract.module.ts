@@ -11,12 +11,11 @@ import { ContractController } from './contracts.controller';
 import { ContractsOfffer } from '../Entity/contractoffer.entity';
 import { CounterContractsOfffer } from '../Entity/countercontractOffer.entity';
 import { ContractPhotographerService } from './contract.photographer.service';
-import { QrcodeService } from '../qrcode/qrcode.service';
 import { MailService } from '../mailer.service';
 
 @Module({
     imports:[TypeOrmModule.forFeature([Contracts,Notifications,vendorEntity,ModelEntity,PhotographerEntity,ContractsOfffer,CounterContractsOfffer])],
-    providers:[ContractModelService,ContractPhotographerService,QrcodeService,MailService ],
+    providers:[ContractModelService,ContractPhotographerService,MailService ],
     controllers:[ContractController]
     
     

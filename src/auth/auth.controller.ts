@@ -25,10 +25,10 @@ export class AuthController {
 
 
     @Post('customer/verify-otp')
-    async verifyOtp(@Body() verifyOtpDto:VerifyOtpdto): Promise<{ isValid: boolean; accessToken: any,walletPIN:string }> {
+    async verifyOtp(@Body() verifyOtpDto:VerifyOtpdto): Promise<{ isValid: boolean; accessToken: any }> {
       try {
         const result = await this.authservice.verifyotp(verifyOtpDto);
-        return { isValid: result.isValid, accessToken: result.accessToken, walletPIN:result.walletPIN};
+        return { isValid: result.isValid, accessToken: result.accessToken};
       } catch (error) {
         throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
       }

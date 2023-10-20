@@ -15,7 +15,6 @@ import { PhotographerModule } from './Users/photographers/photo.module';
 import { CustomerModule } from './Users/customers/customers.module';
 import { WalletModule } from './Wallet/wallet.module';
 import { UploadService } from './uploads.service';
-import { QrcodeModule } from './qrcode/qrcode.module';
 import { PaymentModule } from './payment/payment.module';
 
 
@@ -45,7 +44,7 @@ import { PaymentModule } from './payment/payment.module';
         },
       }
     }),
-    QrcodeModule,
+    
     PaymentModule
   
   ],

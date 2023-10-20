@@ -75,6 +75,8 @@ export enum NotificationType{
     photographer_liked_a_post="photographer_liked_a_post",
     photographer_replied_a_comment="photographer_replied_a_comment",
 
+    wallet_funded="wallet_funded",
+
 
 
 }

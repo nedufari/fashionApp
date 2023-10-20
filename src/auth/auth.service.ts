@@ -351,7 +351,7 @@ export class AuthService {
    
   }
 
-  async verifyotp(verifyotpdto:VerifyOtpdto):Promise<{isValid:boolean; accessToken:any, walletPIN:string}>{
+  async verifyotp(verifyotpdto:VerifyOtpdto):Promise<{isValid:boolean; accessToken:any}>{
     const findemail= await this.otprepository.findOne({where:{email:verifyotpdto.email}})
     if (!findemail) throw new HttpException('the user does not match the owner of the otp',HttpStatus.NOT_FOUND)
     //find the otp privided if it matches with the otp stored 
@@ -370,18 +370,7 @@ export class AuthService {
       customer.is_active=true
       customer.is_verified=true
 
-      //create wallet for the customer 
-      const walletpin = this.generateWalletTransactionPin()
-      const hashpin = await this.hashpin(walletpin)
-      
-      
-      const wallet =new Wallet()
-      wallet.owner = customer
-      wallet.cratedDate = new Date()
-      wallet.PIN = hashpin
-      await this.walletripo.save(wallet)
-    
-
+      //notification
      const notification = new Notifications()
       notification.account= customer.id,
       notification.subject="OTP sent!"
@@ -398,7 +387,7 @@ export class AuthService {
 
     const accessToken= await this.signToken(customer.id,customer.email,customer.role)
 
-    return {isValid:true, accessToken, walletPIN:walletpin}
+    return {isValid:true, accessToken}
     }
 
 
@@ -1292,6 +1281,8 @@ export class AuthService {
     
   }
 
+
+  
   
   async AdultModelverifyotp(verifyotpdto:VerifyOtpdto):Promise<{isValid:boolean; accessToken:any}>{
     const findemail= await this.otprepository.findOne({where:{email:verifyotpdto.email}})

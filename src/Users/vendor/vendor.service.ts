@@ -4,7 +4,8 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectRepository, } from '@nestjs/typeorm';
+import { FindManyOptions } from 'typeorm';
 import {
   IVendorPostResponse,
   IvndorPostResponseWithComments,
@@ -585,14 +586,18 @@ export class VendorService {
   }
 
   //advanced query
-  async search(
+  async searchModels(
     keyword: any|string,
+    page: number = 1, //page number for pagination 
+    limit = 20 //number of items per page
   ): Promise<{ models: IModel[]; totalCount: number }> {
+    const skip = (page - 1) * limit;
+    const take = limit;
     const [models, totalCount] = await this.modelrepository.findAndCount({
       where: [
         { username: Like(`%${keyword}%`) },
-        { kindofmodel: KindOfModel.KID},
-        { kindofmodel: KindOfModel.ADULT},
+        { kindofmodel: KindOfModel.KID },
+        { kindofmodel: KindOfModel.ADULT },
         { address: Like(`%${keyword}%`) },
         { gender: Like(`%${keyword}%`) },
         { complexion: Like(`%${keyword}%`) },
@@ -605,9 +610,10 @@ export class VendorService {
         { facebook: Like(`%${keyword}%`) },
         { manager: Like(`%${keyword}%`) },
         { bio: Like(`%${keyword}%`) },
-        // Add more columns as needed for your search
       ],
-      cache:(false)
+      skip, // Apply pagination - skip records
+      take, // Limit the number of records per page
+      cache: false,
     });
 
     if (totalCount === 0) 
@@ -617,10 +623,18 @@ export class VendorService {
     return { models, totalCount };
   }
 
+  
+
+
+
     //advanced query for photographers 
     async searchPhotographers(
       keyword: any|string,
+      page: number = 1, //page number for pagination 
+      limit = 20 //number of items per page
     ): Promise<{ photographers: IPhotographer[]; totalCount: number }> {
+      const skip = (page - 1) * limit;
+      const take = limit;
       const [photographers, totalCount] = await this.photographerrepository.findAndCount({
         where: [
           { username: Like(`%${keyword}%`) },
@@ -634,6 +648,8 @@ export class VendorService {
           { bio: Like(`%${keyword}%`) },
           // Add more columns as needed for your search
         ],
+        skip, // Apply pagination - skip records
+        take, // Limit the number of records per page
         cache:(false)
       });
   

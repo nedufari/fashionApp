@@ -11,7 +11,7 @@ import { JwtGuard } from '../../auth/guards/jwt.guards';
 import { UploadService } from '../../uploads.service';
 import { LayComplaintDto } from '../../sharedDto/complaints.dto';
 
-@UseGuards(JwtGuard)
+//@UseGuards(JwtGuard)
 @Controller('vendor')
 export class VendorController {
   constructor(private readonly vendorservice: VendorService,
@@ -132,7 +132,8 @@ export class VendorController {
 async searchModels(@Query('keyword') keyword: string,) {
   try {
     
-      return await this.vendorservice.search(keyword);
+    const result = await this.vendorservice.searchModels(keyword);
+    return { data: result.models, totalCount: result.totalCount };
   } catch (error) {
     throw error
     

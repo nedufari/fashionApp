@@ -14,7 +14,6 @@ import { NotificationType } from "../Enums/notificationTypes.enum";
 import { add } from 'date-fns';
 import { CounterContractsOfffer, IcounterContractOfferModelResponse } from "../Entity/countercontractOffer.entity";
 import { ContractsOfffer, IContractOfferModelResponse } from "../Entity/contractoffer.entity";
-import { QrcodeService } from "../qrcode/qrcode.service";
 import { MailService } from "../mailer.service";
 
 
@@ -27,7 +26,6 @@ export class ContractModelService{
     @InjectRepository(PhotographerEntity)private photographerrepository:PhotographerEntityRepository,
     @InjectRepository(ModelEntity)private modelrepository:ModelEntityRepository,
     @InjectRepository(Notifications)private notificationrepository:NotificationsRepository,
-    private readonly qrcodeservice:QrcodeService,
     private readonly mailerservice:MailService){}
 
 
@@ -200,8 +198,7 @@ async AcceptContractOfferORDecline(vendorid: string, modelid: string, coi:string
        model.is_onContract = true; // Update the is_on_contract field as needed
        await this.modelrepository.save(model);
 
-       //generate qrcode for the contract 
-       await this.qrcodeservice.generateContractQrCode(contract)
+       
 
        //send mail to photographer 
        await this.mailerservice.SendMailtoModelVendor(vendor.email,contract.contract_duration,contract.contract_worth,contract.contract_validity_number,isModel.model,isVendor.vendor,contract.expiration_date)

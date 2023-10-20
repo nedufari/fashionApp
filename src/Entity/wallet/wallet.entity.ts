@@ -7,10 +7,10 @@ export interface IWallet{
     balance:number
     cratedDate:Date
     PIN:string
-    owner:CustomerEntity
+    owner:string
 }
 interface ICustomerInfo {
-    digital_photo: string;
+    
     username: string;
 }
 
@@ -37,7 +37,6 @@ export class Wallet implements IWallet{
     @Column({nullable:false})
     PIN : string
 
-    @OneToOne(()=>CustomerEntity)
-    @JoinColumn()
-    owner:CustomerEntity
+   @Column({nullable:false})
+    owner:string
 }
