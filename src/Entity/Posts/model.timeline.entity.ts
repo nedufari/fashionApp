@@ -52,6 +52,6 @@ export class ModelTimelineEntity implements IModelTimeLine{
     caption:string
 
      //relationship
-     @ManyToOne(()=> ModelEntity, (model)=>model.myTimeline)
+     @ManyToOne(()=> ModelEntity, (model)=>model.myTimeline, { cascade: true, onDelete: 'CASCADE' })
      owner:ModelEntity
 }

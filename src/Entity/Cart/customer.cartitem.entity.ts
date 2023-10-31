@@ -21,7 +21,7 @@ export class CustomerCartItemEntity implements ICustomerCartItem{
     @CreateDateColumn()
     created_at:Date
 
-    @ManyToOne(()=>CustomerCartEntity, (cart)=> cart.cartItem)
+    @ManyToOne(()=>CustomerCartEntity, (cart)=> cart.cartItem,)
     cart: CustomerCartEntity
 
     @Column()

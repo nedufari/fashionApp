@@ -18,10 +18,10 @@ export class CustomerCartEntity implements ICustomerCart{
     @PrimaryGeneratedColumn()
     id:number
 
-    @ManyToOne(()=>CustomerEntity, (customer)=> customer.carts)
+    @ManyToOne(()=>CustomerEntity, (customer)=> customer.carts, { cascade: true, onDelete: 'CASCADE' })
     customer: CustomerEntity
 
-    @OneToMany(()=>CustomerCartItemEntity, (cartitem)=>cartitem.cart)
+    @OneToMany(()=>CustomerCartItemEntity, (cartitem)=>cartitem.cart, { cascade: true, onDelete: 'CASCADE' })
     cartItem:CustomerCartItemEntity[]
 
     @CreateDateColumn()

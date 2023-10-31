@@ -53,6 +53,6 @@ export class PhotographerTimelineEntity implements IPhotographerTimeLine{
     caption:string
 
      //relationship
-     @ManyToOne(()=> PhotographerEntity, (photographer)=>photographer.myTimeline)
+     @ManyToOne(()=> PhotographerEntity, (photographer)=>photographer.myTimeline, { cascade: true, onDelete: 'CASCADE' })
      owner:PhotographerEntity
 }

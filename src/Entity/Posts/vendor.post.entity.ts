@@ -125,7 +125,7 @@ export class VendorPostsEntity implements IVendoPost{
 
 
     //relationship
-    @ManyToOne(()=> vendorEntity, (vendor)=>vendor.myposts)
+    @ManyToOne(()=> vendorEntity, (vendor)=>vendor.myposts,)
     owner:vendorEntity
 
     @Column()
@@ -135,10 +135,10 @@ export class VendorPostsEntity implements IVendoPost{
     creditedPhotographer:string
 
     //activities
-    @OneToMany(()=>Comments,(comments)=>comments.vendor)
+    @OneToMany(()=>Comments,(comments)=>comments.vendor,)
     comments:Comments[]
 
-    @OneToMany(()=>VendorProducts,(product)=>product.post)
+    @OneToMany(()=>VendorProducts,(product)=>product.post, { cascade: true, onDelete: 'CASCADE' })
     products: VendorProducts[]
 
     

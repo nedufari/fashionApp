@@ -89,19 +89,19 @@ export class Comments {
     @Column()
     content: string;
 
-    @ManyToOne(() => ModelEntity, model => model.comments)
+    @ManyToOne(() => ModelEntity, model => model.comments, { cascade: true, onDelete: 'CASCADE' })
     model?: ModelEntity;
 
-    @ManyToOne(() => PhotographerEntity, photographer => photographer.comments)
+    @ManyToOne(() => PhotographerEntity, photographer => photographer.comments, { cascade: true, onDelete: 'CASCADE' })
     photographer?: PhotographerEntity;
 
-    @ManyToOne(() => AdminEntity, admin => admin.comments)
+    @ManyToOne(() => AdminEntity, admin => admin.comments, { cascade: true, onDelete: 'CASCADE' })
     admin?: AdminEntity;
 
-    @ManyToOne(() => CustomerEntity, customer => customer.comments)
+    @ManyToOne(() => CustomerEntity, customer => customer.comments, { cascade: true, onDelete: 'CASCADE' })
     customer?: CustomerEntity;
 
-    @ManyToOne(()=>VendorPostsEntity,vendorentity=>vendorentity.comments,)
+    @ManyToOne(()=>VendorPostsEntity,vendorentity=>vendorentity.comments, { cascade: true, onDelete: 'CASCADE' })
     vendor?:VendorPostsEntity
 
     @ManyToOne(() => VendorPostsEntity, post => post.comments)
