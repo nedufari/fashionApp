@@ -73,7 +73,11 @@ export class UpdatePhotographerDataDto{
 
     @IsString()
     @IsOptional()
-    username:string 
+    brandname:string 
+
+    @IsString()
+    @IsOptional()
+    fullname:string 
 
     @IsString()
     @IsOptional()

@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, ForbiddenException, Get, Param, Post, Req, UseGuards } from "@nestjs/common";
 import { UserWalletService } from "./users.wallet.service";
-import { IWallet, IWalletResponse } from "../Entity/wallet/wallet.entity";
+import { IWallet, IWalletResponse, IWalletResponseModel } from "../Entity/wallet/wallet.entity";
 import { CreateWalletDto, InitializeFundingDto } from "./wallet.dto";
 import { JwtGuard } from "../auth/guards/jwt.guards";
 import { SharedInitializeService } from "./shared.wallets.service";
@@ -16,7 +16,7 @@ export class UserWalletController{
 
 
     @Post('customer/create/:id')
-    async Customercreatewallet(@Param('id')id:string,@Body()walletdto:CreateWalletDto,@Req()request):Promise<IWalletResponse>{
+    async Customercreatewallet(@Param('id')id:string,@Body()walletdto:CreateWalletDto,@Req()request):Promise<IWalletResponseModel>{
         const userIdFromToken = await request.user.id; 
       console.log(request.user.email)
   
@@ -28,7 +28,7 @@ export class UserWalletController{
     }
 
     @Get('customer/mywallet/:walletid/:customerid')
-    async CustomergetMyWallet(@Param('walletid')walletid:string, @Param('customerid')customerid:string,@Req()request):Promise<IWalletResponse>{
+    async CustomergetMyWallet(@Param('walletid')walletid:string, @Param('customerid')customerid:string,@Req()request):Promise<IWalletResponseModel>{
         const userIdFromToken = await request.user.id; 
       console.log(request.user.email)
   
@@ -96,7 +96,7 @@ export class UserWalletController{
      //for models
 
      @Post('model/create/:id')
-     async Modelcreatewallet(@Param('id')id:string,@Body()walletdto:CreateWalletDto,@Req()request):Promise<IWalletResponse>{
+     async Modelcreatewallet(@Param('id')id:string,@Body()walletdto:CreateWalletDto,@Req()request):Promise<IWalletResponseModel>{
          const userIdFromToken = await request.user.id; 
        console.log(request.user.email)
    
@@ -108,7 +108,7 @@ export class UserWalletController{
      }
  
      @Get('model/mywallet/:walletid/:customerid')
-     async ModelgetMyWallet(@Param('walletid')walletid:string, @Param('customerid')customerid:string,@Req()request):Promise<IWalletResponse>{
+     async ModelgetMyWallet(@Param('walletid')walletid:string, @Param('customerid')customerid:string,@Req()request):Promise<IWalletResponseModel>{
          const userIdFromToken = await request.user.id; 
        console.log(request.user.email)
    

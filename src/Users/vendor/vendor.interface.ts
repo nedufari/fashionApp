@@ -11,6 +11,7 @@ export interface IVendor{
     email:string,
     password:string
     brandname:string 
+    fullname:string
     address:string 
     phone1:string 
     phone2:string 

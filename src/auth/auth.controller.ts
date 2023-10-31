@@ -177,14 +177,6 @@ export class AuthController {
         return await this.authservice.loginPhotographer(logindto)
     }
 
-    
-    @Post("login/model")
-    async loginKidModel(@Body()logindto:Logindto){
-        return await this.authservice.loginKidModel(logindto)
-    }
-
-    
-  
 
     
     @Post("login/admin")
@@ -285,7 +277,7 @@ export class AuthController {
  
      @Patch("model/resetPassword")
      async KidmodelResetPasswordFinally(@Body()dto:FinallyResetPasswordDto):Promise<{message:string}>{
-         return await this.authservice.finallyKidsModelResetPassword(dto)
+         return await this.authservice.finallyModelResetPassword(dto)
      }
 
 

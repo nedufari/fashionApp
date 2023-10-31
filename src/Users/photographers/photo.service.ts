@@ -120,8 +120,8 @@ export class PhotographerService{
   //create timeline 
   async createAtimeline(dto:ModelTimelineDto,modelid:string,mediaFiles:Express.Multer.File[]):Promise<IPhotographerTimeLineResponse>{
     try {
-      const model = await this.photoripo.findOne({ where: { id: modelid } });
-      if (!model) throw new HttpException('model with the id not found',HttpStatus.NOT_FOUND)
+      const photographer = await this.photoripo.findOne({ where: { id: modelid } });
+      if (!photographer) throw new HttpException('model with the id not found',HttpStatus.NOT_FOUND)
   
   
       const mediaurls :string[] = []
@@ -137,16 +137,16 @@ export class PhotographerService{
           caption : dto.caption,
           media : mediaurls,
           createdDate : new Date(),
-          owner : model
+          owner : photographer
         })
         await this.phototimelineripo.save(newpost)
 
         //save the notification
     const notification = new Notifications();
-    notification.account = model.id;
+    notification.account = photographer.id;
     notification.subject = 'made a post!';
     notification.notification_type = NotificationType.photographer_Posted;
-    notification.message = `Hello ${model.username}, just made a post `;
+    notification.message = `Hello ${photographer.brandname}, just made a post `;
     await this.notificationrepository.save(notification);
   
         const timelineresponse : IPhotographerTimeLineResponse = {
@@ -156,7 +156,7 @@ export class PhotographerService{
           createdDate : newpost.createdDate,
           owner :{
             displayPicture : newpost.owner.displayPicture,
-            username : newpost.owner.username
+            brandname : newpost.owner.brandname
           }
         }
         return timelineresponse
@@ -169,8 +169,8 @@ export class PhotographerService{
 
   async UpdateAtimeline(dto:ModelTimelineDto,timelineid:number,modelid:string,mediaFiles:Express.Multer.File[]):Promise<IPhotographerTimeLineResponse>{
     try {
-      const model = await this.photoripo.findOne({ where: { id: modelid } });
-      if (!model) throw new HttpException('model with the id not found',HttpStatus.NOT_FOUND)
+      const photographer = await this.photoripo.findOne({ where: { id: modelid } });
+      if (!photographer) throw new HttpException('model with the id not found',HttpStatus.NOT_FOUND)
 
       const findtimeline = await this.phototimelineripo.findOne({where:{id:timelineid}})
       if (!findtimeline) throw new HttpException ('the post with the id does not exist',HttpStatus.NOT_FOUND)
@@ -189,16 +189,16 @@ export class PhotographerService{
           findtimeline.caption = dto.caption,
           findtimeline.media = mediaurls,
           findtimeline.createdDate = new Date(),
-          findtimeline.owner = model
+          findtimeline.owner = photographer
         
         await this.phototimelineripo.save(findtimeline)
 
         //save the notification
     const notification = new Notifications();
-    notification.account = model.id;
+    notification.account = photographer.id;
     notification.subject = 'Updated a post!';
     notification.notification_type = NotificationType.photographer_Updated_a_post;
-    notification.message = `Hello ${model.username}, just updated a post `;
+    notification.message = `Hello ${photographer.brandname}, just updated a post `;
     await this.notificationrepository.save(notification);
   
         const timelineresponse : IPhotographerTimeLineResponse = {
@@ -208,7 +208,7 @@ export class PhotographerService{
           createdDate : findtimeline.createdDate,
           owner :{
             displayPicture : findtimeline.owner.displayPicture,
-            username : findtimeline.owner.username
+            brandname : findtimeline.owner.brandname
           }
         }
         return timelineresponse
@@ -239,7 +239,7 @@ export class PhotographerService{
         createdDate :timeline.createdDate,
         owner:{
           displayPicture:timeline.owner.displayPicture,
-          username :timeline.owner.username
+          brandname :timeline.owner.brandname
         }
       }))
       return timelineresponses
@@ -255,8 +255,8 @@ export class PhotographerService{
   async TakedownTimeline(photoid:string,timelineid:number):Promise<{message:string}>{
     try {
       
-      const model = await this.photoripo.findOne({ where: { id: photoid } });
-      if (!model) throw new HttpException('model with the id not found',HttpStatus.NOT_FOUND)
+      const photographer = await this.photoripo.findOne({ where: { id: photoid } });
+      if (!photographer) throw new HttpException('model with the id not found',HttpStatus.NOT_FOUND)
 
       const findtimeline = await this.phototimelineripo.findOne({where:{id:timelineid}})
       if (!findtimeline) throw new HttpException ('the post with the id does not exist',HttpStatus.NOT_FOUND)
@@ -266,10 +266,10 @@ export class PhotographerService{
 
       //save the notification
     const notification = new Notifications();
-    notification.account = model.id;
+    notification.account = photographer.id;
     notification.subject = 'deleted a post!';
     notification.notification_type = NotificationType.photographer_deleted_a_post;
-    notification.message = `Hello ${model.username}, just deleted a post `;
+    notification.message = `Hello ${photographer.brandname}, just deleted a post `;
     await this.notificationrepository.save(notification);
 
       return {message:'timeline has been removed successfully'}
@@ -286,7 +286,8 @@ export class PhotographerService{
     if (!photographer) throw new HttpException('model with the id not found',HttpStatus.NOT_FOUND)
 
     //update the userdaa 
-    photographer.username = dto.username
+    photographer.brandname = dto.brandname
+    photographer.fullname = dto.fullname
     photographer.address = dto.address
     photographer.phone1 = dto.phone1
     photographer.phone2 = dto.phone2
@@ -309,11 +310,12 @@ export class PhotographerService{
     notification.account = photographer.id;
     notification.subject = 'Updated portfolio!';
     notification.notification_type = NotificationType.RECORD_UPDATED;
-    notification.message = `Hello ${photographer.username}, just updated its portfolio `;
+    notification.message = `Hello ${photographer.brandname}, just updated its portfolio `;
     await this.notificationrepository.save(notification);
 
     const photgrapherresponse :IPhotographerResponse = {
-      username : photographer.username,
+      brandname : photographer.brandname,
+      fullname : photographer.fullname,
       address : photographer.address,
       phone1 :photographer.phone1,
       phone2 :photographer.phone2,
@@ -343,10 +345,10 @@ export class PhotographerService{
     customerid: string,
   ): Promise<{ message: string }> {
     try {
-      const customer = await this.photoripo.findOne({
+      const photographer = await this.photoripo.findOne({
         where: { id: customerid },
       });
-      if (!customer) {
+      if (!photographer) {
         throw new HttpException(
           'The customer is not found',
           HttpStatus.NOT_FOUND,
@@ -356,19 +358,19 @@ export class PhotographerService{
       const fileurl = `http://localhost:3000/api/v1/customer/uploadfile/puplic/${filename}`;
 
       //update picture
-      customer.displayPicture = fileurl;
-      await this.photoripo.save(customer);
+      photographer.displayPicture = fileurl;
+      await this.photoripo.save(photographer);
 
       //save the notification
       const notification = new Notifications();
-      notification.account = customer.id;
+      notification.account = photographer.id;
       notification.subject = 'uploaded a profile picture!';
       notification.notification_type =
         NotificationType.customer_Uploaded_a_profilePicture;
-      notification.message = `Hello ${customer.username}, just uploaded a profile picture `;
+      notification.message = `Hello ${photographer.brandname}, just uploaded a profile picture `;
       await this.notificationrepository.save(notification);
 
-      return { message: customer.displayPicture };
+      return { message: photographer.displayPicture };
     } catch (error) {
       throw error
     }

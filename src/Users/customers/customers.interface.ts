@@ -8,7 +8,7 @@ export interface ICustomer{
     digital_photo:string
     username:string 
     gender:string 
-    fullname:string 
+    name:string 
     is_active:boolean
     is_verified:boolean
     is_logged_in:boolean
@@ -28,7 +28,7 @@ export interface ICustomerResponse{
     digital_photo:string
     username:string 
     gender:string 
-    fullname:string 
+    name:string 
     CustomerID:string
     comments:ICommentResponses[]
     replies:IRepliesResponses[]

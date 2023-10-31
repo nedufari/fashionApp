@@ -15,7 +15,7 @@ export interface IPhotographerTimeLine{
 
 interface IPhotographerInfo {
     displayPicture: string;
-    username: string;
+    brandname: string;
 }
 
 export interface IPhotographerTimeLineResponse{

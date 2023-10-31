@@ -637,7 +637,8 @@ export class VendorService {
       const take = limit;
       const [photographers, totalCount] = await this.photographerrepository.findAndCount({
         where: [
-          { username: Like(`%${keyword}%`) },
+          { brandname: Like(`%${keyword}%`) },
+          { fullname: Like(`%${keyword}%`) },
           { address: Like(`%${keyword}%`) },
           { gender: Like(`%${keyword}%`) },
           { state_of_residence: Like(`%${keyword}%`) },

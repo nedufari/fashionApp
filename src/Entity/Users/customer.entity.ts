@@ -23,7 +23,7 @@ export class CustomerEntity implements ICustomer{
     password:string
 
     @Column({nullable:true, unique:true})
-    fullname:string
+    name:string
 
     
     @Column({nullable:true})

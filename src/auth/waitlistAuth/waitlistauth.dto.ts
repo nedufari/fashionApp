@@ -19,7 +19,7 @@ export class WaitlistModeleRegistrationDto{
 
     @IsString()
     @IsNotEmpty()
-    username:string
+    name:string
 
     @IsNotEmpty()
     @IsDateString()
@@ -74,7 +74,7 @@ export class WaitlistPhotographerRegistrationDto{
 
     @IsString()
     @IsNotEmpty()
-    username:string
+    brandname:string
 
    
 

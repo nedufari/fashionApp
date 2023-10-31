@@ -13,10 +13,11 @@ import { MailService } from "../../mailer.service";
 import { AuthService } from "../auth.service";
 import { WaitlistModeleRegistrationDto, WaitlistPhotographerRegistrationDto, WaitlistVendorRegistrationDto } from "./waitlistauth.dto";
 import { NotificationType } from "../../Enums/notificationTypes.enum";
-import { generate2FACode4digits } from "../../helpers";
+import { generate2FACode4digits, generateRandomFallbackNames4Photographers, generateRandomFallbackNames4Vendors } from "../../helpers";
 import { VerifyOtpdto } from "../dto/logindto";
 import { RequestOtpResendDto } from "../dto/registrationdto";
 import { KindOfModel } from "../../Enums/modelType.enum";
+import * as datamuse  from 'datamuse'
 
 //verify otp for them too 
 @Injectable()
@@ -44,6 +45,8 @@ export class WaitListService{
     //vendor  
     //(sign up)
 
+  
+
     async WaitlistVendorSignup(userdto: WaitlistVendorRegistrationDto,): Promise<{message:string}> {
         try {
           const hashedpassword = await this.authservice.hashpassword(userdto.password);
@@ -64,9 +67,9 @@ export class WaitListService{
         const existingUserByUsername = await this.vendorrepository.findOne({ where: { brandname: userdto.brandname }, select: ['id', 'brandname'] });
         if (existingUserByUsername) {
           // Generate brandname suggestions
-          const suggestions = await this.authservice.generateUsernameSuggestions(userdto.brandname);
+          const suggestions = await generateRandomFallbackNames4Vendors(userdto.brandname,3);
           throw new HttpException(
-            `Vendor with Brandname: ${userdto.brandname} already exists. Please choose another brandname or consider these suggestions: ${suggestions.join(', ')}`,
+            ` ${userdto.brandname} already taken. Please choose another brandname or consider these suggestions: ${suggestions.join(',')}`,
             HttpStatus.CONFLICT,
           );
         }
@@ -120,24 +123,24 @@ export class WaitListService{
     
         //return valid and the access token if the user matches 
     
-        const customer = await this.vendorrepository.findOne({where:{email:verifyotpdto.email}})
-        if (customer.email !== findemail.email) throw new HttpException("this email does not match the customer record we have ", HttpStatus.NOT_FOUND)
+        const vendor = await this.vendorrepository.findOne({where:{email:verifyotpdto.email}})
+        if (vendor.email !== findemail.email) throw new HttpException("this email does not match the customer record we have ", HttpStatus.NOT_FOUND)
         else{
          
-          customer.is_verified=true
-          customer.is_on_waitlist=true
+          vendor.is_verified=true
+          vendor.is_on_waitlist=true
         
     
          const notification = new Notifications()
-          notification.account= customer.id,
+          notification.account= vendor.id,
           notification.subject="OTP sent!"
           notification.notification_type=NotificationType.OTP_VERIFICATION
-          notification.message=`Hello ${customer.username}, otp sent to this email for verification `
+          notification.message=`Hello ${vendor.brandname}, otp sent to this email for verification `
           await this.notificationrepository.save(notification)
     
-          await this.mailerservice.SendWelcomeEmail(customer.email,customer.username)
+          await this.mailerservice.SendWelcomeEmail(vendor.email,vendor.brandname)
     
-          await this.customerrepository.save(customer)
+          await this.customerrepository.save(vendor)
     
         const welcome= "your account has been verified and thanks for joinig the waitlist as a vendor"
     
@@ -175,7 +178,7 @@ export class WaitListService{
          notification.account= emailexsist.id
          notification.subject="New Customer!"
          notification.notification_type=NotificationType.OTP_VERIFICATION
-         notification.message=`Hello ${emailexsist.username}, an otp has been forwarded to your mail `
+         notification.message=`Hello ${emailexsist.brandname}, an otp has been forwarded to your mail `
          await this.notificationrepository.save(notification)
      
          
@@ -194,11 +197,11 @@ export class WaitListService{
     async WaitlistPhotographerSignup(userdto: WaitlistPhotographerRegistrationDto,): Promise<{message:string}> {
         try {
           const hashedpassword = await this.authservice.hashpassword(userdto.password);
-          const customer = new PhotographerEntity()
-          customer.email=userdto.email
-          customer.password=hashedpassword
-          customer.username=userdto.username
-          customer.PhotographerID=this.authservice.generateIdentityNumber()
+          const photographer = new PhotographerEntity()
+          photographer.email=userdto.email
+          photographer.password=hashedpassword
+          photographer.brandname=userdto.brandname
+          photographer.PhotographerID=this.authservice.generateIdentityNumber()
           
           const emailexsist = await this.photographerrepository.findOne({where: { email: userdto.email },select: ['id', 'email']});
           if (emailexsist)
@@ -208,16 +211,16 @@ export class WaitListService{
             );
     
                  // Check if a user with the same username already exists
-        const existingUserByUsername = await this.photographerrepository.findOne({ where: { username: userdto.username }, select: ['id', 'username'] });
+        const existingUserByUsername = await this.photographerrepository.findOne({ where: { brandname: userdto.brandname }, select: ['id', 'brandname'] });
         if (existingUserByUsername) {
           // Generate username suggestions
-          const suggestions = await this.authservice.generateUsernameSuggestions(userdto.username);
+          const suggestions = await generateRandomFallbackNames4Photographers(userdto.brandname,3);
           throw new HttpException(
-            `Photographer with username: ${userdto.username} already exists. Please choose another username or consider these suggestions: ${suggestions.join(', ')}`,
+            `${userdto.brandname} already taken. Please choose another brandname or consider these suggestions: ${suggestions.join(', ')}`,
             HttpStatus.CONFLICT,
           );
         }
-            await this.photographerrepository.save(customer);
+            await this.photographerrepository.save(photographer);
     
           //2fa authentication 
         const emiailverificationcode= generate2FACode4digits()
@@ -225,7 +228,7 @@ export class WaitListService{
           const otp= new UserOtp()
           otp.email=userdto.email
           otp.otp=emiailverificationcode
-          otp.role= customer.role
+          otp.role= photographer.role
           const fiveminuteslater=new Date()
           await fiveminuteslater.setMinutes(fiveminuteslater.getMinutes()+5)
           otp.expiration_time=fiveminuteslater
@@ -233,14 +236,14 @@ export class WaitListService{
           console.log('photographer account created please check your mail to verify your account, by inputing the six digit OTP sent to you')
     
           //send mail 
-          await this.mailerservice.SendVerificationMail(otp.email,emiailverificationcode,customer.username)
+          await this.mailerservice.SendVerificationMail(otp.email,emiailverificationcode,photographer.brandname)
     
           //save the notification 
           const notification = new Notifications()
-          notification.account= customer.id
+          notification.account= photographer.id
           notification.subject="New Customer!"
           notification.notification_type=NotificationType.SIGNED_UP
-          notification.message=`Hello ${customer.username}, your photographer account has been created. please complete your profile `
+          notification.message=`Hello ${photographer.brandname}, your photographer account has been created. please complete your profile `
           await this.notificationrepository.save(notification)
     
           return {message:"new Photographer signed up and verification otp has been sent "}
@@ -265,24 +268,24 @@ export class WaitListService{
     
         //return valid and the access token if the user matches 
     
-        const customer = await this.photographerrepository.findOne({where:{email:verifyotpdto.email}})
-        if (customer.email !== findemail.email) throw new HttpException("this email does not match the customer recod we have ", HttpStatus.NOT_FOUND)
+        const photographer = await this.photographerrepository.findOne({where:{email:verifyotpdto.email}})
+        if (photographer.email !== findemail.email) throw new HttpException("this email does not match the customer recod we have ", HttpStatus.NOT_FOUND)
         else{
           
-          customer.is_verified=true
-          customer.is_on_waitlist=true
+          photographer.is_verified=true
+          photographer.is_on_waitlist=true
         
     
          const notification = new Notifications()
-          notification.account= customer.id,
+          notification.account= photographer.id,
           notification.subject="OTP sent!"
           notification.notification_type=NotificationType.OTP_VERIFICATION
-          notification.message=`Hello ${customer.username}, otp sent to this email for verification `
+          notification.message=`Hello ${photographer.brandname}, otp sent to this email for verification `
           await this.notificationrepository.save(notification)
     
-          await this.mailerservice.SendWelcomeEmail(customer.email,customer.username)
+          await this.mailerservice.SendWelcomeEmail(photographer.email,photographer.brandname)
     
-          await this.customerrepository.save(customer)
+          await this.customerrepository.save(photographer)
     
     
         const welcome= "your account has been verified and thanks for joinig the waitlist as a photographer"
@@ -321,12 +324,12 @@ export class WaitListService{
          notification.account= emailexsist.id
          notification.subject="New Customer!"
          notification.notification_type=NotificationType.OTP_VERIFICATION
-         notification.message=`Hello ${emailexsist.username}, an otp has been sent to your mail `
+         notification.message=`Hello ${emailexsist.brandname}, an otp has been sent to your mail `
          await this.notificationrepository.save(notification)
      
          
            //send mail 
-           await this.mailerservice.SendVerificationMail(newOtp.email,emiailverificationcode, emailexsist.username)
+           await this.mailerservice.SendVerificationMail(newOtp.email,emiailverificationcode, emailexsist.brandname)
     
            return {message:'New OTP sent successfully'}
            
@@ -349,7 +352,8 @@ async Waitlistmodelsignup(modeldto: WaitlistModeleRegistrationDto): Promise<{mes
     const model = new ModelEntity()
     model.email=modeldto.email
     model.password=hashedpassword
-    model.username=modeldto.username
+    model.name=modeldto.name
+    model.DOB = modeldto.dob
     model.age=age
 
 
@@ -379,16 +383,7 @@ async Waitlistmodelsignup(modeldto: WaitlistModeleRegistrationDto): Promise<{mes
         HttpStatus.CONFLICT,
       );
 
-    // Check if a user with the same username already exists
-    const existingUserByUsername = await this.modelrepository.findOne({ where: { username: modeldto.username }, select: ['id', 'username'] });
-    if (existingUserByUsername) {
-      // Generate username suggestions
-      const suggestions = await this.authservice.generateUsernameSuggestions(modeldto.username);
-      throw new HttpException(
-        `Model with username: ${modeldto.username} already exists. Please choose another username or consider these suggestions: ${suggestions.join(', ')}`,
-        HttpStatus.CONFLICT,
-      );
-    }
+
 
     await this.modelrepository.save(model)
 
@@ -459,11 +454,11 @@ async Waitlistmodelsignup(modeldto: WaitlistModeleRegistrationDto): Promise<{mes
     }
   }
 
-  async WaitlistresendModelOtp (dto:RequestOtpResendDto):Promise<{message:string}>{
-    const emailexsist = await this.modelrepository.findOne({where: { email: dto.email },select: ['id', 'email','role']});
+  async WaitlistresendModelOtp (resendOtpdto:RequestOtpResendDto):Promise<{message:string}>{
+    const emailexsist = await this.modelrepository.findOne({where: { email: resendOtpdto.email },select: ['id', 'email','role']});
       if (!emailexsist)
         throw new HttpException(
-          `user with email: ${dto.email} exists, please use another unique email`,
+          `user with email: ${resendOtpdto.email} exists, please use another unique email`,
           HttpStatus.CONFLICT,
         );
      // Generate a new OTP
@@ -474,7 +469,7 @@ async Waitlistmodelsignup(modeldto: WaitlistModeleRegistrationDto): Promise<{mes
      await fiveminuteslater.setMinutes(fiveminuteslater.getMinutes()+5)
      // Define OTP_EXPIRATION_MINUTES
      const newOtp = this.otprepository.create({ 
-      email:dto.email, 
+      email:resendOtpdto.email, 
       otp:emiailverificationcode, 
       expiration_time: fiveminuteslater,
       role: emailexsist.role
@@ -486,12 +481,12 @@ async Waitlistmodelsignup(modeldto: WaitlistModeleRegistrationDto): Promise<{mes
       notification.account= emailexsist.id
       notification.subject="New Customer!"
       notification.notification_type=NotificationType.OTP_VERIFICATION
-      notification.message=`Hello ${emailexsist.username}, an otp has been sent to your mail `
+      notification.message=`Hello ${emailexsist.name}, an otp has been sent to your mail `
       await this.notificationrepository.save(notification)
  
      
        //send mail 
-       await this.mailerservice.SendVerificationMail(newOtp.email,emiailverificationcode, emailexsist.username)
+       await this.mailerservice.SendVerificationMail(newOtp.email,emiailverificationcode, emailexsist.name)
 
        return {message:'New OTP sent successfully'}
        

@@ -402,7 +402,7 @@ export class CustomerService {
       const [vendors, totalCount] =
         await this.vendorrepository.findAndCount({
           where: [
-            { username: Like(`%${keyword}%`) },
+            { brandname: Like(`%${keyword}%`) },
             { address: Like(`%${keyword}%`) },
             { gender: Like(`%${keyword}%`) },
             { brandname: Like(`%${keyword}%`) },

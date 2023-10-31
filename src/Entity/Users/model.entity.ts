@@ -21,9 +21,6 @@ export class ModelEntity implements IModel{
     @Column({unique:true,nullable:false})
     email:string
 
-    
-    @Column({unique:true,nullable:true})
-    brandname:string 
 
     @Column({unique:true,nullable:true})
     username:string 
@@ -32,7 +29,7 @@ export class ModelEntity implements IModel{
     password:string
 
     @Column({nullable:true})
-    fullname:string
+    name:string
 
     //parents either dad or mum or guardian 
     @Column({nullable:true})
@@ -61,6 +58,9 @@ export class ModelEntity implements IModel{
 
     @Column({nullable:true})
     age:number
+
+    @Column({nullable:true})
+    DOB:string
 
     @Column({nullable:true})
     gender:string

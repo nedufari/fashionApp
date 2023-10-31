@@ -81,7 +81,7 @@ async sendcontractoffer(vendorid: string, photoid: string, contractdto: Contract
       if (!photographer) throw new HttpException(`you are not a legitimate photographer on this platform and therefore you cannot perform this task`, HttpStatus.NOT_FOUND);
   
       if (photographer.type_of_contract === TypeOfContract.EXCLUSIVE_CONTRACT && contractdto.type_of_contract === TypeOfContract.EXCLUSIVE_CONTRACT) {
-        throw new HttpException(`Sorry, ${vendor.brandname}, you can't send a contract offer to this, ${photographer.username} because she has an exclusive contract. Until the contract expires, the model cant recieve any offers.`, HttpStatus.NOT_ACCEPTABLE);
+        throw new HttpException(`Sorry, ${vendor.brandname}, you can't send a contract offer to this, ${photographer.brandname} because she has an exclusive contract. Until the contract expires, the model cant recieve any offers.`, HttpStatus.NOT_ACCEPTABLE);
       }
   
       //if the model has an open contract, proceed to send the offer to the model or to the vendor as the case might be
@@ -90,7 +90,7 @@ async sendcontractoffer(vendorid: string, photoid: string, contractdto: Contract
         contractoffer.contract_duration = contractdto.contract_duration
         contractoffer.contract_worth = contractdto.contract_worth
         contractoffer.type_of_contract= contractdto.type_of_contract
-        contractoffer.photographer = photographer.username
+        contractoffer.photographer = photographer.brandname
         contractoffer.vendor = vendor.brandname
         contractoffer.contract_offer_id = this.CVN()
         contractoffer.sent_at = new Date()
@@ -102,7 +102,7 @@ async sendcontractoffer(vendorid: string, photoid: string, contractdto: Contract
         notification.account= contractoffer.id
         notification.subject="contract offer Sent!"
         notification.notification_type=NotificationType.CONTRACT_OFFER_SENT
-        notification.message=`Hello a contract offer  has been initialized between  ${vendor.brandname} and ${photographer.username} for a duration of ${contractdto.contract_duration} worth ${contractdto.contract_worth} Thnaks`
+        notification.message=`Hello a contract offer  has been initialized between  ${vendor.brandname} and ${photographer.brandname} for a duration of ${contractdto.contract_duration} worth ${contractdto.contract_worth} Thnaks`
         await this.notificationrepository.save(notification)
   
         const offerresponse: IContractOfferPhotographerResponse = {
@@ -122,7 +122,7 @@ async sendcontractoffer(vendorid: string, photoid: string, contractdto: Contract
   
        // If the model has an exclusive contract, prevent the contract offer from being sent 
        if (photographer.type_of_contract === TypeOfContract.EXCLUSIVE_CONTRACT) {
-        throw new HttpException(`Sorry, ${vendor.brandname}, you can't send a contract offer to this photographer ${photographer.username} because the model has an exclusive contract. Until the contract expires, this model can't be signed or offered a contract by anyone else.`, HttpStatus.NOT_ACCEPTABLE);
+        throw new HttpException(`Sorry, ${vendor.brandname}, you can't send a contract offer to this photographer ${photographer.brandname} because the model has an exclusive contract. Until the contract expires, this model can't be signed or offered a contract by anyone else.`, HttpStatus.NOT_ACCEPTABLE);
       }
   
   
@@ -132,7 +132,7 @@ async sendcontractoffer(vendorid: string, photoid: string, contractdto: Contract
         contractoffer.contract_duration = contractdto.contract_duration
         contractoffer.contract_worth = contractdto.contract_worth
         contractoffer.type_of_contract= contractdto.type_of_contract
-        contractoffer.photographer = photographer.username
+        contractoffer.photographer = photographer.brandname
         contractoffer.vendor = vendor.brandname
         contractoffer.contract_offer_id = this.CVN()
         contractoffer.sent_at = new Date()
@@ -145,7 +145,7 @@ async sendcontractoffer(vendorid: string, photoid: string, contractdto: Contract
           notification.account= contractoffer.id
           notification.subject="contract offer Sent!"
           notification.notification_type=NotificationType.CONTRACT_OFFER_SENT
-          notification.message=`Hello a contract offer  has been initialized between  ${vendor.brandname} and ${photographer.username} for a duration of ${contractdto.contract_duration} worth ${contractdto.contract_worth} Thnaks`
+          notification.message=`Hello a contract offer  has been initialized between  ${vendor.brandname} and ${photographer.brandname} for a duration of ${contractdto.contract_duration} worth ${contractdto.contract_worth} Thnaks`
           await this.notificationrepository.save(notification)
     
           const offerresponse: IContractOfferPhotographerResponse = {
@@ -189,7 +189,7 @@ async sendcontractoffer(vendorid: string, photoid: string, contractdto: Contract
   
   
       //check vendors and models oaccross the contractoffer table with the coi number too
-      const isPhotographer = await this.contractsofferrepository.findOne({where:{photographer:photographer.username}})
+      const isPhotographer = await this.contractsofferrepository.findOne({where:{photographer:photographer.brandname}})
       const isVendor = await this.contractsofferrepository.findOne({where:{vendor:vendor.brandname}})
       const isCoi= await this.contractsofferrepository.findOne({where:{contract_offer_id:coi}})
   
@@ -201,7 +201,7 @@ async sendcontractoffer(vendorid: string, photoid: string, contractdto: Contract
          // Proceed to contract signature and agreement
          const contract = new Contracts();
          contract.vendor = vendor.brandname;
-         contract.photographer = photographer.username;
+         contract.photographer = photographer.brandname;
          contract.contract_worth = isCoi.contract_worth;
          contract.contract_duration = isCoi.contract_duration;
          contract.type_of_contract = isCoi.type_of_contract;
@@ -236,7 +236,7 @@ async sendcontractoffer(vendorid: string, photoid: string, contractdto: Contract
           notification.account= contract.contract_validity_number
           notification.subject="New Contract Signed!"
           notification.notification_type=NotificationType.CONTRACT_SIGNED
-          notification.message=`Hello a contract has been signed between  ${vendor.brandname} and ${photographer.username} for a duration of ${contract.contract_duration} worth ${contract.contract_worth} which starts ${contract.commence_date} and expires on ${contract.expiration_date}, Thnaks`
+          notification.message=`Hello a contract has been signed between  ${vendor.brandname} and ${photographer.brandname} for a duration of ${contract.contract_duration} worth ${contract.contract_worth} which starts ${contract.commence_date} and expires on ${contract.expiration_date}, Thnaks`
           await this.notificationrepository.save(notification)
     
   
@@ -270,7 +270,7 @@ async sendcontractoffer(vendorid: string, photoid: string, contractdto: Contract
         notification.account= photographer.id || vendor.id
         notification.subject="New Contract offer declined!"
         notification.notification_type=NotificationType.CONTRACT_OFFER_DECLINED
-        notification.message=`Hello a contract  offer  between  ${vendor.brandname} and ${photographer.username} for an extended duration of  has been declined`
+        notification.message=`Hello a contract  offer  between  ${vendor.brandname} and ${photographer.brandname} for an extended duration of  has been declined`
         await this.notificationrepository.save(notification)
   
         throw new HttpException(declinedMessage,HttpStatus.OK)
@@ -298,7 +298,7 @@ async sendcontractoffer(vendorid: string, photoid: string, contractdto: Contract
   
   
       //check vendors and models oaccross the contractoffer table with the coi number too
-      const isPhotographer = await this.contractsofferrepository.findOne({where:{photographer:photographer.username}})
+      const isPhotographer = await this.contractsofferrepository.findOne({where:{photographer:photographer.brandname}})
       const isVendor = await this.contractsofferrepository.findOne({where:{vendor:vendor.brandname}})
       const isCoi= await this.contractsofferrepository.findOne({where:{contract_offer_id:coi}})
   
@@ -337,7 +337,7 @@ async sendcontractoffer(vendorid: string, photoid: string, contractdto: Contract
             notification.account= counteroffer.contract_counteroffer_id
             notification.subject="New Contract counter offer sent!"
             notification.notification_type=NotificationType.CONTRACT_COUNTER_OFFER_SENT
-            notification.message=`Hello a contract offer between  ${vendor.brandname} and ${photographer.username} has been been countered by the model with an offer of ${counteroffer.contract_duration} with a worth of ${counteroffer.contract_worth}`
+            notification.message=`Hello a contract offer between  ${vendor.brandname} and ${photographer.brandname} has been been countered by the model with an offer of ${counteroffer.contract_duration} with a worth of ${counteroffer.contract_worth}`
             await this.notificationrepository.save(notification)
   
       
@@ -362,7 +362,7 @@ async sendcontractoffer(vendorid: string, photoid: string, contractdto: Contract
   
   
       //check vendors and models oaccross the contractoffer table with the coi number too
-      const isPhotographer = await this.countercontractsofferrepository.findOne({where:{photographer:photographer.username}})
+      const isPhotographer = await this.countercontractsofferrepository.findOne({where:{photographer:photographer.brandname}})
       const isVendor = await this.countercontractsofferrepository.findOne({where:{vendor:vendor.brandname}})
       const isCoi= await this.countercontractsofferrepository.findOne({where:{contract_counteroffer_id:coi}})
   
@@ -374,7 +374,7 @@ async sendcontractoffer(vendorid: string, photoid: string, contractdto: Contract
          // Proceed to contract signature and agreement
          const contract = new Contracts();
          contract.vendor = vendor.brandname;
-         contract.photographer = photographer.username;
+         contract.photographer = photographer.brandname;
          contract.contract_worth = isCoi.contract_worth;
          contract.contract_duration = isCoi.contract_duration;
          contract.type_of_contract = isCoi.type_of_contract;
@@ -407,7 +407,7 @@ async sendcontractoffer(vendorid: string, photoid: string, contractdto: Contract
           notification.account= contract.contract_validity_number
           notification.subject="New Contract Signed and counter offer Accepted!"
           notification.notification_type=NotificationType.CONTRACT_COUNTER_OFFER_ACCEPTED
-          notification.message=`Hello a contract has been signed between  ${vendor.brandname} and ${photographer.username} for a duration of ${contract.contract_duration} worth ${contract.contract_worth} which starts ${contract.commence_date} and expires on ${contract.expiration_date}, Thnaks`
+          notification.message=`Hello a contract has been signed between  ${vendor.brandname} and ${photographer.brandname} for a duration of ${contract.contract_duration} worth ${contract.contract_worth} which starts ${contract.commence_date} and expires on ${contract.expiration_date}, Thnaks`
           await this.notificationrepository.save(notification)
     
   
@@ -441,7 +441,7 @@ async sendcontractoffer(vendorid: string, photoid: string, contractdto: Contract
         notification.account= photographer.id || vendor.id
         notification.subject="New Counter Contract  offer declined!"
         notification.notification_type=NotificationType.CONTRACT_COUNTER_OFFER_DECLINED
-        notification.message=`Hello a contract  offer  between  ${vendor.brandname} and ${photographer.username} for an extended duration of  has been declined`
+        notification.message=`Hello a contract  offer  between  ${vendor.brandname} and ${photographer.brandname} for an extended duration of  has been declined`
         await this.notificationrepository.save(notification)
   
         throw new HttpException(declinedMessage,HttpStatus.OK)

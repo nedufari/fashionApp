@@ -9,7 +9,8 @@ export interface IModel{
     id:string,
     email:string,
     password:string
-    brandname:string 
+    name:string
+    username:string
     address:string 
     phone1:string 
     phone2:string 
@@ -17,6 +18,7 @@ export interface IModel{
     bio:string 
     fashion_genre:string 
     digital_photo:string 
+    DOB:string
     age:number
     gender:string 
     complexion:string 
@@ -114,7 +116,8 @@ export  interface IModelResponseComment{
 
 
 export interface IModelResponse{
-    brandname:string 
+    username:string
+    name:string 
     address:string 
     phone1:string 
     phone2:string 
@@ -122,6 +125,7 @@ export interface IModelResponse{
     bio:string 
     fashion_genre:string 
     digital_photo:string 
+    DOB:string
     age:number
     gender:string 
     complexion:string 

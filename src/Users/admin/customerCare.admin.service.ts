@@ -310,7 +310,7 @@ async getProile(id:string):Promise<IAdminResponse>{
 
         else if (fetchall.complainerRole === Roles.PHOTOGRAPHER){
             const customer = await this.photorepository.findOne({where:{id:fetchall.complainerID}})
-            await this.mailservice.SendCompliaitResolutionMail(dto.response,customer.email,dto.title,fetchall.issue,issueId,customer.username)  
+            await this.mailservice.SendCompliaitResolutionMail(dto.response,customer.email,dto.title,fetchall.issue,issueId,customer.brandname)  
         }
 
         else if (fetchall.complainerRole === Roles.VENDOR){

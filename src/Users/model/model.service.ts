@@ -169,6 +169,7 @@ export class ModelService {
         HttpStatus.NOT_FOUND,
       );
 
+    (model.name = dto.name),
     (model.username = dto.username),
       (model.address = dto.address),
       (model.phone1 = dto.phone1),

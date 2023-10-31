@@ -19,11 +19,8 @@ export class PhotographerEntity implements IPhotographer{
     @Column({unique:true,nullable:false})
     email:string
 
-    
-   
-
     @Column({unique:true,nullable:true})
-    username:string 
+    brandname:string 
 
     @Column({nullable:false})
     password:string

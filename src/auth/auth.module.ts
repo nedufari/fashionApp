@@ -8,7 +8,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
-import { UserModule } from '../Users/users.module';
 import { CustomerEntity } from '../Entity/Users/customer.entity';
 import { vendorEntity } from '../Entity/Users/vendor.entity';
 import { PhotographerEntity } from '../Entity/Users/photorapher.entity';

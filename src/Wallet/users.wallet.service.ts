@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { IWallet, IWalletResponse, Wallet } from "../Entity/wallet/wallet.entity";
+import { IWallet, IWalletResponse, IWalletResponseModel, Wallet } from "../Entity/wallet/wallet.entity";
 import { CustomerEntityRepository, ModelEntityRepository, NotificationsRepository, PhotographerEntityRepository, WalletRepository } from "../auth/auth.repository";
 import { CustomerEntity } from "../Entity/Users/customer.entity";
 import { CreateWalletDto } from "./wallet.dto";
@@ -28,7 +28,7 @@ export class UserWalletService{
 
       //for customers 
 
-    async CustomercreateWallet(customerid:string,walletdto:CreateWalletDto):Promise<IWalletResponse>{
+    async CustomercreateWallet(customerid:string,walletdto:CreateWalletDto):Promise<IWalletResponseModel>{
         try {
             const customer = await this.customerripository.findOne({where:{id:customerid}})
             if (!customer) throw new HttpException('this customer is not found',HttpStatus.NOT_FOUND)
@@ -52,7 +52,7 @@ export class UserWalletService{
             wallet.PIN = hashpin
             await this.walletripo.save(wallet)
     
-            const walletResponse :IWalletResponse ={
+            const walletResponse :IWalletResponseModel ={
                 walletid : wallet.walletid,
                 balance :wallet.balance,
                 cratedDate : wallet.cratedDate,
@@ -70,7 +70,7 @@ export class UserWalletService{
 
     
 
-    async CustomerfetchMywallet(walletid:string,customerid:string):Promise<IWalletResponse>{
+    async CustomerfetchMywallet(walletid:string,customerid:string):Promise<IWalletResponseModel>{
         try {
             const customer = await this.customerripository.findOne({where:{id:customerid}})
             if (!customer) throw new HttpException('this customer is not found',HttpStatus.NOT_FOUND)
@@ -78,7 +78,7 @@ export class UserWalletService{
             const findwallet = await this.walletripo.findOne({where:{walletid:walletid}})
             if (!findwallet) throw new HttpException('this walletId does not exist',HttpStatus.NOT_FOUND)
 
-            const walletResponse :IWalletResponse ={
+            const walletResponse :IWalletResponseModel ={
                 walletid : findwallet.walletid,
                 balance :findwallet.balance,
                 cratedDate : findwallet.cratedDate,
@@ -147,7 +147,7 @@ export class UserWalletService{
                 balance :wallet.balance,
                 cratedDate : wallet.cratedDate,
                 owner :{
-                    username: photographer.username,
+                    brandname: photographer.brandname,
                     
                 }
             }
@@ -162,8 +162,8 @@ export class UserWalletService{
 
     async PhotographerfetchMywallet(walletid:string,customerid:string):Promise<IWalletResponse>{
         try {
-            const customer = await this.photographerrepository.findOne({where:{id:customerid}})
-            if (!customer) throw new HttpException('this customer is not found',HttpStatus.NOT_FOUND)
+            const photographer = await this.photographerrepository.findOne({where:{id:customerid}})
+            if (!photographer) throw new HttpException('this customer is not found',HttpStatus.NOT_FOUND)
 
             const findwallet = await this.walletripo.findOne({where:{walletid:walletid}})
             if (!findwallet) throw new HttpException('this walletId does not exist',HttpStatus.NOT_FOUND)
@@ -173,7 +173,7 @@ export class UserWalletService{
                 balance :findwallet.balance,
                 cratedDate : findwallet.cratedDate,
                 owner :{
-                    username: customer.username,
+                    brandname: photographer.brandname,
                     
                 }
             }
@@ -190,14 +190,14 @@ export class UserWalletService{
 
     async PhotographerdeleteMyWallet(walletid:string,customerid:string):Promise<{message:string}>{
         try {
-            const customer = await this.photographerrepository.findOne({where:{id:customerid}})
-            if (!customer) throw new HttpException('this customer is not found',HttpStatus.NOT_FOUND)
+            const photographer = await this.photographerrepository.findOne({where:{id:customerid}})
+            if (!photographer) throw new HttpException('this customer is not found',HttpStatus.NOT_FOUND)
 
             const findwallet = await this.walletripo.findOne({where:{walletid:walletid}})
             if (!findwallet) throw new HttpException('this walletId does not exist',HttpStatus.NOT_FOUND)
 
             await this.walletripo.remove(findwallet)
-            return {message:`this wallet has been successfully deleted by ${customer.username} on ${new Date()}`}
+            return {message:`this wallet has been successfully deleted by ${photographer.brandname} on ${new Date()}`}
 
         } catch (error) {
             throw error
@@ -210,14 +210,14 @@ export class UserWalletService{
     
     //for models 
 
-    async ModelcreateWallet(photoid:string,walletdto:CreateWalletDto):Promise<IWalletResponse>{
+    async ModelcreateWallet(photoid:string,walletdto:CreateWalletDto):Promise<IWalletResponseModel>{
         try {
-            const photographer = await this.modelrepository.findOne({where:{id:photoid}})
-            if (!photographer) throw new HttpException('this photographer is not found',HttpStatus.NOT_FOUND)
+            const model = await this.modelrepository.findOne({where:{id:photoid}})
+            if (!model) throw new HttpException('this photographer is not found',HttpStatus.NOT_FOUND)
 
             const hasWallet = await this.walletripo.createQueryBuilder('wallet')
             .leftJoinAndSelect('wallet.owner','owner')
-            .where('owner.id = :photoid',{photoid:photographer.id} )
+            .where('owner.id = :photoid',{photoid:model.id} )
             .getOne()
 
             if (hasWallet) throw new HttpException('you alrready have a wallet, you cannot create another wallet, you would have to delete the one you have first',HttpStatus.NOT_ACCEPTABLE)
@@ -228,17 +228,17 @@ export class UserWalletService{
             walletdto.PIN = hashpin
 
             const wallet =new Wallet()
-            wallet.owner = photographer.id
+            wallet.owner = model.id
             wallet.cratedDate = new Date()
             wallet.PIN = hashpin
             await this.walletripo.save(wallet)
     
-            const walletResponse :IWalletResponse ={
+            const walletResponse :IWalletResponseModel ={
                 walletid : wallet.walletid,
                 balance :wallet.balance,
                 cratedDate : wallet.cratedDate,
                 owner :{
-                    username: photographer.username,
+                    username: model.username,
                     
                 }
             }
@@ -251,20 +251,20 @@ export class UserWalletService{
 
     
 
-    async ModelfetchMywallet(walletid:string,customerid:string):Promise<IWalletResponse>{
+    async ModelfetchMywallet(walletid:string,customerid:string):Promise<IWalletResponseModel>{
         try {
-            const customer = await this.modelrepository.findOne({where:{id:customerid}})
-            if (!customer) throw new HttpException('this customer is not found',HttpStatus.NOT_FOUND)
+            const model = await this.modelrepository.findOne({where:{id:customerid}})
+            if (!model) throw new HttpException('this customer is not found',HttpStatus.NOT_FOUND)
 
             const findwallet = await this.walletripo.findOne({where:{walletid:walletid}})
             if (!findwallet) throw new HttpException('this walletId does not exist',HttpStatus.NOT_FOUND)
 
-            const walletResponse :IWalletResponse ={
+            const walletResponse :IWalletResponseModel ={
                 walletid : findwallet.walletid,
                 balance :findwallet.balance,
                 cratedDate : findwallet.cratedDate,
                 owner :{
-                    username: customer.username,
+                    username: model.username,
                     
                 }
             }
@@ -281,14 +281,14 @@ export class UserWalletService{
 
     async ModeldeleteMyWallet(walletid:string,customerid:string):Promise<{message:string}>{
         try {
-            const customer = await this.modelrepository.findOne({where:{id:customerid}})
-            if (!customer) throw new HttpException('this customer is not found',HttpStatus.NOT_FOUND)
+            const model = await this.modelrepository.findOne({where:{id:customerid}})
+            if (!model) throw new HttpException('this customer is not found',HttpStatus.NOT_FOUND)
 
             const findwallet = await this.walletripo.findOne({where:{walletid:walletid}})
             if (!findwallet) throw new HttpException('this walletId does not exist',HttpStatus.NOT_FOUND)
 
             await this.walletripo.remove(findwallet)
-            return {message:`this wallet has been successfully deleted by ${customer.username} on ${new Date()}`}
+            return {message:`this wallet has been successfully deleted by ${model.username} on ${new Date()}`}
 
         } catch (error) {
             throw error

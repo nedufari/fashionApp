@@ -8,7 +8,8 @@ export interface IPhotographer{
     id:string,
     email:string,
     password:string
-    username:string 
+    brandname:string 
+    fullname:string
     address:string 
     phone1:string 
     phone2:string 
@@ -45,7 +46,8 @@ export interface IPhotographer{
 }
 
 export interface IPhotographerResponse{
-    username:string 
+    brandname:string 
+    fullname:string
     address:string 
     phone1:string 
     phone2:string 

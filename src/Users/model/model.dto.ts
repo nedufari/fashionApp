@@ -88,6 +88,10 @@ export class ModelPortfolioDto{
 
     @IsString()
     @IsOptional()
+    name:string 
+
+    @IsString()
+    @IsOptional()
     address:string 
 
     @IsString()

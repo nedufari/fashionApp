@@ -22,13 +22,11 @@ export class vendorEntity implements IVendor{
     @Column({unique:true,nullable:true})
     brandname:string 
 
-    @Column({unique:true,nullable:true})
-    username:string 
-
+   
     @Column({nullable:false})
     password:string
 
-    @Column({nullable:true,unique:true})
+    @Column({nullable:true})
     fullname:string
 
     

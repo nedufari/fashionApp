@@ -11,6 +11,11 @@ export interface IWallet{
 }
 interface ICustomerInfo {
     
+    brandname: string;
+}
+
+interface ICustomerInfoModel {
+    
     username: string;
 }
 
@@ -21,6 +26,13 @@ export interface IWalletResponse{
     balance:number
     cratedDate:Date
     owner:ICustomerInfo
+}
+
+export interface IWalletResponseModel{
+    walletid:string
+    balance:number
+    cratedDate:Date
+    owner:ICustomerInfoModel
 }
 
 @Entity('wallet')

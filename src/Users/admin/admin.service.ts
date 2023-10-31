@@ -304,7 +304,7 @@ export class AdminService{
             notification.notification_type=NotificationType.account_deleted
             notification.message=`the entire account of ${photoid} has been deleted by the admin`
             await this.notificationrepository.save(notification)
-            return {message:`${findphotographer.username} has been deleted as a photographer on walkway successfully`}
+            return {message:`${findphotographer.brandname} has been deleted as a photographer on walkway successfully`}
             
         } catch (error) {
             
@@ -390,9 +390,9 @@ export class AdminService{
             notification.account= photolid
             notification.subject="Account Verified!"
             notification.notification_type=NotificationType.account_verified
-            notification.message=`the account of ${findphotographer.username} has been verified by the admin`
+            notification.message=`the account of ${findphotographer.brandname} has been verified by the admin`
             await this.notificationrepository.save(notification)
-            return {message:`${findphotographer.username} has been verified as a photographer in walkway`}
+            return {message:`${findphotographer.brandname} has been verified as a photographer in walkway`}
             
             
         } catch (error) {
@@ -455,7 +455,7 @@ export class AdminService{
             await this.notificationrepository.save(notification)
 
 
-            return {message:`${findvendor.username} has been verified as a model in walkway`}
+            return {message:`${findvendor.brandname} has been verified as a model in walkway`}
             
 
 
