@@ -85,6 +85,9 @@ export class vendorEntity implements IVendor{
     is_verified:boolean
 
     @Column({type:"boolean", default:false,nullable:true})
+    is_on_waitlist:boolean
+
+    @Column({type:"boolean", default:false,nullable:true})
     is_deleted:boolean
 
     @Column({type:"boolean", default:false,nullable:true})

@@ -397,9 +397,9 @@ export class CustomerService {
   //advanced query for vendors
   async searchVendors(
     keyword: any | string,
-  ): Promise<{ photographers: IVendor[]; totalCount: number }> {
+  ): Promise<{ vendors: IVendor[]; totalCount: number }> {
     try {
-      const [photographers, totalCount] =
+      const [vendors, totalCount] =
         await this.vendorrepository.findAndCount({
           where: [
             { username: Like(`%${keyword}%`) },
@@ -422,7 +422,7 @@ export class CustomerService {
         );
 
       this.logger.log('vendor successfully searched ');
-      return { photographers, totalCount };
+      return { vendors, totalCount };
     } catch (error) {
       this.logger.error(`An error occurred: ${error.message}`, error.stack);
     }
@@ -430,7 +430,7 @@ export class CustomerService {
 
   async searchVendorsNiche(
     keyword: any | string,
-  ): Promise<{ photographers: IVendor[]; totalCount: number }> {
+  ): Promise<{ vendors: IVendor[]; totalCount: number }> {
     try {
       const query = `
                 SELECT *
@@ -450,15 +450,15 @@ export class CustomerService {
 
       const values = [`%${keyword}%`, keyword];
 
-      const photographers = await this.vendorrepository.query(query, values);
+      const vendors = await this.vendorrepository.query(query, values);
 
-      const totalCount = photographers.length;
+      const totalCount = vendors.length;
 
       if (totalCount === 0) {
         throw new NotFoundException(`No search results found for "${keyword}"`);
       }
       this.logger.log('vendor niche successfully searched ');
-      return { photographers, totalCount };
+      return { vendors, totalCount };
     } catch (error) {
       this.logger.error(`An error occurred: ${error.message}`, error.stack);
     }

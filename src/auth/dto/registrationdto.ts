@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsString,IsNumber, IsEnum, IsStrongPassword } from "class-validator"
+import { IsEmail, IsNotEmpty, IsString,IsNumber, IsEnum, IsStrongPassword, IsDateString, IsOptional } from "class-validator"
 import{} from "class-transformer"
 import { AdminTypes, ClearanceLevels, Roles } from "../../Enums/roles.enum"
 import { KindOfModel } from "../../Enums/modelType.enum"
@@ -145,27 +145,16 @@ export class kidsModeleRegistrationDto{
     username:string
 
     @IsNotEmpty()
-    @IsNumber()
-    age:number
+    // @IsNumber()
+    @IsDateString()
+    dob:string
 
     @IsString()
     @IsNotEmpty()
     gender:string
-
-    @IsString()
-    @IsNotEmpty()
-    manager:string
-
-    @IsString()
-    @IsNotEmpty()
-    ManagerPhone:string
-
-    @IsEnum(KindOfModel)
-    @IsNotEmpty({message:'you must selcet the kind of model you are registering as'})
-    kindofmodel:KindOfModel
-
-
-
+    
+    manager?:string
+    managerPhone?:string
 
 }
 

@@ -22,7 +22,8 @@ export class SuperAdminService {
   }
 
   private adminid(): string {
-    return nanoid(10);
+    const nanoid= customAlphabet('1234567890',6);
+    return nanoid()
   }
 
   //create various kinds of admins

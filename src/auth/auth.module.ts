@@ -20,9 +20,11 @@ import { MailService } from '../mailer.service';
 import { Comments } from '../Entity/Activities/comment.entity';
 import { Replies } from '../Entity/Activities/reply.entity';
 import { Wallet } from '../Entity/wallet/wallet.entity';
+import { WaitListService } from './waitlistAuth/waitlistauth.service';
+import { WaitListController } from './waitlistAuth/waitlistauth.controller';
 
 @Module({
-  providers: [JwtGuard, RolesGuard, JwtStrategy, AuthService,MailService],
+  providers: [JwtGuard, RolesGuard, JwtStrategy, AuthService,MailService,WaitListService],
   exports:[],
   imports: [
     TypeOrmModule.forFeature([
@@ -44,6 +46,6 @@ import { Wallet } from '../Entity/wallet/wallet.entity';
         })
     })
   ],
-  controllers: [AuthController],
+  controllers: [AuthController,WaitListController],
 })
 export class AuthModule {}

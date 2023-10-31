@@ -27,6 +27,7 @@ export interface IPhotographer{
     paymentplan:PaymentPlan
     is_active:boolean
     is_verified:boolean
+    is_on_waitlist:boolean
     is_deleted:boolean
     is_profile_completed:boolean
     is_on_contract:boolean

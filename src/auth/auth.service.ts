@@ -22,6 +22,7 @@ import { customAlphabet, nanoid } from 'nanoid';
 import { ChangePasswordDto, FinallyResetPasswordDto, SendPasswordResetLinkDto } from './dto/password.dto';
 import { AdminTypes, ClearanceLevels } from '../Enums/roles.enum';
 import { Wallet } from '../Entity/wallet/wallet.entity';
+import { KindOfModel } from '../Enums/modelType.enum';
 
 
 @Injectable()
@@ -53,24 +54,24 @@ export class AuthService {
 
 
   //wallet transaction pin 
-  async hashpin(pin: string): Promise<string> {
+  public async hashpin(pin: string): Promise<string> {
     return await bcrypt.hash(pin, 20);
   }
 
-  async comaprePassword(userpassword,dbpassword): Promise<boolean> {
+  public async comaprePassword(userpassword,dbpassword): Promise<boolean> {
     return await bcrypt.compare(userpassword,dbpassword);
   }
 
-  private generateIdentityNumber():string{
+  public generateIdentityNumber():string{
     return nanoid(8)
   }
 
-  private generatePasswordResetLink():string{
+  public generatePasswordResetLink():string{
     const nanoid = customAlphabet('1234567890',6)
     return nanoid()
   }
 
-  private generateWalletTransactionPin():string{
+  public generateWalletTransactionPin():string{
     const nanoid = customAlphabet('1234567890',4)
     return nanoid()
   }
@@ -162,11 +163,13 @@ export class AuthService {
 
   
   async Adminverifyotp(verifyotpdto:VerifyOtpdto):Promise<{isValid:boolean; accessToken:any}>{
+    
     const findemail= await this.otprepository.findOne({where:{email:verifyotpdto.email}})
     if (!findemail) throw new HttpException('the user does not match the owner of the otp',HttpStatus.NOT_FOUND)
+
     //find the otp privided if it matches with the otp stored 
     const findotp= await this.otprepository.findOne({where:{otp:verifyotpdto.otp}})
-    if (!findotp) throw new HttpException('you prided an invalid otp', HttpStatus.BAD_REQUEST)
+    if (!findotp) throw new HttpException('you provided an invalid otp', HttpStatus.BAD_REQUEST)
     
     //find if the otp is expired 
     if ( findotp.expiration_time <= new Date()) throw new HttpException('otp is expired please request for another one',HttpStatus.REQUEST_TIMEOUT)
@@ -181,7 +184,6 @@ export class AuthService {
       customer.is_active=true
     }
 
-    
 
      const notification = new Notifications()
       notification.account= customer.id,
@@ -979,56 +981,68 @@ export class AuthService {
   ////////////////////////////////////// kid model ///////////////////////////////////////////////////////
   
 
-  async kidsmodelsignup(kiddto: kidsModeleRegistrationDto): Promise<{message:string}> {
-    
-    if (kiddto.age < 1 || kiddto.age > 15) {
-      throw new HttpException(`Kid's age must be between 1 and 15 years old`,HttpStatus.BAD_REQUEST,);}
-    const hashedpassword = await this.hashpassword(kiddto.password);
+  async modelsignup(modeldto: kidsModeleRegistrationDto): Promise<{message:string}> {
 
-    const kid = new ModelEntity()
-    kid.email=kiddto.email
-    kid.password=hashedpassword
-    kid.username=kiddto.username
-    kid.manager=kiddto.manager
-    kid.ManagerPhone=kiddto.ManagerPhone
-    kid.age=kiddto.age
-    kid.kindofmodel=kiddto.kindofmodel
-    kid.ModelID=this.generateIdentityNumber()
+    const dob = new Date(modeldto.dob)
+    const today = new Date()
+    const age =today.getFullYear() - dob.getFullYear()
+
+    const hashedpassword = await this.hashpassword(modeldto.password);
+
+    //pre save the model data
+    const model = new ModelEntity()
+    model.email=modeldto.email
+    model.password=hashedpassword
+    model.username=modeldto.username
+    model.age=age
+
+
+    if (age < 1 || age > 15) {
+
+      model.kindofmodel= KindOfModel.ADULT}
+      else{
+
+      if (!modeldto.manager || !modeldto.managerPhone){
+        throw new HttpException('child model requires manager and manager\'s phone number since child is below 15',HttpStatus.BAD_REQUEST)
+      }
+      model.manager=modeldto.manager
+      model.ManagerPhone=modeldto.managerPhone
+      model.kindofmodel= KindOfModel.KID
+      
+    }
+    model.ModelID=this.generateIdentityNumber()
 
 
     const emailexsist = await this.modelrepository.findOne({
-      where: { email: kiddto.email },
+      where: { email: modeldto.email },
       select: ['id', 'email'],
     });
     if (emailexsist)
       throw new HttpException(
-        `user with email: ${kiddto.email} exists, please use another unique email`,
+        `user with email: ${modeldto.email} exists, please use another unique email`,
         HttpStatus.CONFLICT,
       );
 
-           // Check if a user with the same username already exists
-    const existingUserByUsername = await this.modelrepository.findOne({ where: { username: kiddto.username }, select: ['id', 'username'] });
+    // Check if a user with the same username already exists
+    const existingUserByUsername = await this.modelrepository.findOne({ where: { username: modeldto.username }, select: ['id', 'username'] });
     if (existingUserByUsername) {
       // Generate username suggestions
-      const suggestions = await this.generateUsernameSuggestions(kiddto.username);
+      const suggestions = await this.generateUsernameSuggestions(modeldto.username);
       throw new HttpException(
-        `Kid Model with username: ${kiddto.username} already exists. Please choose another username or consider these suggestions: ${suggestions.join(', ')}`,
+        `Kid Model with username: ${modeldto.username} already exists. Please choose another username or consider these suggestions: ${suggestions.join(', ')}`,
         HttpStatus.CONFLICT,
       );
     }
 
-   
-
-
-    await this.modelrepository.save(kid)
+    await this.modelrepository.save(model)
 
       //2fa authentication 
       const emiailverificationcode= generate2FACode4digits()
 
       const otp= new UserOtp()
-      otp.email=kiddto.email
+      otp.email=modeldto.email
       otp.otp=emiailverificationcode
-      otp.role= kid.role
+      otp.role= model.role
       const fiveminuteslater=new Date()
       await fiveminuteslater.setMinutes(fiveminuteslater.getMinutes()+5)
       otp.expiration_time=fiveminuteslater
@@ -1036,24 +1050,24 @@ export class AuthService {
       console.log('customer account created please check your mail to verify your account, by inputing the six digit OTP sent to you')
 
       //send mail 
-      await this.mailerservice.SendVerificationMail(otp.email,emiailverificationcode,kid.username)
+      await this.mailerservice.SendVerificationMail(otp.email,emiailverificationcode,model.username)
       //  await this.mailerservice.SendMail(otp.email,subject,content)
 
       //save the notification 
       const notification = new Notifications()
-      notification.account= kid.id
+      notification.account= model.id
       notification.subject="New Customer!"
       notification.notification_type=NotificationType.SIGNED_UP
-      notification.message=`Hello ${kid.username}, your kid model account has been created as a ${kid.kindofmodel}. please complete your profile `
+      notification.message=`Hello ${model.username}, your model account has been created as a ${model.kindofmodel}. please complete your profile `
       await this.notificationrepository.save(notification)
 
-      return {message:"new Photographer signed up and verification otp has been sent "}
+      return {message:"new model signed up and verification otp has been sent "}
     
   }
 
 
   
-  async KidsModelverifyotp(verifyotpdto:VerifyOtpdto):Promise<{isValid:boolean; accessToken:any}>{
+  async Modelverifyotp(verifyotpdto:VerifyOtpdto):Promise<{isValid:boolean; accessToken:any}>{
     const findemail= await this.otprepository.findOne({where:{email:verifyotpdto.email}})
     if (!findemail) throw new HttpException('the user does not match the owner of the otp',HttpStatus.NOT_FOUND)
     //find the otp privided if it matches with the otp stored 
@@ -1090,7 +1104,7 @@ export class AuthService {
     }
   }
 
-  async resendKidsModelOtp (dto:RequestOtpResendDto):Promise<{message:string}>{
+  async resendModelOtp (dto:RequestOtpResendDto):Promise<{message:string}>{
     const emailexsist = await this.modelrepository.findOne({where: { email: dto.email },select: ['id', 'email','role']});
       if (!emailexsist)
         throw new HttpException(
@@ -1128,7 +1142,7 @@ export class AuthService {
        
    }
 
-  async KidsModelchnangepassword(dto:ChangePasswordDto, customerid:string):Promise<{message:string}>{
+  async Modelchnangepassword(dto:ChangePasswordDto, customerid:string):Promise<{message:string}>{
     const customer = await this.modelrepository.findOne({where:{ModelID:customerid}})
     if (!customer) throw new HttpException(`customer with ${customerid} does not exist and you cant be allowed to change a password`,HttpStatus.NOT_FOUND)
 
@@ -1159,7 +1173,7 @@ export class AuthService {
   }
 
 
-  async KidsModelsendPasswordResetLink(dto:SendPasswordResetLinkDto):Promise<{message:string}>{
+  async ModelsendPasswordResetLink(dto:SendPasswordResetLinkDto):Promise<{message:string}>{
     const isEmailReistered= await this.modelrepository.findOne({where:{email:dto.email}})
     if (!isEmailReistered) throw new HttpException(`this email ${dto.email} does not exist in walkway, please try another email address`,HttpStatus.NOT_FOUND)
 
@@ -1211,245 +1225,6 @@ export class AuthService {
 
     return {message:"your password has been reset susscessfully"}
   }
-
-
-
-
-  //////////////////////////////////////// adult model /////////////////////////////////////////////////
-
-  async Adultmodelsignup(adultdto: AdultModelRegistrationDto): Promise<{message:string}> {
-    
-    
-    const hashedpassword = await this.hashpassword(adultdto.password);
-   
-
-    const adult = new ModelEntity()
-    adult.email=adultdto.email
-    adult.password=hashedpassword
-    adult.username=adultdto.username
-    adult.kindofmodel=adultdto.kindofmodel
-    adult.ModelID=this.generateIdentityNumber()
-
-     const emailexsist = await this.modelrepository.findOne({
-      where: { email: adultdto.email },
-      select: ['id', 'email'],
-    });
-    if (emailexsist)
-      throw new HttpException(
-        `user with email: ${adultdto.email} exists, please use another unique email`,
-        HttpStatus.CONFLICT,
-      );
-
-       // Check if a user with the same username already exists
-    const existingUserByUsername = await this.modelrepository.findOne({ where: { username: adultdto.username }, select: ['id', 'username'] });
-    if (existingUserByUsername) {
-      // Generate username suggestions
-      const suggestions = await this.generateUsernameSuggestions(adultdto.username);
-      throw new HttpException(
-        `Adult Model with username: ${adultdto.username} already exists. Please choose another username or consider these suggestions: ${suggestions.join(', ')}`,
-        HttpStatus.CONFLICT,
-      )
-    }
-   
-    await this.modelrepository.save(adult)
-
-      //2fa authentication 
-      const emiailverificationcode= generate2FACode4digits()
-
-      const otp= new UserOtp()
-      otp.email=adultdto.email
-      otp.otp=emiailverificationcode
-      otp.role= adult.role
-      const fiveminuteslater=new Date()
-      await fiveminuteslater.setMinutes(fiveminuteslater.getMinutes()+5)
-      otp.expiration_time=fiveminuteslater
-      await this.otprepository.save(otp)
-      console.log('model account created please check your mail to verify your account, by inputing the six digit OTP sent to you')
-
-      //send mail 
-      await this.mailerservice.SendVerificationMail(otp.email,emiailverificationcode,adult.username)
-
-      //save the notification 
-      const notification = new Notifications()
-      notification.account= adult.id
-      notification.subject="New Customer!"
-      notification.notification_type=NotificationType.SIGNED_UP
-      notification.message=`Hello ${adult.username}, your kid model account has been created as an ${adult.kindofmodel}. please complete your profile `
-      await this.notificationrepository.save(notification)
-
-      return {message:"new Adult model signed up and verification otp has been sent "}
-    
-  }
-
-
-  
-  
-  async AdultModelverifyotp(verifyotpdto:VerifyOtpdto):Promise<{isValid:boolean; accessToken:any}>{
-    const findemail= await this.otprepository.findOne({where:{email:verifyotpdto.email}})
-    if (!findemail) throw new HttpException('the user does not match the owner of the otp',HttpStatus.NOT_FOUND)
-    //find the otp privided if it matches with the otp stored 
-    const findotp= await this.otprepository.findOne({where:{otp:verifyotpdto.otp}})
-    if (!findotp) throw new HttpException('you prided an invalid otp', HttpStatus.BAD_REQUEST)
-    
-    //find if the otp is expired 
-    if ( findotp.expiration_time <= new Date()) throw new HttpException('otp is expired please request for another one',HttpStatus.REQUEST_TIMEOUT)
-
-    //return valid and the access token if the user matches 
-
-    const customer = await this.modelrepository.findOne({where:{email:verifyotpdto.email}})
-    if (customer.email !== findemail.email) throw new HttpException("this email does not match the customer recod we have ", HttpStatus.NOT_FOUND)
-    else{
-      customer.is_logged_in=true
-      customer.is_verified=true
-      customer.is_active=true
-    
-
-     const notification = new Notifications()
-      notification.account= customer.id,
-      notification.subject="OTP sent!"
-      notification.notification_type=NotificationType.OTP_VERIFICATION
-      notification.message=`Hello ${customer.username}, otp sent to this email for verification `
-      await this.notificationrepository.save(notification)
-
-      await this.mailerservice.SendWelcomeEmail(customer.email,customer.username)
-
-      await this.customerrepository.save(customer)
-
-
-
-    const accessToken= await this.signToken(customer.id,customer.email,customer.role)
-
-    return {isValid:true, accessToken}
-    }
-  }
-
-  async resendAdultModelOtp (dto:RequestOtpResendDto):Promise<{message:string}>{
-    const emailexsist = await this.modelrepository.findOne({where: { email: dto.email },select: ['id', 'email','role']});
-      if (!emailexsist)
-        throw new HttpException(
-          `user with email: ${dto.email} exists, please use another unique email`,
-          HttpStatus.CONFLICT,
-        );
-     // Generate a new OTP
-     const emiailverificationcode= generate2FACode4digits() // Your OTP generation logic
-
-     // Save the OTP with expiration time
-     const fiveminuteslater=new Date()
-     await fiveminuteslater.setMinutes(fiveminuteslater.getMinutes()+5)
-     // Define OTP_EXPIRATION_MINUTES
-     const newOtp = this.otprepository.create({ 
-      email:dto.email, 
-      otp:emiailverificationcode, 
-      expiration_time: fiveminuteslater,
-      role: emailexsist.role
-    });
-     await this.otprepository.save(newOtp);
-
-      //save the notification 
-      const notification = new Notifications()
-      notification.account= emailexsist.id
-      notification.subject="New Customer!"
-      notification.notification_type=NotificationType.OTP_VERIFICATION
-      notification.message=`Hello ${emailexsist.username}, an otp has been sent to your mail `
-      await this.notificationrepository.save(notification)
- 
-     
-       //send mail 
-       await this.mailerservice.SendVerificationMail(newOtp.email,emiailverificationcode, emailexsist.username)
-
-       return {message:'New OTP sent successfully'}
-       
-   }
-
-  async AdultModelchnangepassword(dto:ChangePasswordDto, customerid:string):Promise<{message:string}>{
-    const customer = await this.modelrepository.findOne({where:{ModelID:customerid}})
-    if (!customer) throw new HttpException(`customer with ${customerid} does not exist and you cant be allowed to change a password`,HttpStatus.NOT_FOUND)
-
-    //confirm the oldpassword with the saved password
-    const ispasswordMatch= await this.comaprePassword(customer.password,dto.oldPassword)
-    if (!ispasswordMatch) throw new HttpException('the provided old password is not a match with the current password please provide, else you wont be allowed to perform this action', HttpStatus.NOT_ACCEPTABLE)
-
-    //input new password 
-    const newPassword= await this.hashpassword(dto.newpassword)
-    customer.password= newPassword
-
-    //compare the new and old password 
-    const isnewoldSame= await this.comaprePassword(dto.newpassword,customer.password)
-    if (isnewoldSame) throw new HttpException('your new password must be different from the old one for a stronger security',HttpStatus.NOT_ACCEPTABLE)
-    await this.modelrepository.save(customer)
-
-    const notification = new Notifications()
-    notification.account= customer.id,
-    notification.subject="Password changed!"
-    notification.notification_type=NotificationType.OTP_VERIFICATION
-    notification.message=`Hello ${customer.username}, password has been succsfully chnaged `
-    await this.notificationrepository.save(notification)
-
-
-
-    return {message:"your password has been changed successfully"}
-
-  }
-
-
-  async AdultModelsendPasswordResetLink(dto:SendPasswordResetLinkDto):Promise<{message:string}>{
-    const isEmailReistered= await this.modelrepository.findOne({where:{email:dto.email}})
-    if (!isEmailReistered) throw new HttpException(`this email ${dto.email} does not exist in walkway, please try another email address`,HttpStatus.NOT_FOUND)
-
-    const resetlink= this.generatePasswordResetLink()
-    const expirationTime = new Date();
-      expirationTime.setHours(expirationTime.getHours() + 1);
-
-    //send reset link to the email provided 
-    await this.mailerservice.SendPasswordResetLinkMail(dto.email,resetlink)
-
-    //save the reset link and the expiration time to the database 
-    isEmailReistered.password_reset_link=resetlink
-    isEmailReistered.reset_link_exptime=expirationTime
-    await this.customerrepository.save(isEmailReistered)
-
-    const notification = new Notifications()
-    notification.account= isEmailReistered.id,
-    notification.subject="password Reset link!"
-    notification.notification_type=NotificationType.OTP_VERIFICATION
-    notification.message=`Hello ${isEmailReistered.username}, password resent link sent `
-    await this.notificationrepository.save(notification)
-
-
-
-    return {message:"the password reset link has been sent successfully"}
-    
-  }
-
-  async finallyAdultModelResetPassword(dto:FinallyResetPasswordDto):Promise<{message:string}>{
-    const verifyuser= await this.modelrepository.findOne({where:{email:dto.email}})
-    if (!verifyuser) throw new HttpException('this user is not registered on walkway',HttpStatus.NOT_FOUND)
-
-    //compare token 
-    if (verifyuser.password_reset_link !== dto.resetlink) throw new HttpException('the link is incorrect please retry or request for another link',HttpStatus.NOT_ACCEPTABLE)
-
-    //take new password 
-    const newpassword= await this.hashpassword(dto.password)
-    verifyuser.password=newpassword
-
-    await this.modelrepository.save(verifyuser)
-
-    const notification = new Notifications()
-    notification.account= verifyuser.id,
-    notification.subject="Password reset!"
-    notification.notification_type=NotificationType.OTP_VERIFICATION
-    notification.message=`Hello ${verifyuser.username}, password reset link verified and the password has been recently reseted `
-    await this.notificationrepository.save(notification)
-
-
-    return {message:"your password has been reset susscessfully"}
-  }
-
-
-
-
-
-
 
 
 

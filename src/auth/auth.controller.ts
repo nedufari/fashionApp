@@ -54,25 +54,16 @@ export class AuthController {
       }
     }
 
-    @Post('kidmodel/verify-otp')
+    @Post('model/verify-otp')
     async KidModelverifyOtp(@Body() verifyOtpDto:VerifyOtpdto): Promise<{ isValid: boolean; accessToken: any }> {
       try {
-        const result = await this.authservice.KidsModelverifyotp(verifyOtpDto);
+        const result = await this.authservice.Modelverifyotp(verifyOtpDto);
         return { isValid: result.isValid, accessToken: result.accessToken};
       } catch (error) {
         throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
       }
     }
 
-    @Post('customer/verify-otp')
-    async AdultModelverifyOtp(@Body() verifyOtpDto:VerifyOtpdto): Promise<{ isValid: boolean; accessToken: any }> {
-      try {
-        const result = await this.authservice.AdultModelverifyotp(verifyOtpDto);
-        return { isValid: result.isValid, accessToken: result.accessToken};
-      } catch (error) {
-        throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
-      }
-    }
 
     @Post('admin/verify-otp')
     async AdminverifyOtp(@Body() verifyOtpDto:VerifyOtpdto): Promise<{ isValid: boolean; accessToken: any }> {
@@ -96,16 +87,12 @@ export class AuthController {
       return { message: 'New OTP sent successfully' };
     }
 
-    @Post('adult/request-otp-resend')
-    async AdultrequestOtpResend(@Body() requestOtpResendDto: RequestOtpResendDto): Promise<{ message: string }> {
-      await this.authservice.resendAdultModelOtp(requestOtpResendDto); // Assuming you have a method to send OTP
-      return { message: 'New OTP sent successfully' };
-    }
+    
 
 
-    @Post('kid/request-otp-resend')
+    @Post('model/request-otp-resend')
     async KidrequestOtpResend(@Body() requestOtpResendDto: RequestOtpResendDto): Promise<{ message: string }> {
-      await this.authservice.resendKidsModelOtp(requestOtpResendDto); // Assuming you have a method to send OTP
+      await this.authservice.resendModelOtp(requestOtpResendDto); // Assuming you have a method to send OTP
       return { message: 'New OTP sent successfully' };
     }
 
@@ -144,10 +131,10 @@ export class AuthController {
     }
 
 
-    @Post('signup/kidmodel')
+    @Post('signup/model')
     async kidmodelsignup(@Body()dto:kidsModeleRegistrationDto):Promise<{message:string}>{
         try {
-           return await this.authservice.kidsmodelsignup(dto)
+           return await this.authservice.modelsignup(dto)
             
             
         } catch (error) {
@@ -157,19 +144,6 @@ export class AuthController {
         
     }
 
-    @Post('signup/adultmodel')
-    async AdultModelsignup(@Body()dto:AdultModelRegistrationDto):Promise<{message:string}>{
-        try {
-           return await this.authservice.Adultmodelsignup(dto)
-            
-        
-            
-        } catch (error) {
-            throw error
-            
-        }      
-        
-    }
 
     @Post('signup/admin')
     async Adminsignup(@Body()dto:AdminRegistrationDto):Promise<{message:string}>{
@@ -204,16 +178,13 @@ export class AuthController {
     }
 
     
-    @Post("login/kidmodel")
+    @Post("login/model")
     async loginKidModel(@Body()logindto:Logindto){
         return await this.authservice.loginKidModel(logindto)
     }
 
     
-    @Post("login/adultmodel")
-    async loginAdultModel(@Body()logindto:Logindto){
-        return await this.authservice.loginAdultModel(logindto)
-    }
+  
 
     
     @Post("login/admin")
@@ -294,9 +265,9 @@ export class AuthController {
     }
 
 
-     /////kidmodel ////
+     /////model ////
      @UseGuards(JwtGuard)
-     @Patch("/kidmodel/changePassword/:kidmodelid")
+     @Patch("/model/changePassword/:kidmodelid")
      async KidmodelchangePassword(@Body()changepassword:ChangePasswordDto,@Param('kidmodelid')kidmodelid:string,@Req()request):Promise<{message:string}>{
       const userIdFromToken = await request.user.id; 
       console.log(request.user.email)
@@ -304,41 +275,19 @@ export class AuthController {
       if (userIdFromToken !== kidmodelid) {
       throw new ForbiddenException("You are not authorized to perform this action on another user's account.");
       }
-         return await this.authservice.KidsModelchnangepassword(changepassword,kidmodelid)
+         return await this.authservice.Modelchnangepassword(changepassword,kidmodelid)
      }
  
-     @Post("/kidmodel/resetlink")
+     @Post("/model/resetlink")
      async KidmodelPasswordResetLink(@Body()email:SendPasswordResetLinkDto):Promise<{message:string}>{
-         return await this.authservice.KidsModelsendPasswordResetLink(email)
+         return await this.authservice.ModelsendPasswordResetLink(email)
      }
  
-     @Patch("kidmodel/resetPassword")
+     @Patch("model/resetPassword")
      async KidmodelResetPasswordFinally(@Body()dto:FinallyResetPasswordDto):Promise<{message:string}>{
          return await this.authservice.finallyKidsModelResetPassword(dto)
      }
 
-      /// adult model ////
-      @UseGuards(JwtGuard)
-    @Patch("/adultmodel/changePassword/:adultmodelid")
-    async AdultModelchangePassword(@Body()changepassword:ChangePasswordDto,@Param('adultmodelidid')adultmodelid:string,@Req()request):Promise<{message:string}>{
-      const userIdFromToken = await request.user.id; 
-      console.log(request.user.email)
-  
-      if (userIdFromToken !== adultmodelid) {
-      throw new ForbiddenException("You are not authorized to perform this action on another user's account.");
-      }
-        return await this.authservice.AdultModelchnangepassword(changepassword,adultmodelid)
-    }
-
-    @Post("/adultmodel/resetlink")
-    async AdultModelPasswordResetLink(@Body()email:SendPasswordResetLinkDto):Promise<{message:string}>{
-        return await this.authservice.AdultModelsendPasswordResetLink(email)
-    }
-
-    @Patch("adultmodel/resetPassword")
-    async AdultResetPasswordFinally(@Body()dto:FinallyResetPasswordDto):Promise<{message:string}>{
-        return await this.authservice.finallyAdultModelResetPassword(dto)
-    }
 
      ///// admin ////
      @UseGuards(JwtGuard)

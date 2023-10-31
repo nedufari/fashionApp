@@ -266,6 +266,9 @@ caps_ize:string
     is_active:boolean
 
     @Column({type:"boolean", default:false,nullable:true})
+    is_on_waitlist:boolean
+
+    @Column({type:"boolean", default:false,nullable:true})
     is_verified:boolean
 
     @Column({type:"boolean", default:false,nullable:true})
