@@ -5,7 +5,6 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TypeOrmService } from './typeorm/typeorm.service';
 import { ContractModule } from './contract/contract.module';
-import { UserModule } from './Users/users.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { MailService } from './mailer.service';
 import { AdminModule } from './Users/admin/admin.module';
@@ -16,13 +15,14 @@ import { CustomerModule } from './Users/customers/customers.module';
 import { WalletModule } from './Wallet/wallet.module';
 import { UploadService } from './uploads.service';
 import { PaymentModule } from './payment/payment.module';
+import { AppService } from './app.service';
+import { AppController } from './app.controller';
 
 
 @Module({
   imports: [
     TypeormModules, 
     AuthModule,
-    UserModule,
     ConfigModule.forRoot({isGlobal:true}),
     TypeOrmModule.forRootAsync({useClass:TypeOrmService}),
     ContractModule,
@@ -48,7 +48,8 @@ import { PaymentModule } from './payment/payment.module';
     PaymentModule
   
   ],
-  providers:[MailService,UploadService],
-  exports:[UploadService]
+  providers:[MailService,UploadService,AppService],
+  controllers:[AppController],
+  exports:[UploadService,]
 })
 export class AppModule {}
