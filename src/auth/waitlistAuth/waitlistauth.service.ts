@@ -77,19 +77,20 @@ export class WaitListService{
     
           //2fa authentication 
         const emiailverificationcode =  generate2FACode4digits()
+        const verificationlink = `http://localhost:3000/api/v1/waitlist/vendor/verify-otp?token=${emiailverificationcode}&email=${userdto.email} `
     
           const otp= new UserOtp()
           otp.email=userdto.email
           otp.otp=emiailverificationcode
           otp.role= vendor.role
           const fiveminuteslater=new Date()
-          await fiveminuteslater.setMinutes(fiveminuteslater.getMinutes()+5)
+          await fiveminuteslater.setMinutes(fiveminuteslater.getMinutes()+30)
           otp.expiration_time=fiveminuteslater
           await this.otprepository.save(otp)
           console.log('vendor account created please check your mail to verify your account, by inputing the six digit OTP sent to you')
     
           //send mail 
-          await this.mailerservice.SendVerificationMail(otp.email,emiailverificationcode,vendor.brandname)
+          await this.mailerservice.SendVerificationMail(otp.email,verificationlink,vendor.brandname)
          
     
           //save the notification 
@@ -97,10 +98,10 @@ export class WaitListService{
           notification.account= vendor.id
           notification.subject="New Vendor!"
           notification.notification_type=NotificationType.SIGNED_UP
-          notification.message=`Hello ${vendor.brandname}, your vendor account  has been created. please complete your profile `
+          notification.message=`Hello ${vendor.brandname}, your vendor account  has been created. please proceed to verify your email `
           await this.notificationrepository.save(notification)
     
-          return {message:"new vendor signed up and verification otp has been sent "}
+          return {message:"new vendor signed up, please procceed to verify your email "}
         
         } catch (error) {
           throw error
@@ -111,11 +112,11 @@ export class WaitListService{
 
       //(verify otp)
 
-      async WaitlistverifyVendorotp(verifyotpdto:VerifyOtpdto):Promise<{isValid:boolean; welcome:any}>{
-        const findemail= await this.otprepository.findOne({where:{email:verifyotpdto.email}})
+      async WaitlistverifyVendorotp(token:string, email:string):Promise<{isValid:boolean; welcome:any}>{
+        const findemail= await this.otprepository.findOne({where:{email:email}})
         if (!findemail) throw new HttpException('the user does not match the owner of the otp',HttpStatus.NOT_FOUND)
         //find the otp privided if it matches with the otp stored 
-        const findotp= await this.otprepository.findOne({where:{otp:verifyotpdto.otp}})
+        const findotp= await this.otprepository.findOne({where:{otp:token}})
         if (!findotp) throw new HttpException('you provided an invalid otp,please go back to your mail and confirm the OTP sent to you', HttpStatus.BAD_REQUEST)
         
         //find if the otp is expired 
@@ -123,7 +124,7 @@ export class WaitListService{
     
         //return valid and the access token if the user matches 
     
-        const vendor = await this.vendorrepository.findOne({where:{email:verifyotpdto.email}})
+        const vendor = await this.vendorrepository.findOne({where:{email:email}})
         if (vendor.email !== findemail.email) throw new HttpException("this email does not match the customer record we have ", HttpStatus.NOT_FOUND)
         else{
          
@@ -133,9 +134,9 @@ export class WaitListService{
     
          const notification = new Notifications()
           notification.account= vendor.id,
-          notification.subject="OTP sent!"
+          notification.subject="Vendor Verified!"
           notification.notification_type=NotificationType.OTP_VERIFICATION
-          notification.message=`Hello ${vendor.brandname}, otp sent to this email for verification `
+          notification.message=`Hello ${vendor.brandname}, your email has been successfully verified `
           await this.notificationrepository.save(notification)
     
           await this.mailerservice.SendWelcomeEmail(vendor.email,vendor.brandname)
@@ -160,10 +161,11 @@ export class WaitListService{
             );
          // Generate a new OTP
          const emiailverificationcode= generate2FACode4digits() // Your OTP generated tokens
+         const verificationlink = `http://localhost:3000/api/v1/waitlist/vendor/verify-otp?token=${emiailverificationcode}&email=${dto.email} `
     
          // Save the OTP with expiration time
          const fiveminuteslater=new Date()
-         await fiveminuteslater.setMinutes(fiveminuteslater.getMinutes()+5)
+         await fiveminuteslater.setMinutes(fiveminuteslater.getMinutes()+30)
          // Define OTP_EXPIRATION_MINUTES
          const newOtp = this.otprepository.create({ 
           email:dto.email, 
@@ -178,14 +180,14 @@ export class WaitListService{
          notification.account= emailexsist.id
          notification.subject="New Customer!"
          notification.notification_type=NotificationType.OTP_VERIFICATION
-         notification.message=`Hello ${emailexsist.brandname}, an otp has been forwarded to your mail `
+         notification.message=`Hello ${emailexsist.brandname}, a new verification Link has been sent to your mail `
          await this.notificationrepository.save(notification)
      
          
            //send mail 
-           await this.mailerservice.SendVerificationMail(newOtp.email,emiailverificationcode, emailexsist.brandname)
+           await this.mailerservice.SendVerificationMail(newOtp.email,verificationlink, emailexsist.brandname)
     
-           return {message:'New OTP sent successfully'}
+           return {message:'New Verification Link sent successfully'}
            
        }
 
@@ -224,29 +226,31 @@ export class WaitListService{
     
           //2fa authentication 
         const emiailverificationcode= generate2FACode4digits()
+        const verificationlink = `http://localhost:3000/api/v1/waitlist/photographer/verify-otp?token=${emiailverificationcode}&email=${userdto.email} `
+
     
           const otp= new UserOtp()
           otp.email=userdto.email
           otp.otp=emiailverificationcode
           otp.role= photographer.role
           const fiveminuteslater=new Date()
-          await fiveminuteslater.setMinutes(fiveminuteslater.getMinutes()+5)
+          await fiveminuteslater.setMinutes(fiveminuteslater.getMinutes()+30)
           otp.expiration_time=fiveminuteslater
           await this.otprepository.save(otp)
           console.log('photographer account created please check your mail to verify your account, by inputing the six digit OTP sent to you')
     
           //send mail 
-          await this.mailerservice.SendVerificationMail(otp.email,emiailverificationcode,photographer.brandname)
+          await this.mailerservice.SendVerificationMail(otp.email,verificationlink,photographer.brandname)
     
           //save the notification 
           const notification = new Notifications()
           notification.account= photographer.id
-          notification.subject="New Customer!"
+          notification.subject="New Photographer!"
           notification.notification_type=NotificationType.SIGNED_UP
-          notification.message=`Hello ${photographer.brandname}, your photographer account has been created. please complete your profile `
+          notification.message=`Hello ${photographer.brandname}, your photographer account has been created. please proceed to verify your email `
           await this.notificationrepository.save(notification)
     
-          return {message:"new Photographer signed up and verification otp has been sent "}
+          return {message:"new Photographer signed up, please proceed to verify your email "}
         
         } catch (error) {
           throw error
@@ -255,20 +259,23 @@ export class WaitListService{
        
       }
 
+
+
       //( verify otp)
-      async WaitlistverifyPhotographerotp(verifyotpdto:VerifyOtpdto):Promise<{isValid:boolean; welcome:any}>{
-        const findemail= await this.otprepository.findOne({where:{email:verifyotpdto.email}})
+      async WaitlistverifyPhotographerEmail(email:string, token:string):Promise<{isValid:boolean; welcome:any}>{
+        const findemail= await this.otprepository.findOne({where:{email:email}})
+
         if (!findemail) throw new HttpException('the user does not match the owner of the otp',HttpStatus.NOT_FOUND)
         //find the otp privided if it matches with the otp stored 
-        const findotp= await this.otprepository.findOne({where:{otp:verifyotpdto.otp}})
+
+        const findotp= await this.otprepository.findOne({where:{otp:token}})
         if (!findotp) throw new HttpException('you prided an invalid otp', HttpStatus.BAD_REQUEST)
         
         //find if the otp is expired 
         if ( findotp.expiration_time <= new Date()) throw new HttpException('otp is expired please request for another one',HttpStatus.REQUEST_TIMEOUT)
     
         //return valid and the access token if the user matches 
-    
-        const photographer = await this.photographerrepository.findOne({where:{email:verifyotpdto.email}})
+        const photographer = await this.photographerrepository.findOne({where:{email:email}})
         if (photographer.email !== findemail.email) throw new HttpException("this email does not match the customer recod we have ", HttpStatus.NOT_FOUND)
         else{
           
@@ -278,9 +285,9 @@ export class WaitListService{
     
          const notification = new Notifications()
           notification.account= photographer.id,
-          notification.subject="OTP sent!"
+          notification.subject="Photographer Verified!"
           notification.notification_type=NotificationType.OTP_VERIFICATION
-          notification.message=`Hello ${photographer.brandname}, otp sent to this email for verification `
+          notification.message=`Hello ${photographer.brandname}, email has been successfully verified `
           await this.notificationrepository.save(notification)
     
           await this.mailerservice.SendWelcomeEmail(photographer.email,photographer.brandname)
@@ -306,10 +313,11 @@ export class WaitListService{
             );
          // Generate a new OTP
          const emiailverificationcode= generate2FACode4digits() // Your OTP generation logic
+         const verificationlink = `http://localhost:3000/api/v1/waitlist/photographer/verify-otp?token=${emiailverificationcode}&email=${dto.email} `
     
          // Save the OTP with expiration time
          const fiveminuteslater=new Date()
-         await fiveminuteslater.setMinutes(fiveminuteslater.getMinutes()+5)
+         await fiveminuteslater.setMinutes(fiveminuteslater.getMinutes()+30)
          // Define OTP_EXPIRATION_MINUTES
          const newOtp = this.otprepository.create({ 
           email:dto.email, 
@@ -322,16 +330,16 @@ export class WaitListService{
          //save the notification 
          const notification = new Notifications()
          notification.account= emailexsist.id
-         notification.subject="New Customer!"
+         notification.subject="New Verification Link Sent!"
          notification.notification_type=NotificationType.OTP_VERIFICATION
-         notification.message=`Hello ${emailexsist.brandname}, an otp has been sent to your mail `
+         notification.message=`Hello ${emailexsist.brandname}, a token has been sent to your mail `
          await this.notificationrepository.save(notification)
      
          
            //send mail 
-           await this.mailerservice.SendVerificationMail(newOtp.email,emiailverificationcode, emailexsist.brandname)
+           await this.mailerservice.SendVerificationMail(newOtp.email,verificationlink, emailexsist.brandname)
     
-           return {message:'New OTP sent successfully'}
+           return {message:'New Verification Link sent successfully'}
            
        }
 
@@ -389,39 +397,40 @@ async Waitlistmodelsignup(modeldto: WaitlistModeleRegistrationDto): Promise<{mes
 
       //2fa authentication 
       const emiailverificationcode= generate2FACode4digits()
+      const verificationlink = `http://localhost:3000/api/v1/waitlist/model/verify-otp?token=${emiailverificationcode}&email=${modeldto.email} `
 
       const otp= new UserOtp()
       otp.email=modeldto.email
       otp.otp=emiailverificationcode
       otp.role= model.role
       const fiveminuteslater=new Date()
-      await fiveminuteslater.setMinutes(fiveminuteslater.getMinutes()+5)
+      await fiveminuteslater.setMinutes(fiveminuteslater.getMinutes()+30)
       otp.expiration_time=fiveminuteslater
       await this.otprepository.save(otp)
-      console.log('customer account created please check your mail to verify your account, by inputing the six digit OTP sent to you')
+      console.log('model account created please check your mail to verify your account, by inputing the six digit OTP sent to you')
 
       //send mail 
-      await this.mailerservice.SendVerificationMail(otp.email,emiailverificationcode,model.username)
+      await this.mailerservice.SendVerificationMail(otp.email,verificationlink,model.username)
       //  await this.mailerservice.SendMail(otp.email,subject,content)
 
       //save the notification 
       const notification = new Notifications()
       notification.account= model.id
-      notification.subject="New Customer!"
+      notification.subject="New Model!"
       notification.notification_type=NotificationType.SIGNED_UP
-      notification.message=`Hello ${model.username}, your  model account has been created as a ${model.kindofmodel}. please complete your profile `
+      notification.message=`Hello ${model.username}, your  model account has been created as a ${model.kindofmodel}. please complete procced to verify your email `
       await this.notificationrepository.save(notification)
 
-      return {message:"new model signed up and verification otp has been sent "}
+      return {message:"new model signed up, please procceed to verify your email "}
     
   }
 
    
-  async WaitlistModelverifyotp(verifyotpdto:VerifyOtpdto):Promise<{isValid:boolean; welcome:any}>{
-    const findemail= await this.otprepository.findOne({where:{email:verifyotpdto.email}})
+  async WaitlistModelverifyotp(email, token:string):Promise<{isValid:boolean; welcome:any}>{
+    const findemail= await this.otprepository.findOne({where:{email:email}})
     if (!findemail) throw new HttpException('the user does not match the owner of the otp',HttpStatus.NOT_FOUND)
     //find the otp privided if it matches with the otp stored 
-    const findotp= await this.otprepository.findOne({where:{otp:verifyotpdto.otp}})
+    const findotp= await this.otprepository.findOne({where:{otp:token}})
     if (!findotp) throw new HttpException('you prided an invalid otp', HttpStatus.BAD_REQUEST)
     
     //find if the otp is expired 
@@ -429,7 +438,7 @@ async Waitlistmodelsignup(modeldto: WaitlistModeleRegistrationDto): Promise<{mes
 
     //return valid and the access token if the user matches 
 
-    const customer = await this.modelrepository.findOne({where:{email:verifyotpdto.email}})
+    const customer = await this.modelrepository.findOne({where:{email:email}})
     if (customer.email !== findemail.email) throw new HttpException("this email does not match the customer recod we have ", HttpStatus.NOT_FOUND)
     else{
       customer.is_logged_in=true
@@ -439,16 +448,16 @@ async Waitlistmodelsignup(modeldto: WaitlistModeleRegistrationDto): Promise<{mes
 
      const notification = new Notifications()
       notification.account= customer.id,
-      notification.subject="OTP sent!"
+      notification.subject="Model Verified!"
       notification.notification_type=NotificationType.OTP_VERIFICATION
-      notification.message=`Hello ${customer.username}, otp sent to this email for verification `
+      notification.message=`Hello ${customer.username}, your email has been successfully verified `
       await this.notificationrepository.save(notification)
 
       await this.mailerservice.SendWelcomeEmail(customer.email,customer.username)
 
       await this.customerrepository.save(customer)
 
-    const welcome= "your account has been verified and thanks for joinig the waitlist as a modelr"
+    const welcome= "your account has been verified and thanks for joinig the waitlist as a model"
 
     return {isValid:true, welcome}
     }
@@ -463,10 +472,11 @@ async Waitlistmodelsignup(modeldto: WaitlistModeleRegistrationDto): Promise<{mes
         );
      // Generate a new OTP
      const emiailverificationcode= generate2FACode4digits() // Your OTP generation logic
+     const verificationlink = `http://localhost:3000/api/v1/waitlist/model/verify-otp?token=${emiailverificationcode}&email=${resendOtpdto.email} `
 
      // Save the OTP with expiration time
      const fiveminuteslater=new Date()
-     await fiveminuteslater.setMinutes(fiveminuteslater.getMinutes()+5)
+     await fiveminuteslater.setMinutes(fiveminuteslater.getMinutes()+30)
      // Define OTP_EXPIRATION_MINUTES
      const newOtp = this.otprepository.create({ 
       email:resendOtpdto.email, 
@@ -479,16 +489,16 @@ async Waitlistmodelsignup(modeldto: WaitlistModeleRegistrationDto): Promise<{mes
       //save the notification 
       const notification = new Notifications()
       notification.account= emailexsist.id
-      notification.subject="New Customer!"
+      notification.subject="New verification Link Sent!"
       notification.notification_type=NotificationType.OTP_VERIFICATION
-      notification.message=`Hello ${emailexsist.name}, an otp has been sent to your mail `
+      notification.message=`Hello ${emailexsist.name}, a new verification Link has been sent to your email `
       await this.notificationrepository.save(notification)
  
      
        //send mail 
        await this.mailerservice.SendVerificationMail(newOtp.email,emiailverificationcode, emailexsist.name)
 
-       return {message:'New OTP sent successfully'}
+       return {message:'New Verification Link successfully'}
        
    }
 

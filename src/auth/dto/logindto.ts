@@ -1,4 +1,4 @@
-import { IsEmail, IsEnum, IsNotEmpty, IsString } from "class-validator";
+import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString } from "class-validator";
 import { AdminTypes } from "../../Enums/roles.enum";
 
 export class Logindto{
@@ -33,7 +33,7 @@ export class VerifyOtpdto{
     email:string
 
     @IsString()
-    @IsNotEmpty()
+    @IsOptional()
     otp:string
 }
 

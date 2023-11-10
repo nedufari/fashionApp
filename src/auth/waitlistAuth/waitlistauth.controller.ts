@@ -1,4 +1,4 @@
-import { Body, Controller,HttpException,HttpStatus,Post } from "@nestjs/common";
+import { Body, Controller,HttpException,HttpStatus,Post, Query, Req, Request } from "@nestjs/common";
 import { WaitListService } from "./waitlistauth.service";
 import { WaitlistModeleRegistrationDto, WaitlistPhotographerRegistrationDto, WaitlistVendorRegistrationDto } from "./waitlistauth.dto";
 import { VerifyOtpdto } from "../dto/logindto";
@@ -55,9 +55,9 @@ export class WaitListController{
     //verify otp 
 
     @Post('vendor/verify-otp')
-    async WaitlistVendorverifyOtp(@Body() verifyOtpDto:VerifyOtpdto): Promise<{ isValid: boolean; welcome: any }> {
+    async WaitlistVendorverifyOtp(@Query("token") token:string,@Query("email")email:string,): Promise<{ isValid: boolean; welcome: any }> {
       try {
-        const result = await this.waitlistservice.WaitlistverifyVendorotp(verifyOtpDto);
+        const result = await this.waitlistservice.WaitlistverifyVendorotp(email,token);
         return { isValid: result.isValid, welcome: result.welcome};
       } catch (error) {
         throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
@@ -65,9 +65,10 @@ export class WaitListController{
     }
 
     @Post('photographer/verify-otp')
-    async WaitlistPhotographerverifyOtp(@Body() verifyOtpDto:VerifyOtpdto): Promise<{ isValid: boolean; welcome: any }> {
+    async WaitlistPhotographerverifyOtp(@Query("token") token:string,@Query("email")email:string,): Promise<{ isValid: boolean; welcome: any }> {
       try {
-        const result = await this.waitlistservice.WaitlistverifyPhotographerotp(verifyOtpDto);
+        
+        const result = await this.waitlistservice.WaitlistverifyPhotographerotp(email,token);
         return { isValid: result.isValid, welcome: result.welcome};
       } catch (error) {
         throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
@@ -75,9 +76,9 @@ export class WaitListController{
     }
 
     @Post('model/verify-otp')
-    async WaitlistModelverifyOtp(@Body() verifyOtpDto:VerifyOtpdto): Promise<{ isValid: boolean; welcome: any }> {
+    async WaitlistModelverifyOtp(@Query("token") token:string,@Query("email")email:string,): Promise<{ isValid: boolean; welcome: any }> {
       try {
-        const result = await this.waitlistservice.WaitlistModelverifyotp(verifyOtpDto);
+        const result = await this.waitlistservice.WaitlistModelverifyotp(email,token);
         return { isValid: result.isValid, welcome: result.welcome};
       } catch (error) {
         throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
