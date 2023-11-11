@@ -112,7 +112,7 @@ export class WaitListService{
 
       //(verify otp)
 
-      async WaitlistverifyVendorotp(token:string, email:string):Promise<{isValid:boolean; welcome:any}>{
+      async WaitlistverifyVendorEmail(token:string, email:string):Promise<{isValid:boolean; welcome:any}>{
         const findemail= await this.otprepository.findOne({where:{email:email}})
         if (!findemail) throw new HttpException('the user does not match the owner of the otp',HttpStatus.NOT_FOUND)
         //find the otp privided if it matches with the otp stored 
@@ -152,7 +152,7 @@ export class WaitListService{
 
       //(resend otp)
 
-      async WaitlistresendVendorOtp (dto:RequestOtpResendDto):Promise<{message:string}>{
+      async WaitlistresendVendorVerificationLink (dto:RequestOtpResendDto):Promise<{message:string}>{
         const emailexsist = await this.vendorrepository.findOne({where: { email: dto.email },select: ['id', 'email','role']});
           if (!emailexsist)
             throw new HttpException(
@@ -261,7 +261,7 @@ export class WaitListService{
 
 
 
-      //( verify otp)
+      //( verify link sent to the email)
       async WaitlistverifyPhotographerEmail(email:string, token:string):Promise<{isValid:boolean; welcome:any}>{
         const findemail= await this.otprepository.findOne({where:{email:email}})
 
@@ -304,7 +304,7 @@ export class WaitListService{
       }
 
       //(resend otp)
-      async WaitlistresendPhotographerOtp (dto:RequestOtpResendDto):Promise<{message:string}>{
+      async WaitlistresendPhotographerVerificationLink (dto:RequestOtpResendDto):Promise<{message:string}>{
         const emailexsist = await this.photographerrepository.findOne({where: { email: dto.email },select: ['id', 'email','role']});
           if (!emailexsist)
             throw new HttpException(
@@ -426,7 +426,7 @@ async Waitlistmodelsignup(modeldto: WaitlistModeleRegistrationDto): Promise<{mes
   }
 
    
-  async WaitlistModelverifyotp(email, token:string):Promise<{isValid:boolean; welcome:any}>{
+  async WaitlistModelverifyEmail(email, token:string):Promise<{isValid:boolean; welcome:any}>{
     const findemail= await this.otprepository.findOne({where:{email:email}})
     if (!findemail) throw new HttpException('the user does not match the owner of the otp',HttpStatus.NOT_FOUND)
     //find the otp privided if it matches with the otp stored 
@@ -463,7 +463,7 @@ async Waitlistmodelsignup(modeldto: WaitlistModeleRegistrationDto): Promise<{mes
     }
   }
 
-  async WaitlistresendModelOtp (resendOtpdto:RequestOtpResendDto):Promise<{message:string}>{
+  async WaitlistresendModelVerificationLink (resendOtpdto:RequestOtpResendDto):Promise<{message:string}>{
     const emailexsist = await this.modelrepository.findOne({where: { email: resendOtpdto.email },select: ['id', 'email','role']});
       if (!emailexsist)
         throw new HttpException(
@@ -501,12 +501,6 @@ async Waitlistmodelsignup(modeldto: WaitlistModeleRegistrationDto): Promise<{mes
        return {message:'New Verification Link successfully'}
        
    }
-
-
-
-
-
-
 
 
 

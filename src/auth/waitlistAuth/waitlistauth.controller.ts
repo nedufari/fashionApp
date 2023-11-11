@@ -52,33 +52,33 @@ export class WaitListController{
     }
 
 
-    //verify otp 
+    //verify user 
 
-    @Post('vendor/verify-otp')
-    async WaitlistVendorverifyOtp(@Query("token") token:string,@Query("email")email:string,): Promise<{ isValid: boolean; welcome: any }> {
+    @Post('vendor/verify-email')
+    async WaitlistVendorverifyEmail(@Query("token") token:string,@Query("email")email:string,): Promise<{ isValid: boolean; welcome: any }> {
       try {
-        const result = await this.waitlistservice.WaitlistverifyVendorotp(email,token);
+        const result = await this.waitlistservice.WaitlistverifyVendorEmail(email,token);
         return { isValid: result.isValid, welcome: result.welcome};
       } catch (error) {
         throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
       }
     }
 
-    @Post('photographer/verify-otp')
-    async WaitlistPhotographerverifyOtp(@Query("token") token:string,@Query("email")email:string,): Promise<{ isValid: boolean; welcome: any }> {
+    @Post('photographer/verify-email')
+    async WaitlistPhotographerverifyEmail(@Query("token") token:string,@Query("email")email:string,): Promise<{ isValid: boolean; welcome: any }> {
       try {
         
-        const result = await this.waitlistservice.WaitlistverifyPhotographerotp(email,token);
+        const result = await this.waitlistservice.WaitlistverifyPhotographerEmail(email,token);
         return { isValid: result.isValid, welcome: result.welcome};
       } catch (error) {
         throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
       }
     }
 
-    @Post('model/verify-otp')
-    async WaitlistModelverifyOtp(@Query("token") token:string,@Query("email")email:string,): Promise<{ isValid: boolean; welcome: any }> {
+    @Post('model/verify-email')
+    async WaitlistModelverifyEmail(@Query("token") token:string,@Query("email")email:string,): Promise<{ isValid: boolean; welcome: any }> {
       try {
-        const result = await this.waitlistservice.WaitlistModelverifyotp(email,token);
+        const result = await this.waitlistservice.WaitlistModelverifyEmail(email,token);
         return { isValid: result.isValid, welcome: result.welcome};
       } catch (error) {
         throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
@@ -87,23 +87,23 @@ export class WaitListController{
 
     
 
-    //resend otp
+    //resend verification link
 
     @Post('vendor/request-otp-resend')
     async VendorrequestOtpResend(@Body() requestOtpResendDto: RequestOtpResendDto): Promise<{ message: string }> {
-      await this.waitlistservice.WaitlistresendVendorOtp(requestOtpResendDto); // Assuming you have a method to send OTP
-      return { message: 'New OTP sent successfully' };
+      await this.waitlistservice.WaitlistresendVendorVerificationLink(requestOtpResendDto); // Assuming you have a method to send OTP
+      return { message: 'New verification link sent successfully' };
     }
 
     @Post('model/request-otp-resend')
-    async KidrequestOtpResend(@Body() requestOtpResendDto: RequestOtpResendDto): Promise<{ message: string }> {
-      await this.waitlistservice.WaitlistresendModelOtp(requestOtpResendDto); // Assuming you have a method to send OTP
-      return { message: 'New OTP sent successfully' };
+    async ModelrequestOtpResend(@Body() requestOtpResendDto: RequestOtpResendDto): Promise<{ message: string }> {
+      await this.waitlistservice.WaitlistresendModelVerificationLink(requestOtpResendDto); // Assuming you have a method to send OTP
+      return { message: 'New verification link sent successfully' };
     }
 
     @Post('photographer/request-otp-resend')
-    async requestOtpResend(@Body() requestOtpResendDto: RequestOtpResendDto): Promise<{ message: string }> {
-      await this.waitlistservice.WaitlistresendPhotographerOtp(requestOtpResendDto); // Assuming you have a method to send OTP
-      return { message: 'New OTP sent successfully' };
+    async PhotographerrequestOtpResend(@Body() requestOtpResendDto: RequestOtpResendDto): Promise<{ message: string }> {
+      await this.waitlistservice.WaitlistresendPhotographerVerificationLink(requestOtpResendDto); // Assuming you have a method to send OTP
+      return { message: 'New verification link sent successfully' };
     }
 }
