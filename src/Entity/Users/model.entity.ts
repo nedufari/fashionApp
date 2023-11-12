@@ -310,6 +310,9 @@ caps_ize:string
     @Column({type:"boolean", nullable:true})
     is_onContract:boolean
 
+    @Column({type:"boolean", nullable:true,default:false})
+    is_reminder_sent:boolean
+
     @Column({nullable:true,type:"enum", enum:TypeOfContract})
     type_of_contract:TypeOfContract
 

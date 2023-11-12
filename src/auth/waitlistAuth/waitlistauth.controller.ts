@@ -20,8 +20,7 @@ export class WaitListController{
         } catch (error) {
             throw error
             
-        }
-        
+        } 
     }
 
     @Post('signup/photographer')
@@ -33,8 +32,7 @@ export class WaitListController{
         } catch (error) {
             throw error
             
-        }      
-        
+        }         
     }
 
 
