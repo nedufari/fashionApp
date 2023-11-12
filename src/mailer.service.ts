@@ -845,6 +845,100 @@ export class MailService{
       await this.mailservice.sendMail({to:email,subject,html:content})
 
     }
+
+
+    async SendMailForContractExpiryRemider(email:string,contract_duration:string,contract_worth:string,contract_validity_number:string,to:string,partner:string,expiration_date:Date):Promise<void>{
+      const subject = "contract expiry reminder"
+      const content = `
+      <!DOCTYPE html>
+<html>
+<head>
+  <title>Contract Expiry Reminder</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+      color: #333333;
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .logo {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    .contract-heading {
+      text-align: center;
+      color: #aa6c39;
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+    .contract-details {
+      font-size: 16px;
+      line-height: 1.4;
+    }
+    .contract-qr-code {
+      text-align: center;
+      margin-top: 30px;
+    }
+    .signature {
+      text-align: right;
+      font-size: 18px;
+      font-weight: bold;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">
+      <img src="https://yourcompanylogo.com/logo.png" alt="Company Logo" width="150" height="150" />
+    </div>
+    <h1 class="contract-heading">Contract Expiry reminder</h1>
+    <p class="contract-details">
+      Dear ${to},
+    </p>
+    <p class="contract-details">
+
+      This letter is to inform you that the contract between ${to} and ${partner}  is expiring in few days.
+
+      The details of the contract are as follows:
+    </p>
+    <ul class="contract-details">
+      <li>Contract Worth: ${contract_worth}</li>
+      <li>Contract Validity Number: ${contract_validity_number}</li>
+      <li>Contract Duration: ${contract_duration}</li>
+      <li>Contract Expiration Date: ${expiration_date}</li>
+    </ul>
+    <div class="contract-qr-code">
+      <!-- Insert the QR code here (if applicable) -->
+      <img src="https://yourqrcode.com/contract_qr_code.png" alt="Contract QR Code" width="200" height="200" />
+    </div>
+    <p class="contract-details">
+      If you have any questions or concerns, feel free to contact our support team at support@walkway.com.
+    </p>
+    <p class="contract-details">
+      We look forward to a successful partnership with you. Thank you for choosing Walkway!
+    </p>
+    <p class="signature">
+      Best regards,
+      Walkway Team
+    </p>
+  </div>
+</body>
+</html>
+      `
+      await this.mailservice.sendMail({to:email,subject,html:content})
+
+    }
+
 }
 
 

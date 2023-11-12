@@ -267,7 +267,6 @@ async countercontrctOffer(vendorid:string, modelid:string,coi:string,counteroffe
   try {
     const vendor = await this.vendorrepository.findOne({where:{id:vendorid}})
     if (!vendor) throw new HttpException(`you are not a legitimate vendor on this platform and therefore you cant perform this action`,HttpStatus.NOT_FOUND)
-    console.log(vendor.brandname)
 
     // Check if the model has a contract
     const model = await this.modelrepository.findOne({ where: { id: modelid } });
@@ -435,6 +434,17 @@ async AcceptCounterContractOfferORDecline(vendorid: string, modelid: string, coi
     
   }
 
+
+}
+
+
+async fetchContractsCloseToExpiry(daysDifference : number): Promise<Contracts[]>{
+  const contracts = this.contractrepository.createQueryBuilder('Contracts')
+                                                .where(` expiration_date - CURRENT_DATE   = :daysDifference`, {
+                                                    daysDifference
+                                                })
+                                                .getMany();
+  return contracts;
 
 }
 

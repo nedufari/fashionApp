@@ -25,9 +25,8 @@ export class PhotographerController{
         const userIdFromToken = await request.user.id; 
         console.log(request.user.email)
     
-        if (userIdFromToken !== photo) {
-        throw new ForbiddenException("You are not authorized to perform this action on another user's account.");
-    }
+        const accessGranted = await this.handleThirdLevelAuth(userIdFromToken, photo);
+
         return await this.photoservice.getMyoffers(photo)
     }
 
@@ -36,9 +35,8 @@ export class PhotographerController{
         const userIdFromToken = await request.user.id; 
         console.log(request.user.email)
     
-        if (userIdFromToken !== photo) {
-        throw new ForbiddenException("You are not authorized to perform this action on another user's account.");
-        }
+        const accessGranted = await this.handleThirdLevelAuth(userIdFromToken, photo);
+
         return await this.photoservice.getMyCounteroffers(photo)
     }
 
@@ -53,9 +51,8 @@ async CreateTimeline(@Param('photoid') photoid: string, @Body() timelinedto: Mod
     const userIdFromToken = await request.user.id; 
     console.log(request.user.email)
 
-    if (userIdFromToken !== photoid) {
-    throw new ForbiddenException("You are not authorized to perform this action on another user's account.");
-    }
+    const accessGranted = await this.handleThirdLevelAuth(userIdFromToken, photoid);
+
   const post = await this.photoservice.createAtimeline(timelinedto,photoid,mediaFiles);
   return post;
 }
@@ -66,9 +63,8 @@ async UpdatePost(@Param('photoid') photoid: string,@Param('timelineid') timeline
     const userIdFromToken = await request.user.id; 
     console.log(request.user.email)
 
-    if (userIdFromToken !== photoid) {
-    throw new ForbiddenException("You are not authorized to perform this action on another user's account.");
-    }
+    const accessGranted = await this.handleThirdLevelAuth(userIdFromToken, photoid);
+
   const post = await this.photoservice.UpdateAtimeline(timelinedto,timelineid,photoid,mediaFiles);
   return post;
 }
@@ -78,9 +74,8 @@ async getMytimelines(@Param('photoid',ParseUUIDPipe)photoid:string,@Req()request
     const userIdFromToken = await request.user.id; 
     console.log(request.user.email)
 
-    if (userIdFromToken !== photoid) {
-    throw new ForbiddenException("You are not authorized to perform this action on another user's account.");
-    }
+    const accessGranted = await this.handleThirdLevelAuth(userIdFromToken, photoid);
+
     return await this.photoservice.mytimeLines(photoid)
 }
 
@@ -89,9 +84,8 @@ async findmyNotifications(@Param('photographer')photographer:string,@Req()reques
     const userIdFromToken = await request.user.id; 
     console.log(request.user.email)
 
-    if (userIdFromToken !== photographer) {
-    throw new ForbiddenException("You are not authorized to perform this action on another user's account.");
-    }
+        const accessGranted = await this.handleThirdLevelAuth(userIdFromToken, photographer);
+
     return await this.photoservice.getMyNotifications(photographer)
 }
 
@@ -100,9 +94,8 @@ async takedowntimeline(@Param('photoid')photoid:string,@Param('timelineid')timel
     const userIdFromToken = await request.user.id; 
     console.log(request.user.email)
 
-    if (userIdFromToken !== photoid) {
-    throw new ForbiddenException("You are not authorized to perform this action on another user's account.");
-    }
+    const accessGranted = await this.handleThirdLevelAuth(userIdFromToken, photoid);
+
     return await this.photoservice.TakedownTimeline(photoid,timelineid)
     
 }
@@ -112,9 +105,8 @@ async ModelPortfolio(@Body()dto:UpdatePhotographerDataDto,@Param('photoid')photo
     const userIdFromToken = await request.user.id; 
     console.log(request.user.email)
 
-    if (userIdFromToken !== photoid) {
-    throw new ForbiddenException("You are not authorized to perform this action on another user's account.");
-    }
+      const accessGranted = await this.handleThirdLevelAuth(userIdFromToken, photoid);
+
     return await this.photoservice.createPhotographerportfolio(photoid,dto)
 }
 
@@ -127,10 +119,8 @@ async updateProfilePhoto(
 ):Promise<{message:string}>{
     const userIdFromToken = await request.user.id; 
     console.log(request.user.email)
-    if (userIdFromToken !== modelid) {
-      throw new ForbiddenException("You are not authorized to perform this action on another user's account.");
-    }
 
+    const accessGranted = await this.handleThirdLevelAuth(userIdFromToken, modelid)
   const filename = await this.fileuploadservice.uploadFile(file);
   const upload = await this.photoservice.updateProfilePics( filename,modelid,);
   return { message: ` file  uploaded successfully.` }
@@ -144,9 +134,8 @@ async createComplaint(@Param('customerid') customerid: string,@Body() complaintD
     const userIdFromToken = await request.user.id; 
     console.log(request.user.email)
 
-    if (userIdFromToken !== customerid) {
-    throw new ForbiddenException("You are not authorized to perform this action on another user's account.");
-    }
+    const accessGranted = await this.handleThirdLevelAuth(userIdFromToken, customerid);
+
     // Call the service to handle the complaint
     const filename = await this.fileuploadservice.uploadFile(file);
     const response = await this.photoservice.handleComplaint(customerid, complaintDto,filename);
@@ -155,5 +144,12 @@ async createComplaint(@Param('customerid') customerid: string,@Body() complaintD
    
     throw error;
   }
+}
+
+async handleThirdLevelAuth(userIdFromToken: string,customerid: string):Promise<boolean>{
+  if (userIdFromToken !== customerid) {
+    throw new ForbiddenException("You are not authorized to perform this action on another user's account.");
+    }
+    return true;
 }
 }
