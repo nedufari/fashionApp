@@ -17,6 +17,8 @@ import { UploadService } from './uploads.service';
 import { PaymentModule } from './payment/payment.module';
 import { AppService } from './app.service';
 import { AppController } from './app.controller';
+import { ScheduleModule } from '@nestjs/schedule';
+import { ScheduledJobsModule } from './scheduled-jobs/scheduled-jobs.module';
 
 
 @Module({
@@ -45,7 +47,10 @@ import { AppController } from './app.controller';
       }
     }),
     
-    PaymentModule
+    PaymentModule,
+    ScheduleModule.forRoot(),
+    ScheduledJobsModule
+    
   
   ],
   providers:[MailService,UploadService,AppService],

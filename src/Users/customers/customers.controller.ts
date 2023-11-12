@@ -23,9 +23,8 @@ export class CustomerControlller{
       const userIdFromToken = await request.user.id; 
       console.log(request.user.email)
   
-      if (userIdFromToken !== customerid) {
-      throw new ForbiddenException("You are not authorized to perform this action on another user's account.");
-      }
+      const accessGranted = await this.handleThirdLevelAuth(userIdFromToken, customerid);
+
         return await this.customerservice.makeComment(postid,customerid,dto)
     }
 
@@ -34,9 +33,8 @@ export class CustomerControlller{
       const userIdFromToken = await request.user.id; 
       console.log(request.user.email)
   
-      if (userIdFromToken !== customerid) {
-      throw new ForbiddenException("You are not authorized to perform this action on another user's account.");
-      }
+      const accessGranted = await this.handleThirdLevelAuth(userIdFromToken, customerid);
+
         return await this.customerservice.replycomment(commentid,customerid,dto)
     }
 
@@ -55,10 +53,10 @@ export class CustomerControlller{
     async findmyNotifications(@Param('customer')customer:string,@Req()request):Promise<INotificationResponse[]>{
       const userIdFromToken = await request.user.id; 
       console.log(request.user.email)
+      console.log(request)
   
-      if (userIdFromToken !== customer) {
-      throw new ForbiddenException("You are not authorized to perform this action on another user's account.");
-      }
+      const accessGranted = await this.handleThirdLevelAuth(userIdFromToken, customer);
+
         return await this.customerservice.getMyNotifications(customer)
     }
 
@@ -110,9 +108,8 @@ async updateProfilePhoto(
   const userIdFromToken = await request.user.id; 
       console.log(request.user.email)
   
-      if (userIdFromToken !== customerid) {
-      throw new ForbiddenException("You are not authorized to perform this action on another user's account.");
-      }
+  const accessGranted = await this.handleThirdLevelAuth(userIdFromToken, customerid);
+
   const filename = await this.fileuploadservice.uploadFile(file);
   const upload = await this.customerservice.updateProfilePics( filename,customerid,);
   return { message: ` file  uploaded successfully.` }
@@ -126,9 +123,8 @@ async createComplaint(@Param('customerid') customerid: string,@Body() complaintD
     const userIdFromToken = await request.user.id; 
     console.log(request.user.email)
 
-    if (userIdFromToken !== customerid) {
-    throw new ForbiddenException("You are not authorized to perform this action on another user's account.");
-    }
+    const accessGranted = await this.handleThirdLevelAuth(userIdFromToken, customerid);
+
     // Call the service to handle the complaint
     const filename = await this.fileuploadservice.uploadFile(file);
     const response = await this.customerservice.handleComplaint(customerid, complaintDto,filename);
@@ -138,5 +134,13 @@ async createComplaint(@Param('customerid') customerid: string,@Body() complaintD
     throw error;
   }
 }
+
+async handleThirdLevelAuth(userIdFromToken: string,customerid: string):Promise<boolean>{
+  if (userIdFromToken !== customerid) {
+    throw new ForbiddenException("You are not authorized to perform this action on another user's account.");
+    }
+    return true;
+}
+
 
 }

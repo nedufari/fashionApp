@@ -1,7 +1,7 @@
 import { Body, Controller, Get, HttpException, HttpStatus, Param, Post,Put, UseGuards } from "@nestjs/common";
 import { ContractModelService } from "./contract.models.service";
 import { AcceptContractofferDto, ContractDto, CounterOfferDto, ExtendContractDto } from "./cotracts.dto";
-import {  IContractModelResponse, IContractPhotographerResponse } from "../Entity/contracts.entity";
+import {  Contracts, IContractModelResponse, IContractPhotographerResponse } from "../Entity/contracts.entity";
 // import { ContractPhotographerService } from "./contract.photographer.service";
 import { IContractOfferModelResponse, IContractOfferPhotographerResponse } from "../Entity/contractoffer.entity";
 import { ICounterContractOfferPhotographerResponse, IcounterContractOfferModelResponse } from "../Entity/countercontractOffer.entity";
@@ -139,6 +139,22 @@ export class ContractController{
                 
                 const contract = await this.photographercontractservice.AcceptCounterContractOfferORDecline(vendorid,photoid,coi,acceptofferdto)
                 return contract
+                
+                
+            } catch (error) {
+                throw error
+                
+            }
+            
+        }
+
+
+        @Get('fetchContractsCloseToExpiry/:daysDifference')
+        async fetchContractsCloseToExpiry(@Param('daysDifference')daysDifference:number): Promise<Contracts[]>{
+            try {
+                
+                const contracts = await this.modelcontractservice.fetchContractsCloseToExpiry(daysDifference);
+                return contracts
                 
                 
             } catch (error) {
